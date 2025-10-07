@@ -11,6 +11,9 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="container">
+        <!-- Statistics Bar -->
+        <StatsBar :articles="articles" :last-refresh="lastRefreshTime" />
+
         <!-- Location Bar -->
         <div class="location-bar">
           <div class="location-info">
@@ -74,17 +77,34 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Settings Modal -->
+    <SettingsModal
+      v-model="showSettings"
+      :settings="settings"
+      @save="handleSaveSettings"
+    />
+
+    <!-- Loading Overlay -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <span>Lade Nachrichten...</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useNewsStore } from '../stores/useNewsStore'
 import { newsService } from '../services/newsService'
 import { useLocation } from '../composables/useLocation'
 import CleanHeader from '../components/CleanHeader.vue'
 import CleanNewsCard from '../components/CleanNewsCard.vue'
 import LocationSelector from '../components/LocationSelector.vue'
+import SettingsModal from '../components/SettingsModal.vue'
+import StatsBar from '../components/StatsBar.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{
@@ -98,6 +118,9 @@ const searchQuery = ref('')
 const activeCategories = ref<string[]>([])
 const selectedArticle = ref<NewsArticle | null>(null)
 const showSettings = ref(false)
+const isLoading = ref(false)
+const lastRefreshTime = ref<number>(0)
+let autoRefreshInterval: ReturnType<typeof setInterval> | null = null
 
 const categories = ['Alle', 'Breaking', 'Lokal', 'Community', 'Tech']
 
@@ -148,20 +171,52 @@ const handleLocationChange = async (location: { lat: number; lng: number; name?:
 }
 
 const handleRefresh = async () => {
-  // Fetch real RSS feeds
-  const rssArticles = await newsService.fetchAllRSS(locationName.value)
+  isLoading.value = true
 
-  // If RSS feeds return articles, use them
-  if (rssArticles.length > 0) {
-    for (const article of rssArticles) {
-      await store.addArticle(props.parentId || 'default', article)
+  try {
+    // Fetch real RSS feeds
+    const rssArticles = await newsService.fetchAllRSS(locationName.value)
+
+    // If RSS feeds return articles, use them
+    if (rssArticles.length > 0) {
+      for (const article of rssArticles) {
+        await store.addArticle(props.parentId || 'default', article)
+      }
+    } else {
+      // Fallback to mock data if RSS fails
+      const freshArticles = await newsService.searchByInterests(settings.value.interests)
+      for (const article of freshArticles) {
+        await store.addArticle(props.parentId || 'default', article)
+      }
     }
-  } else {
-    // Fallback to mock data if RSS fails
-    const freshArticles = await newsService.searchByInterests(settings.value.interests)
-    for (const article of freshArticles) {
-      await store.addArticle(props.parentId || 'default', article)
-    }
+
+    lastRefreshTime.value = Date.now()
+  } catch (error) {
+    console.error('Refresh failed:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const handleSaveSettings = async (newSettings: any) => {
+  await store.updateSettings(props.parentId || 'default', newSettings)
+
+  // Restart auto-refresh if settings changed
+  setupAutoRefresh()
+}
+
+const setupAutoRefresh = () => {
+  // Clear existing interval
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval)
+    autoRefreshInterval = null
+  }
+
+  // Setup new interval if enabled
+  if (settings.value.autoRefresh) {
+    autoRefreshInterval = setInterval(() => {
+      handleRefresh()
+    }, settings.value.refreshInterval)
   }
 }
 
@@ -193,6 +248,16 @@ onMounted(async () => {
 
   // Load initial RSS feeds on mount
   await handleRefresh()
+
+  // Setup auto-refresh
+  setupAutoRefresh()
+})
+
+onUnmounted(() => {
+  // Cleanup auto-refresh interval
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval)
+  }
 })
 </script>
 
@@ -390,6 +455,46 @@ onMounted(async () => {
 .modal-link:hover {
   background: #4f46e5;
   transform: translateY(-2px);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(99, 102, 241, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner span {
+  color: #f8fafc;
+  font-size: 1.125rem;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
