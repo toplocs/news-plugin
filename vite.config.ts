@@ -53,10 +53,6 @@ export default defineConfig({
     outDir: './dist',
     assetsDir: '',
     minify: false,
-    terserOptions: {
-      compress: false,
-      mangle: false,
-    },
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
