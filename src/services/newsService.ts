@@ -1,4 +1,5 @@
 import type { NewsArticle, NewsSource } from '../types'
+import { rssService } from './rssService'
 
 /**
  * News Service - Handles fetching and processing news from various sources
@@ -14,9 +15,30 @@ export class NewsService {
   private initDefaultSources() {
     this.sources = [
       {
-        id: 'local',
-        name: 'Local News',
-        url: 'https://example.com/rss',
+        id: 'tagesschau',
+        name: 'Tagesschau',
+        url: 'https://www.tagesschau.de/xml/rss2/',
+        type: 'rss',
+        enabled: true
+      },
+      {
+        id: 'spiegel',
+        name: 'Der Spiegel',
+        url: 'https://www.spiegel.de/schlagzeilen/index.rss',
+        type: 'rss',
+        enabled: true
+      },
+      {
+        id: 'zeit',
+        name: 'Die Zeit',
+        url: 'https://www.zeit.de/index',
+        type: 'rss',
+        enabled: false // May not work due to CORS
+      },
+      {
+        id: 'heise',
+        name: 'Heise Online',
+        url: 'https://www.heise.de/rss/heise-atom.xml',
         type: 'rss',
         enabled: true
       },
@@ -33,11 +55,9 @@ export class NewsService {
   /**
    * Fetch news articles from RSS feed
    */
-  async fetchFromRSS(url: string): Promise<NewsArticle[]> {
+  async fetchFromRSS(url: string, location?: string): Promise<NewsArticle[]> {
     try {
-      // In a real implementation, you would parse RSS here
-      // For now, return mock data
-      return this.generateMockArticles(3)
+      return await rssService.fetchFeed(url, location)
     } catch (error) {
       console.error('Failed to fetch RSS:', error)
       return []
@@ -89,6 +109,21 @@ export class NewsService {
   async searchByInterests(interests: string[]): Promise<NewsArticle[]> {
     // In production, this would use semantic search
     return this.generateMockArticles(3, { interests })
+  }
+
+  /**
+   * Fetch all news from enabled RSS sources
+   */
+  async fetchAllRSS(location?: string): Promise<NewsArticle[]> {
+    const rssFeeds = this.sources
+      .filter(s => s.enabled && s.type === 'rss')
+      .map(s => ({ url: s.url, location }))
+
+    if (rssFeeds.length === 0) {
+      return []
+    }
+
+    return await rssService.fetchMultipleFeeds(rssFeeds)
   }
 
   /**

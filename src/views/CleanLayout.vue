@@ -14,6 +14,7 @@
         <!-- Location Bar -->
         <div class="location-bar">
           <div class="location-info">
+            <LocationSelector @location-change="handleLocationChange" />
             <span class="radius">{{ settings.radius }}km Umkreis</span>
             <span class="count">{{ filteredArticles.length }} Artikel</span>
           </div>
@@ -80,8 +81,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useNewsStore } from '../stores/useNewsStore'
 import { newsService } from '../services/newsService'
+import { useLocation } from '../composables/useLocation'
 import CleanHeader from '../components/CleanHeader.vue'
 import CleanNewsCard from '../components/CleanNewsCard.vue'
+import LocationSelector from '../components/LocationSelector.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{
@@ -90,6 +93,7 @@ const props = defineProps<{
 }>()
 
 const store = useNewsStore()
+const { currentLocation, calculateDistance } = useLocation()
 const searchQuery = ref('')
 const activeCategories = ref<string[]>([])
 const selectedArticle = ref<NewsArticle | null>(null)
@@ -101,6 +105,9 @@ const articles = computed(() => store.getArticlesByParent(props.parentId || 'def
 const settings = computed(() => store.getSettings(props.parentId || 'default'))
 
 const locationName = computed(() => {
+  if (currentLocation.value?.name) {
+    return currentLocation.value.name
+  }
   return props.parentId === 'demo' ? 'Berlin Mitte' : 'Deine Location'
 })
 
@@ -133,10 +140,28 @@ const handleSearch = (query: string) => {
   searchQuery.value = query
 }
 
+const handleLocationChange = async (location: { lat: number; lng: number; name?: string } | null) => {
+  if (location) {
+    // Refresh articles with new location
+    await handleRefresh()
+  }
+}
+
 const handleRefresh = async () => {
-  const freshArticles = await newsService.searchByInterests(settings.value.interests)
-  for (const article of freshArticles) {
-    await store.addArticle(props.parentId || 'default', article)
+  // Fetch real RSS feeds
+  const rssArticles = await newsService.fetchAllRSS(locationName.value)
+
+  // If RSS feeds return articles, use them
+  if (rssArticles.length > 0) {
+    for (const article of rssArticles) {
+      await store.addArticle(props.parentId || 'default', article)
+    }
+  } else {
+    // Fallback to mock data if RSS fails
+    const freshArticles = await newsService.searchByInterests(settings.value.interests)
+    for (const article of freshArticles) {
+      await store.addArticle(props.parentId || 'default', article)
+    }
   }
 }
 
@@ -163,9 +188,11 @@ const formatDate = (timestamp: number): string => {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   store.subscribeToParent(props.parentId || 'default')
-  handleRefresh()
+
+  // Load initial RSS feeds on mount
+  await handleRefresh()
 })
 </script>
 
