@@ -161,19 +161,51 @@ const handleSearch = () => {
 
 @media (max-width: 768px) {
   .container {
-    gap: 1rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .brand {
     min-width: auto;
+    flex: 1 1 auto;
   }
 
   .brand-text h1 {
-    font-size: 1rem;
+    font-size: 0.9375rem;
   }
 
   .location {
     display: none;
+  }
+
+  .search-bar {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .actions {
+    gap: 0.25rem;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .brand-text h1 {
+    font-size: 0.875rem;
+  }
+
+  .search-bar input {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.875rem;
   }
 }
 </style>

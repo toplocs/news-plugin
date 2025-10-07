@@ -92,6 +92,9 @@
         <span>Lade Nachrichten...</span>
       </div>
     </div>
+
+    <!-- Toast Notifications -->
+    <ToastContainer />
   </div>
 </template>
 
@@ -100,11 +103,13 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useNewsStore } from '../stores/useNewsStore'
 import { newsService } from '../services/newsService'
 import { useLocation } from '../composables/useLocation'
+import { useToast } from '../composables/useToast'
 import CleanHeader from '../components/CleanHeader.vue'
 import CleanNewsCard from '../components/CleanNewsCard.vue'
 import LocationSelector from '../components/LocationSelector.vue'
 import SettingsModal from '../components/SettingsModal.vue'
 import StatsBar from '../components/StatsBar.vue'
+import ToastContainer from '../components/ToastContainer.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{
@@ -114,6 +119,7 @@ const props = defineProps<{
 
 const store = useNewsStore()
 const { currentLocation, calculateDistance } = useLocation()
+const { success, error, info } = useToast()
 const searchQuery = ref('')
 const activeCategories = ref<string[]>([])
 const selectedArticle = ref<NewsArticle | null>(null)
@@ -165,6 +171,7 @@ const handleSearch = (query: string) => {
 
 const handleLocationChange = async (location: { lat: number; lng: number; name?: string } | null) => {
   if (location) {
+    info(`Standort gewechselt: ${location.name || 'Unbekannt'}`)
     // Refresh articles with new location
     await handleRefresh()
   }
@@ -182,27 +189,36 @@ const handleRefresh = async () => {
       for (const article of rssArticles) {
         await store.addArticle(props.parentId || 'default', article)
       }
+      success(`${rssArticles.length} neue Artikel geladen`)
     } else {
       // Fallback to mock data if RSS fails
       const freshArticles = await newsService.searchByInterests(settings.value.interests)
       for (const article of freshArticles) {
         await store.addArticle(props.parentId || 'default', article)
       }
+      info(`${freshArticles.length} Artikel geladen (Mock-Daten)`)
     }
 
     lastRefreshTime.value = Date.now()
-  } catch (error) {
-    console.error('Refresh failed:', error)
+  } catch (err) {
+    console.error('Refresh failed:', err)
+    error('Fehler beim Laden der Nachrichten')
   } finally {
     isLoading.value = false
   }
 }
 
 const handleSaveSettings = async (newSettings: any) => {
-  await store.updateSettings(props.parentId || 'default', newSettings)
+  try {
+    await store.updateSettings(props.parentId || 'default', newSettings)
+    success('Einstellungen gespeichert')
 
-  // Restart auto-refresh if settings changed
-  setupAutoRefresh()
+    // Restart auto-refresh if settings changed
+    setupAutoRefresh()
+  } catch (err) {
+    console.error('Settings save failed:', err)
+    error('Fehler beim Speichern der Einstellungen')
+  }
 }
 
 const setupAutoRefresh = () => {
@@ -498,13 +514,81 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .main-content {
+    padding: 1.5rem 0;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
   .location-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
+  }
+
+  .location-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filters {
+    justify-content: flex-start;
+  }
+
+  .filter-btn {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.875rem;
   }
 
   .news-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem 0;
+  }
+
+  .container {
+    padding: 0 0.75rem;
+  }
+
+  .location-bar {
+    padding: 1rem;
+  }
+
+  .filter-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+
+  .empty-state p {
+    font-size: 0.875rem;
   }
 }
 </style>
