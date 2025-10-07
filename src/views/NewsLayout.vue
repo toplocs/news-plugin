@@ -10,6 +10,9 @@
 
     <!-- Main Layout - 3 Column Grid -->
     <div class="container mx-auto px-4 py-6">
+      <!-- Statistics Bar -->
+      <StatsBar :articles="articles" :last-refresh="Date.now()" class="mb-6" />
+
       <!-- Location Header -->
       <LocationHeader
         :location-name="locationName"
@@ -62,6 +65,9 @@
       :active-view="activeView"
       @update:view="activeView = $event"
     />
+
+    <!-- Toast Notifications -->
+    <ToastContainer />
   </div>
 </template>
 
@@ -69,6 +75,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useNewsStore } from '../stores/useNewsStore'
 import { newsService } from '../services/newsService'
+import { useToast } from '../composables/useToast'
 import HeaderBar from '../components/HeaderBar.vue'
 import LocationHeader from '../components/LocationHeader.vue'
 import FeedView from '../components/FeedView.vue'
@@ -77,6 +84,8 @@ import NewsDetailModal from '../components/NewsDetailModal.vue'
 import MobileBottomNav from '../components/MobileBottomNav.vue'
 import SidebarLeft from '../components/SidebarLeft.vue'
 import UserSidebar from '../components/UserSidebar.vue'
+import StatsBar from '../components/StatsBar.vue'
+import ToastContainer from '../components/ToastContainer.vue'
 import type { NewsArticle, NewsFilter as Filter } from '../types'
 
 const props = defineProps<{
@@ -85,6 +94,7 @@ const props = defineProps<{
 }>()
 
 const store = useNewsStore()
+const { success, error: showError, info } = useToast()
 const filter = ref<Filter>({})
 const selectedArticle = ref<NewsArticle | null>(null)
 const feedLayout = ref<'grid' | 'list'>('grid')
@@ -190,9 +200,26 @@ const handleSearch = (query: string) => {
 }
 
 const handleRefresh = async () => {
-  const freshArticles = await newsService.searchByInterests(settings.value.interests)
-  for (const article of freshArticles) {
-    await store.addArticle(props.parentId || 'default', article)
+  try {
+    // Try to fetch real RSS feeds first
+    const rssArticles = await newsService.fetchAllRSS(locationName.value)
+
+    if (rssArticles.length > 0) {
+      for (const article of rssArticles) {
+        await store.addArticle(props.parentId || 'default', article)
+      }
+      success(`${rssArticles.length} neue Artikel geladen`)
+    } else {
+      // Fallback to mock data
+      const freshArticles = await newsService.searchByInterests(settings.value.interests)
+      for (const article of freshArticles) {
+        await store.addArticle(props.parentId || 'default', article)
+      }
+      info(`${freshArticles.length} Artikel geladen (Mock-Daten)`)
+    }
+  } catch (err) {
+    console.error('Refresh failed:', err)
+    showError('Fehler beim Laden der Nachrichten')
   }
 }
 
