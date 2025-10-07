@@ -13,6 +13,7 @@
 <script setup lang="ts">
 import { PluginInfoPage } from '@toplocs/plugin-sdk'
 import pluginConfig from './index'
+import './assets/animations.css'
 
 const about = `
 The News Plugin brings local journalism and community news discovery to TopLocs. It enables communities to aggregate, share, and discover local news from multiple sources, with AI-powered semantic search and location-based filtering. Perfect for staying informed about what's happening in your community.
