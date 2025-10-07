@@ -117,36 +117,45 @@ export class NewsService {
     const now = Date.now()
 
     const titles = [
-      'Local Community Center Opens New Facilities',
-      'City Council Announces Green Initiative',
-      'Tech Startup Launches in Downtown Area',
-      'New Restaurant Brings Authentic Cuisine to Town',
-      'Schools Report Improved Test Scores',
-      'Local Artist Wins National Award',
-      'Public Transit Expansion Plans Revealed',
-      'Community Garden Project Gains Support',
-      'Historical Building Renovation Complete',
-      'Youth Sports Program Sees Record Participation'
+      '🔥 Breaking: Neues Community Center eröffnet in Mitte',
+      'Stadtrat beschließt Green Initiative für Berlin',
+      'Tech Startup revolutioniert Local News in Kreuzberg',
+      'Authentisches Restaurant eröffnet am Alexanderplatz',
+      'Schulen melden verbesserte Testergebnisse',
+      'Berliner Künstler gewinnt nationalen Preis',
+      'U-Bahn Erweiterung: Neue Pläne enthüllt',
+      'Community Garden Projekt begeistert Nachbarschaft',
+      'Historisches Gebäude: Renovierung abgeschlossen',
+      'Jugendsport-Programm: Rekord-Teilnehmerzahl'
     ]
 
-    const sources = ['Local News', 'Community Post', 'City Herald', 'Downtown Journal']
+    const sources = ['Berliner Morgenpost', 'Community Post', 'TagesspiEGEL', 'Kiez News']
+    const authors = ['Anna Schmidt', 'Max Müller', 'Lisa Weber', 'Tom Fischer']
+    const locations = ['Berlin Mitte', 'Kreuzberg', 'Prenzlauer Berg', 'Friedrichshain']
 
     for (let i = 0; i < count; i++) {
       const randomTitle = titles[Math.floor(Math.random() * titles.length)]
       const randomSource = sources[Math.floor(Math.random() * sources.length)]
+      const randomAuthor = authors[Math.floor(Math.random() * authors.length)]
+      const randomLocation = locations[Math.floor(Math.random() * locations.length)]
+      const isBreaking = i === 0 && Math.random() > 0.7
+
+      const baseTags = ['news', 'local']
+      if (isBreaking) baseTags.push('breaking')
+      if (context?.interests) baseTags.push(...context.interests.slice(0, 2))
 
       articles.push({
         id: `article_${Date.now()}_${i}`,
-        title: randomTitle,
-        summary: `${randomTitle.slice(0, 100)}... Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.`,
+        title: randomTitle.replace('🔥 Breaking: ', ''),
+        summary: `In ${randomLocation} gibt es spannende Neuigkeiten: ${randomTitle}. Die Community reagiert begeistert auf diese Entwicklung. Weitere Details folgen.`,
         url: `https://example.com/article/${i}`,
         source: randomSource,
-        imageUrl: Math.random() > 0.5 ? `https://via.placeholder.com/400x300?text=Article+${i}` : undefined,
-        author: Math.random() > 0.5 ? 'John Doe' : undefined,
-        publishedAt: now - Math.random() * 86400000 * 7, // Random time in last week
+        imageUrl: `https://picsum.photos/seed/${i}/600/400`,
+        author: randomAuthor,
+        publishedAt: now - Math.random() * 86400000 * 7,
         topics: context?.interests || ['community', 'local'],
-        locations: ['default_location'],
-        tags: ['news', 'local', 'community'].slice(0, Math.floor(Math.random() * 3) + 1)
+        locations: [randomLocation],
+        tags: baseTags.slice(0, Math.min(3, baseTags.length))
       })
     }
 

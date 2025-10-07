@@ -10,6 +10,17 @@
 
     <!-- Main Layout - 3 Column Grid -->
     <div class="container mx-auto px-4 py-6">
+      <!-- Location Header -->
+      <LocationHeader
+        :location-name="locationName"
+        :radius="settings.radius"
+        :news-count="filteredArticles.length"
+        :breaking-count="breakingCount"
+        :local-count="localCount"
+        :community-count="communityCount"
+        :sources-count="activeSources"
+        @update:radius="updateRadius"
+      />
       <div class="grid gap-6" :class="layoutGridClass">
         <!-- Left Sidebar - Settings/Filters (25%) -->
         <aside class="space-y-6" :class="leftSidebarClass">
@@ -118,6 +129,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useNewsStore } from '../stores/useNewsStore'
 import { newsService } from '../services/newsService'
 import HeaderBar from '../components/HeaderBar.vue'
+import LocationHeader from '../components/LocationHeader.vue'
 import FeedView from '../components/FeedView.vue'
 import NewsFilter from '../components/NewsFilter.vue'
 import NewsDetailModal from '../components/NewsDetailModal.vue'
@@ -174,9 +186,32 @@ const recentSources = computed(() => availableSources.value.slice(0, 4))
 
 const pageTitle = computed(() => {
   return props.entity === 'Location'
-    ? 'Local News'
+    ? 'Lokale Nachrichten'
     : 'Topic News'
 })
+
+const locationName = computed(() => {
+  return props.parentId === 'demo' ? 'Berlin Mitte' : props.parentId || 'Deine Location'
+})
+
+const breakingCount = computed(() => {
+  return filteredArticles.value.filter(a => a.tags?.includes('breaking')).length
+})
+
+const localCount = computed(() => {
+  return filteredArticles.value.filter(a => a.tags?.includes('local')).length
+})
+
+const communityCount = computed(() => {
+  return filteredArticles.value.filter(a => a.source.includes('Community')).length
+})
+
+const updateRadius = async (newRadius: number) => {
+  await store.updateSettings(props.parentId || 'default', {
+    ...settings.value,
+    radius: newRadius
+  })
+}
 
 // Responsive breakpoints
 const isMobile = ref(false)
