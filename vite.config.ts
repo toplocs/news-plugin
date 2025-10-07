@@ -57,6 +57,7 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
         demo: path.resolve(__dirname, 'demo.html'),
+        demo3col: path.resolve(__dirname, 'demo-3col.html'),
         landing: path.resolve(__dirname, 'landing.html')
       },
       external: ['vue'],
