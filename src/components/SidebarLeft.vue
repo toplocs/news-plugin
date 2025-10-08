@@ -1,172 +1,275 @@
 <template>
   <div class="sidebar-left">
-    <!-- Quick Settings -->
-    <div class="section">
-      <h3 class="section-title">
-        <span class="icon">⚙️</span>
-        <span>Schnelleinstellungen</span>
-      </h3>
+    <!-- Navigation Menu -->
+    <div class="nav-menu">
+      <button
+        v-for="item in menuItems"
+        :key="item.id"
+        @click="activeView = item.id"
+        :class="{ active: activeView === item.id }"
+        class="nav-item"
+        :aria-label="`${item.label} anzeigen`"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+        <span v-if="item.badge" class="nav-badge">{{ item.badge }}</span>
+      </button>
+    </div>
 
-      <!-- Radius Slider -->
-      <div class="setting-item">
-        <label class="setting-label">
-          <span>Suchradius</span>
-          <span class="value">{{ localSettings.radius }} km</span>
-        </label>
-        <input
-          v-model.number="localSettings.radius"
-          type="range"
-          min="1"
-          max="100"
-          class="slider"
-          @change="emitUpdate"
+    <!-- View Content -->
+    <div class="view-content">
+      <!-- Quick Settings View -->
+      <div v-if="activeView === 'settings'" class="view-panel">
+        <h3 class="panel-title">
+          <span class="icon">⚙️</span>
+          <span>Schnelleinstellungen</span>
+        </h3>
+
+        <!-- Radius Slider -->
+        <div class="setting-item">
+          <label class="setting-label">
+            <span>Suchradius</span>
+            <span class="value">{{ localSettings.radius }} km</span>
+          </label>
+          <input
+            v-model.number="localSettings.radius"
+            type="range"
+            min="1"
+            max="100"
+            class="slider"
+            @change="emitUpdate"
+          />
+        </div>
+
+        <!-- Auto Refresh Toggle -->
+        <div class="setting-item">
+          <label class="setting-toggle">
+            <input
+              v-model="localSettings.autoRefresh"
+              type="checkbox"
+              class="toggle-input"
+              @change="emitUpdate"
+            />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Auto-Refresh</span>
+          </label>
+        </div>
+
+        <!-- Show Images Toggle -->
+        <div class="setting-item">
+          <label class="setting-toggle">
+            <input
+              v-model="localSettings.showImages"
+              type="checkbox"
+              class="toggle-input"
+              @change="emitUpdate"
+            />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Bilder anzeigen</span>
+          </label>
+        </div>
+
+        <!-- Notifications Toggle -->
+        <div class="setting-item">
+          <label class="setting-toggle">
+            <input
+              v-model="localSettings.notificationsEnabled"
+              type="checkbox"
+              class="toggle-input"
+              @change="emitUpdate"
+            />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Benachrichtigungen</span>
+          </label>
+        </div>
+
+        <!-- Profile Edit Button -->
+        <div class="setting-item" style="margin-top: 2rem;">
+          <button @click="$emit('edit-profile')" class="profile-edit-btn">
+            <span>👤</span>
+            <span>Profil bearbeiten</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Discovery View -->
+      <div v-if="activeView === 'discovery'" class="view-panel">
+        <DiscoveryPanel
+          :matches="discoveryMatches || []"
+          :highScoreMatches="discoveryHighScoreMatches"
+          :isLoading="discoveryLoading || false"
+          :lastUpdate="discoveryLastUpdate || 0"
+          @refresh="$emit('refresh-discovery')"
+          @select="$emit('select-discovery', $event)"
         />
       </div>
 
-      <!-- Auto Refresh Toggle -->
-      <div class="setting-item">
-        <label class="setting-toggle">
-          <input
-            v-model="localSettings.autoRefresh"
-            type="checkbox"
-            class="toggle-input"
-            @change="emitUpdate"
-          />
-          <span class="toggle-slider"></span>
-          <span class="toggle-label">Auto-Refresh</span>
-        </label>
-      </div>
+      <!-- Bookmarks View - Gespeicherte Artikel -->
+      <div v-if="activeView === 'bookmarks'" class="view-panel">
+        <h3 class="panel-title">
+          <span class="icon">🔖</span>
+          <span>Gespeicherte Artikel</span>
+        </h3>
+        <p class="panel-description">Deine gemerkten Artikel zum späteren Lesen</p>
 
-      <!-- Show Images Toggle -->
-      <div class="setting-item">
-        <label class="setting-toggle">
-          <input
-            v-model="localSettings.showImages"
-            type="checkbox"
-            class="toggle-input"
-            @change="emitUpdate"
-          />
-          <span class="toggle-slider"></span>
-          <span class="toggle-label">Bilder anzeigen</span>
-        </label>
-      </div>
-    </div>
+        <!-- Empty State -->
+        <div v-if="bookmarkCount === 0" class="empty-state">
+          <span class="empty-icon">📚</span>
+          <p>Klicke auf das Lesezeichen-Icon bei Artikeln um sie hier zu speichern</p>
+        </div>
 
-    <!-- News Sources -->
-    <div class="section">
-      <h3 class="section-title">
-        <span class="icon">📰</span>
-        <span>Quellen</span>
-      </h3>
-      <div class="sources-list">
-        <label
-          v-for="source in availableSources"
-          :key="source.id"
-          class="source-item"
-        >
-          <input
-            v-model="localSettings.sources"
-            :value="source.id"
-            type="checkbox"
-            class="checkbox"
-            @change="emitUpdate"
-          />
-          <span class="source-name">{{ source.name }}</span>
-          <span v-if="source.enabled" class="source-status">●</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="section">
-      <h3 class="section-title">
-        <span class="icon">📊</span>
-        <span>Statistik</span>
-      </h3>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value">{{ stats.total }}</div>
-          <div class="stat-label">Artikel</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ stats.today }}</div>
-          <div class="stat-label">Heute</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ stats.sources }}</div>
-          <div class="stat-label">Quellen</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ stats.unread }}</div>
-          <div class="stat-label">Ungelesen</div>
+        <!-- Bookmarks List -->
+        <div v-else class="bookmarks-list">
+          <div
+            v-for="article in sortedBookmarks"
+            :key="article.id"
+            class="bookmark-item"
+          >
+            <div class="bookmark-content" @click="emit('article-click', article)">
+              <h4 class="bookmark-title">{{ article.title }}</h4>
+              <p class="bookmark-meta">
+                <span>{{ article.source }}</span>
+                <span class="separator">•</span>
+                <span>{{ formatDate(article.publishedAt) }}</span>
+              </p>
+            </div>
+            <button
+              @click.stop="removeBookmark(article.id)"
+              class="bookmark-remove-btn"
+              title="Lesezeichen entfernen"
+            >
+              🗑️
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Interests Tags -->
-    <div class="section">
-      <h3 class="section-title">
-        <span class="icon">🏷️</span>
-        <span>Interessen</span>
-      </h3>
-      <div class="interests-tags">
-        <span
-          v-for="interest in localSettings.interests"
-          :key="interest"
-          class="interest-tag"
-        >
-          {{ interest }}
-          <button @click="removeInterest(interest)" class="remove-tag">×</button>
-        </span>
+      <!-- Interests View -->
+      <div v-if="activeView === 'interests'" class="view-panel">
+        <h3 class="panel-title">
+          <span class="icon">🏷️</span>
+          <span>Meine Interessen</span>
+        </h3>
+        <p class="panel-description">Verwalte deine Interessen für personalisierte News</p>
+
+        <div class="interests-tags">
+          <div
+            v-for="interest in localSettings.interests"
+            :key="interest"
+            class="interest-tag"
+          >
+            <span class="interest-name">{{ interest }}</span>
+            <button @click="removeInterest(interest)" class="remove-tag" :aria-label="`${interest} entfernen`">×</button>
+          </div>
+        </div>
+
         <button @click="showAddInterest = true" class="add-interest-btn">
-          + Hinzufügen
+          <span>+</span>
+          <span>Neues Interesse hinzufügen</span>
         </button>
-      </div>
-      <div v-if="showAddInterest" class="add-interest-form">
-        <input
-          v-model="newInterest"
-          type="text"
-          placeholder="Neues Interesse..."
-          @keyup.enter="addInterest"
-          class="interest-input"
-        />
-        <button @click="addInterest" class="confirm-btn">✓</button>
-        <button @click="showAddInterest = false" class="cancel-btn">×</button>
+
+        <div v-if="showAddInterest" class="add-interest-form">
+          <input
+            v-model="newInterest"
+            type="text"
+            placeholder="z.B. Technologie, Sport, Kultur..."
+            @keyup.enter="addInterest"
+            class="interest-input"
+            ref="interestInput"
+          />
+          <button @click="addInterest" class="confirm-btn" aria-label="Bestätigen">✓</button>
+          <button @click="cancelAddInterest" class="cancel-btn" aria-label="Abbrechen">×</button>
+        </div>
+
+        <!-- Suggested Interests -->
+        <div v-if="!showAddInterest && localSettings.interests.length < 10" class="suggested-section">
+          <h4 class="suggested-title">Vorschläge</h4>
+          <div class="suggested-tags">
+            <button
+              v-for="suggestion in suggestedInterests"
+              :key="suggestion"
+              @click="addSuggestedInterest(suggestion)"
+              class="suggested-tag"
+            >
+              + {{ suggestion }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick, onMounted, type ComputedRef } from 'vue'
 import type { NewsSettings } from '../types'
+import DiscoveryPanel from './DiscoveryPanel.vue'
+import { useBookmarks } from '../stores/useBookmarks'
 
 const props = defineProps<{
   settings: NewsSettings
+  discoveryMatches?: any[]
+  discoveryLoading?: boolean
+  discoveryLastUpdate?: number
 }>()
 
 const emit = defineEmits<{
   'update-settings': [settings: NewsSettings]
+  'edit-profile': []
+  'refresh-discovery': []
+  'select-discovery': [match: any]
+  'article-click': [article: any]
 }>()
 
+type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery'
+
+const activeView = ref<ViewType>('interests') // Start with Interests - most important!
 const localSettings = ref<NewsSettings>({ ...props.settings })
 const showAddInterest = ref(false)
 const newInterest = ref('')
+const interestInput = ref<HTMLInputElement | null>(null)
 
-const availableSources = [
-  { id: 'tagesschau', name: 'Tagesschau', enabled: true },
-  { id: 'spiegel', name: 'Der Spiegel', enabled: true },
-  { id: 'heise', name: 'Heise Online', enabled: true },
-  { id: 'local', name: 'Lokale News', enabled: true },
-  { id: 'community', name: 'Community', enabled: true }
+// Bookmarks management
+const bookmarksStore = useBookmarks()
+const { bookmarks, sortedBookmarks, bookmarkCount, removeBookmark } = bookmarksStore
+
+// ONLY ESSENTIAL TABS - Each must have REAL user value!
+const menuItems: Array<{ id: ViewType; icon: string; label: string; badge?: string | ComputedRef<string> }> = [
+  {
+    id: 'interests',
+    icon: '🏷️',
+    label: 'Meine Interessen',
+    badge: computed(() => localSettings.value.interests.length.toString())
+  },
+  {
+    id: 'bookmarks',
+    icon: '🔖',
+    label: 'Gespeichert',
+    badge: computed(() => bookmarkCount.value > 0 ? bookmarkCount.value.toString() : '')
+  },
+  {
+    id: 'settings',
+    icon: '⚙️',
+    label: 'Einstellungen'
+  },
+  {
+    id: 'discovery',
+    icon: '✨',
+    label: 'Community'
+  }
 ]
 
-const stats = computed(() => ({
-  total: 47,
-  today: 12,
-  sources: 5,
-  unread: 8
-}))
+// Removed: availableSources, stats, weeklyActivity - no longer needed after tab simplification
+
+const suggestedInterests = computed(() => {
+  const all = ['Technologie', 'Politik', 'Sport', 'Kultur', 'Wissenschaft', 'Wirtschaft', 'Gesundheit', 'Reisen']
+  return all.filter(s => !localSettings.value.interests.includes(s)).slice(0, 5)
+})
+
+const discoveryHighScoreMatches = computed(() => {
+  if (!props.discoveryMatches) return []
+  return props.discoveryMatches.filter(m => m.score > 0.7)
+})
 
 watch(
   () => props.settings,
@@ -175,15 +278,35 @@ watch(
   }
 )
 
+watch(activeView, () => {
+  showAddInterest.value = false
+  newInterest.value = ''
+})
+
+watch(showAddInterest, async (show) => {
+  if (show) {
+    await nextTick()
+    interestInput.value?.focus()
+  }
+})
+
 const emitUpdate = () => {
   emit('update-settings', localSettings.value)
 }
 
 const addInterest = () => {
-  if (newInterest.value.trim() && !localSettings.value.interests.includes(newInterest.value.trim())) {
-    localSettings.value.interests.push(newInterest.value.trim())
+  const interest = newInterest.value.trim()
+  if (interest && !localSettings.value.interests.includes(interest)) {
+    localSettings.value.interests.push(interest)
     newInterest.value = ''
     showAddInterest.value = false
+    emitUpdate()
+  }
+}
+
+const addSuggestedInterest = (interest: string) => {
+  if (!localSettings.value.interests.includes(interest)) {
+    localSettings.value.interests.push(interest)
     emitUpdate()
   }
 }
@@ -195,43 +318,148 @@ const removeInterest = (interest: string) => {
     emitUpdate()
   }
 }
+
+const cancelAddInterest = () => {
+  showAddInterest.value = false
+  newInterest.value = ''
+}
+
+// Format date helper
+const formatDate = (timestamp: number): string => {
+  const date = new Date(timestamp)
+  const now = Date.now()
+  const diff = now - timestamp
+
+  // Less than 1 hour
+  if (diff < 60 * 60 * 1000) {
+    const minutes = Math.floor(diff / (60 * 1000))
+    return `vor ${minutes} Min`
+  }
+
+  // Less than 24 hours
+  if (diff < 24 * 60 * 60 * 1000) {
+    const hours = Math.floor(diff / (60 * 60 * 1000))
+    return `vor ${hours} Std`
+  }
+
+  // Less than 7 days
+  if (diff < 7 * 24 * 60 * 60 * 1000) {
+    const days = Math.floor(diff / (24 * 60 * 60 * 1000))
+    return `vor ${days} Tag${days > 1 ? 'en' : ''}`
+  }
+
+  // Older than 7 days - show date
+  return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+}
+
+// Load bookmarks on mount
+onMounted(() => {
+  bookmarksStore.loadBookmarks()
+})
 </script>
 
 <style scoped>
 .sidebar-left {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  height: 100%;
+  gap: 0;
 }
 
-.section {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
+/* Navigation Menu */
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.section-title {
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: #f8fafc;
+}
+
+.nav-item.active {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+.nav-icon {
+  font-size: 1.125rem;
+}
+
+.nav-label {
+  flex: 1;
+  text-align: left;
+}
+
+.nav-badge {
+  padding: 0.125rem 0.5rem;
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #a5b4fc;
+}
+
+/* View Content */
+.view-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.view-panel {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.9375rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: #f8fafc;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
+}
+
+.panel-description {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  margin: 0 0 1.5rem 0;
 }
 
 .icon {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
 }
 
 /* Settings */
 .setting-item {
-  margin-bottom: 1rem;
-}
-
-.setting-item:last-child {
-  margin-bottom: 0;
+  margin-bottom: 1.25rem;
 }
 
 .setting-label {
@@ -264,6 +492,7 @@ const removeInterest = (interest: string) => {
   border-radius: 50%;
   background: #6366f1;
   cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .slider::-moz-range-thumb {
@@ -273,6 +502,7 @@ const removeInterest = (interest: string) => {
   background: #6366f1;
   cursor: pointer;
   border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .setting-toggle {
@@ -322,100 +552,63 @@ const removeInterest = (interest: string) => {
   font-weight: 500;
 }
 
-/* Sources */
-.sources-list {
+/* Profile Edit Button */
+.profile-edit-btn {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 
-.source-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
+.profile-edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
 }
 
-.source-item:hover {
-  background: rgba(15, 23, 42, 0.6);
-  border-color: rgba(99, 102, 241, 0.2);
-}
-
-.checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: #6366f1;
-  cursor: pointer;
-}
-
-.source-name {
-  flex: 1;
-  font-size: 0.875rem;
-  color: #cbd5e1;
-}
-
-.source-status {
-  color: #22c55e;
-  font-size: 0.75rem;
-}
-
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 0.875rem;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 0.5rem;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #6366f1;
-  margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
+/* Removed: Sources, Stats, Activity CSS - tabs have been removed */
 
 /* Interests */
 .interests-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .interest-tag {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
+  padding: 0.5rem 0.875rem;
   background: rgba(99, 102, 241, 0.2);
   border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 999px;
+  transition: all 0.2s;
+}
+
+.interest-tag:hover {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+.interest-name {
   color: #a5b4fc;
   font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .remove-tag {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: rgba(239, 68, 68, 0.2);
   border: none;
@@ -431,12 +624,16 @@ const removeInterest = (interest: string) => {
 }
 
 .add-interest-btn {
-  padding: 0.375rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.875rem;
   background: rgba(30, 41, 59, 0.6);
   border: 1px dashed rgba(99, 102, 241, 0.4);
-  border-radius: 999px;
+  border-radius: 0.5rem;
   color: #6366f1;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -450,12 +647,12 @@ const removeInterest = (interest: string) => {
 .add-interest-form {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 .interest-input {
   flex: 1;
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 0.875rem;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.5rem;
@@ -470,8 +667,8 @@ const removeInterest = (interest: string) => {
 
 .confirm-btn,
 .cancel-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 0.375rem;
   border: none;
   font-size: 1.125rem;
@@ -495,5 +692,207 @@ const removeInterest = (interest: string) => {
 
 .cancel-btn:hover {
   background: rgba(239, 68, 68, 0.4);
+}
+
+.suggested-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.suggested-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.suggested-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.suggested-tag {
+  padding: 0.375rem 0.75rem;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggested-tag:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+/* Profile */
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-avatar {
+  position: relative;
+}
+
+.avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #1e293b;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 0.25rem 0;
+}
+
+.profile-email {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.profile-action-btn:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(99, 102, 241, 0.2);
+  color: #f8fafc;
+}
+
+/* Removed: About CSS - tab has been removed */
+
+/* Bookmarks List */
+.bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bookmark-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.bookmark-item:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(99, 102, 241, 0.2);
+  transform: translateX(2px);
+}
+
+.bookmark-content {
+  flex: 1;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.bookmark-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f8fafc;
+  margin: 0 0 0.375rem 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.bookmark-meta {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.bookmark-meta .separator {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.bookmark-remove-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 0.375rem;
+  color: #ef4444;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bookmark-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: scale(1.05);
 }
 </style>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Test - News Plugin</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .test-section {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+    }
+    h2 {
+      margin-top: 0;
+      color: #6366f1;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 0.5rem;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 0.5rem;
+      font-family: monospace;
+      font-size: 0.875rem;
+    }
+    .success { color: #22c55e; }
+    .error { color: #ef4444; }
+    .info { color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <h1>🧪 News Plugin - Feature Test</h1>
+
+  <div class="test-section">
+    <h2>1. LocalStorage Test</h2>
+    <button onclick="testLocalStorage()">Test LocalStorage</button>
+    <div id="localStorage-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. Gun.js Test</h2>
+    <button onclick="testGunJS()">Test Gun.js Connection</button>
+    <div id="gunjs-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Profile Editor Test</h2>
+    <button onclick="testProfileSave()">Save Test Profile</button>
+    <button onclick="testProfileLoad()">Load Profile</button>
+    <div id="profile-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Bookmark Test</h2>
+    <button onclick="testBookmarkAdd()">Add Bookmark</button>
+    <button onclick="testBookmarkLoad()">Load Bookmarks</button>
+    <button onclick="testBookmarkClear()">Clear All</button>
+    <div id="bookmark-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>5. Notification Test</h2>
+    <button onclick="testNotificationAdd()">Add Notification</button>
+    <button onclick="testNotificationLoad()">Load Notifications</button>
+    <div id="notification-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>6. Chat Test</h2>
+    <button onclick="testChatSend()">Send Test Message</button>
+    <button onclick="testChatLoad()">Load Messages</button>
+    <div id="chat-result" class="result"></div>
+  </div>
+
+  <script type="module">
+    import Gun from 'https://cdn.jsdelivr.net/npm/gun/gun.js'
+
+    // Initialize Gun
+    window.gun = Gun(['https://gun-manhattan.herokuapp.com/gun'])
+    console.log('Gun.js initialized')
+
+    // LocalStorage Test
+    window.testLocalStorage = function() {
+      const result = document.getElementById('localStorage-result')
+      try {
+        localStorage.setItem('test_key', 'test_value')
+        const value = localStorage.getItem('test_key')
+        localStorage.removeItem('test_key')
+
+        if (value === 'test_value') {
+          result.innerHTML = '<span class="success">✅ LocalStorage funktioniert</span>'
+        } else {
+          result.innerHTML = '<span class="error">❌ LocalStorage Fehler</span>'
+        }
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    // Gun.js Test
+    window.testGunJS = async function() {
+      const result = document.getElementById('gunjs-result')
+      result.innerHTML = '<span class="info">⏳ Testing Gun.js...</span>'
+
+      try {
+        const testNode = gun.get('news_plugin_test')
+        testNode.put({ test: 'value', timestamp: Date.now() })
+
+        setTimeout(() => {
+          testNode.once((data) => {
+            if (data && data.test === 'value') {
+              result.innerHTML = '<span class="success">✅ Gun.js funktioniert<br>Data: ' + JSON.stringify(data, null, 2) + '</span>'
+            } else {
+              result.innerHTML = '<span class="error">❌ Gun.js: Keine Daten empfangen</span>'
+            }
+          })
+        }, 500)
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ Gun.js Error: ' + err.message + '</span>'
+      }
+    }
+
+    // Profile Test
+    window.testProfileSave = function() {
+      const result = document.getElementById('profile-result')
+      const profile = {
+        id: 'test_user_' + Date.now(),
+        name: 'Test User',
+        bio: 'Das ist ein Test-Profil',
+        interests: ['Technologie', 'Sport'],
+        avatar: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%236366f1" width="100" height="100"/%3E%3Ctext x="50" y="50" text-anchor="middle" dy=".3em" fill="white" font-size="40"%3ET%3C/text%3E%3C/svg%3E'
+      }
+
+      try {
+        localStorage.setItem('news_plugin_profile', JSON.stringify(profile))
+        gun.get('news_plugin').get('users').get(profile.id).put(profile)
+
+        result.innerHTML = '<span class="success">✅ Profil gespeichert<br>' + JSON.stringify(profile, null, 2) + '</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    window.testProfileLoad = function() {
+      const result = document.getElementById('profile-result')
+      try {
+        const stored = localStorage.getItem('news_plugin_profile')
+        if (stored) {
+          const profile = JSON.parse(stored)
+          result.innerHTML = '<span class="success">✅ Profil geladen<br>' + JSON.stringify(profile, null, 2) + '</span>'
+        } else {
+          result.innerHTML = '<span class="error">❌ Kein Profil gefunden</span>'
+        }
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    // Bookmark Test
+    window.testBookmarkAdd = function() {
+      const result = document.getElementById('bookmark-result')
+      const article = {
+        id: 'article_' + Date.now(),
+        title: 'Test Artikel',
+        summary: 'Das ist ein Test-Artikel',
+        url: 'https://example.com/test',
+        source: 'Test Source',
+        publishedAt: Date.now(),
+        topics: ['test'],
+        tags: ['test']
+      }
+
+      try {
+        const bookmarks = JSON.parse(localStorage.getItem('news_plugin_bookmarks') || '[]')
+        bookmarks.unshift(article)
+        localStorage.setItem('news_plugin_bookmarks', JSON.stringify(bookmarks))
+
+        gun.get('news_plugin_bookmarks').get(article.id).put({
+          ...article,
+          bookmarkedAt: Date.now()
+        })
+
+        result.innerHTML = '<span class="success">✅ Bookmark hinzugefügt<br>Gesamt: ' + bookmarks.length + '</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    window.testBookmarkLoad = function() {
+      const result = document.getElementById('bookmark-result')
+      try {
+        const bookmarks = JSON.parse(localStorage.getItem('news_plugin_bookmarks') || '[]')
+        result.innerHTML = '<span class="success">✅ Bookmarks geladen<br>Anzahl: ' + bookmarks.length + '<br>' + JSON.stringify(bookmarks, null, 2) + '</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    window.testBookmarkClear = function() {
+      const result = document.getElementById('bookmark-result')
+      try {
+        localStorage.removeItem('news_plugin_bookmarks')
+        result.innerHTML = '<span class="success">✅ Alle Bookmarks gelöscht</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    // Notification Test
+    window.testNotificationAdd = function() {
+      const result = document.getElementById('notification-result')
+      const notification = {
+        id: 'notif_' + Date.now(),
+        type: 'article',
+        title: 'Test Notification',
+        message: 'Das ist eine Test-Benachrichtigung',
+        timestamp: Date.now(),
+        read: false
+      }
+
+      try {
+        const notifications = JSON.parse(localStorage.getItem('news_plugin_notifications') || '[]')
+        notifications.unshift(notification)
+        localStorage.setItem('news_plugin_notifications', JSON.stringify(notifications))
+
+        result.innerHTML = '<span class="success">✅ Notification hinzugefügt<br>Gesamt: ' + notifications.length + '</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    window.testNotificationLoad = function() {
+      const result = document.getElementById('notification-result')
+      try {
+        const notifications = JSON.parse(localStorage.getItem('news_plugin_notifications') || '[]')
+        result.innerHTML = '<span class="success">✅ Notifications geladen<br>Anzahl: ' + notifications.length + '</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    // Chat Test
+    window.testChatSend = function() {
+      const result = document.getElementById('chat-result')
+      const threadId = 'test_user_1_test_user_2'
+      const message = {
+        id: 'msg_' + Date.now(),
+        sender: 'test_user_1',
+        text: 'Hallo! Das ist eine Test-Nachricht',
+        timestamp: Date.now(),
+        read: false
+      }
+
+      try {
+        gun.get('news_plugin').get('chats').get(threadId).get('messages').get(message.id).put({
+          sender: message.sender,
+          text: message.text,
+          timestamp: message.timestamp,
+          read: false
+        })
+
+        result.innerHTML = '<span class="success">✅ Nachricht gesendet<br>' + JSON.stringify(message, null, 2) + '</span>'
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    window.testChatLoad = function() {
+      const result = document.getElementById('chat-result')
+      result.innerHTML = '<span class="info">⏳ Lade Nachrichten...</span>'
+
+      const threadId = 'test_user_1_test_user_2'
+      const messages = []
+
+      try {
+        gun.get('news_plugin').get('chats').get(threadId).get('messages').map().once((data, id) => {
+          if (data && data.text) {
+            messages.push({ id, ...data })
+          }
+        })
+
+        setTimeout(() => {
+          if (messages.length > 0) {
+            result.innerHTML = '<span class="success">✅ Nachrichten geladen<br>Anzahl: ' + messages.length + '<br>' + JSON.stringify(messages, null, 2) + '</span>'
+          } else {
+            result.innerHTML = '<span class="error">⚠️ Keine Nachrichten gefunden</span>'
+          }
+        }, 1000)
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ ' + err.message + '</span>'
+      }
+    }
+
+    // Auto-run tests
+    console.log('Test page loaded. Click buttons to test features.')
+  </script>
+</body>
+</html>

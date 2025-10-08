@@ -82,19 +82,32 @@ export class RSSService {
    * Convert RSS items to NewsArticle format
    */
   private convertToArticles(feed: RSSFeed, location?: string): NewsArticle[] {
-    return feed.items.map(item => ({
-      id: this.generateId(item.guid || item.link),
-      title: this.cleanTitle(item.title),
-      summary: this.extractSummary(item.description || item.content || ''),
-      url: item.link,
-      source: feed.feed.title || 'RSS Feed',
-      imageUrl: this.extractImage(item),
-      author: item.author || feed.feed.author,
-      publishedAt: new Date(item.pubDate).getTime(),
-      topics: item.categories || ['news'],
-      locations: location ? [location] : [],
-      tags: this.extractTags(item)
-    }))
+    return feed.items.map(item => {
+      const category = this.detectCategory(item)
+      const contentType = this.determineContentType(item, category)
+      const difficulty = this.determineDifficulty(item)
+
+      return {
+        id: this.generateId(item.guid || item.link),
+        title: this.cleanTitle(item.title),
+        summary: this.extractSummary(item.description || item.content || ''),
+        content: this.extractFullContent(item),
+        url: item.link,
+        source: feed.feed.title || 'RSS Feed',
+        imageUrl: this.extractImage(item) || this.getPlaceholderImage(category),
+        author: item.author || feed.feed.author || 'Redaktion',
+        publishedAt: new Date(item.pubDate).getTime(),
+        topics: item.categories || ['news'],
+        locations: location ? [location] : [],
+        tags: this.extractTags(item),
+        // 📚 ERWEITERTE FELDER
+        contentType,
+        difficulty,
+        readingTime: this.estimateReadingTime(item.content || item.description || ''),
+        resources: [],
+        relatedContent: []
+      }
+    })
   }
 
   /**
@@ -163,6 +176,95 @@ export class RSSService {
     }
 
     return tags
+  }
+
+  /**
+   * Detect category from item data
+   */
+  private detectCategory(item: RSSItem): string {
+    const allText = `${item.title} ${item.description || ''} ${(item.categories || []).join(' ')}`.toLowerCase()
+
+    if (allText.includes('tech') || allText.includes('software') || allText.includes('digital')) return 'tech'
+    if (allText.includes('local') || allText.includes('community') || allText.includes('stadt')) return 'local'
+    if (allText.includes('science') || allText.includes('research') || allText.includes('studie')) return 'science'
+    if (allText.includes('business') || allText.includes('wirtschaft') || allText.includes('market')) return 'business'
+    if (allText.includes('kultur') || allText.includes('culture') || allText.includes('art')) return 'culture'
+
+    return 'news'
+  }
+
+  /**
+   * Determine content type from item
+   */
+  private determineContentType(item: RSSItem, category: string): 'news' | 'tutorial' | 'case-study' | 'research' | 'library' | 'video' | 'guide' {
+    const title = item.title.toLowerCase()
+    const desc = (item.description || '').toLowerCase()
+
+    if (title.includes('tutorial') || title.includes('how to') || title.includes('guide')) return 'tutorial'
+    if (title.includes('case study') || title.includes('fallstudie')) return 'case-study'
+    if (title.includes('research') || title.includes('study') || title.includes('forschung')) return 'research'
+    if (title.includes('library') || title.includes('framework') || title.includes('tool')) return 'library'
+    if (title.includes('video') || item.enclosure?.type?.startsWith('video/')) return 'video'
+    if (desc.includes('step by step') || desc.includes('schritt für schritt')) return 'guide'
+
+    // Category-based fallback
+    if (category === 'science') return Math.random() < 0.5 ? 'research' : 'news'
+    if (category === 'tech') return Math.random() < 0.3 ? 'tutorial' : 'news'
+
+    return 'news'
+  }
+
+  /**
+   * Determine difficulty level from content
+   */
+  private determineDifficulty(item: RSSItem): 'beginner' | 'intermediate' | 'advanced' {
+    const text = `${item.title} ${item.description || ''}`.toLowerCase()
+
+    if (text.includes('beginner') || text.includes('anfänger') || text.includes('introduction') || text.includes('basics')) return 'beginner'
+    if (text.includes('advanced') || text.includes('expert') || text.includes('fortgeschritten') || text.includes('deep dive')) return 'advanced'
+
+    // Default to intermediate
+    return 'intermediate'
+  }
+
+  /**
+   * Estimate reading time based on content length
+   */
+  private estimateReadingTime(content: string): number {
+    const text = content.replace(/<[^>]*>/g, '')
+    const wordCount = text.split(/\s+/).length
+    // Average reading speed: 200 words per minute
+    return Math.max(3, Math.ceil(wordCount / 200))
+  }
+
+  /**
+   * Extract full content from RSS item
+   */
+  private extractFullContent(item: RSSItem): string {
+    const content = item.content || item.description || ''
+    // Remove HTML tags but keep structure with paragraphs
+    return content
+      .replace(/<br\s*\/?>/gi, '\n\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  /**
+   * Get placeholder image based on category
+   */
+  private getPlaceholderImage(category: string): string {
+    const placeholders: Record<string, string> = {
+      'tech': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=400&fit=crop',
+      'science': 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&h=400&fit=crop',
+      'business': 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop',
+      'culture': 'https://images.unsplash.com/photo-1499364615650-ec38552f4f34?w=600&h=400&fit=crop',
+      'local': 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&h=400&fit=crop',
+      'news': 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=400&fit=crop'
+    }
+
+    return placeholders[category] || placeholders['news']
   }
 }
 

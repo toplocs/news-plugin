@@ -1,4 +1,5 @@
 import gun from './gun'
+import 'gun/sea'
 import type { UserProfile, UserSettings } from '../types/user'
 
 /**
@@ -6,19 +7,70 @@ import type { UserProfile, UserSettings } from '../types/user'
  * Uses SEA for encryption of private fields
  */
 
+// @ts-ignore - Gun SEA is dynamically loaded
+const SEA = (gun as any).SEA
+
 const userNode = gun.get('news_plugin_users')
+
+// Demo encryption key - in production, this would be derived from user auth
+// For now, we persist the key in localStorage to enable decryption
+const getUserEncryptionKey = async (userId: string) => {
+  // In production: derive from WebAuthn/passkey
+  // For demo: persist key in localStorage per user
+  const storageKey = `news_plugin_key_${userId}`
+  const stored = localStorage.getItem(storageKey)
+
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch (e) {
+      console.warn('Failed to parse stored key, generating new one')
+    }
+  }
+
+  // Generate new key pair and store it
+  const pair = await SEA.pair()
+  localStorage.setItem(storageKey, JSON.stringify(pair))
+  return pair
+}
 
 export class UserService {
   /**
    * Get user profile by ID
    */
   async getUserProfile(userId: string): Promise<UserProfile | null> {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       userNode
         .get(userId)
-        .once((data: any) => {
+        .once(async (data: any) => {
           if (data) {
-            resolve(data as UserProfile)
+            const pair = await getUserEncryptionKey(userId)
+
+            // Decrypt private fields if they exist and are encrypted
+            let decryptedEmail = data.email
+            let decryptedPhone = data.phone
+
+            if (data.email && typeof data.email === 'string' && data.email.startsWith('SEA{')) {
+              try {
+                decryptedEmail = await SEA.decrypt(data.email, pair)
+              } catch (e) {
+                console.warn('Failed to decrypt email:', e)
+              }
+            }
+
+            if (data.phone && typeof data.phone === 'string' && data.phone.startsWith('SEA{')) {
+              try {
+                decryptedPhone = await SEA.decrypt(data.phone, pair)
+              } catch (e) {
+                console.warn('Failed to decrypt phone:', e)
+              }
+            }
+
+            resolve({
+              ...data,
+              email: decryptedEmail,
+              phone: decryptedPhone
+            } as UserProfile)
           } else {
             resolve(null)
           }
@@ -30,12 +82,29 @@ export class UserService {
    * Create or update user profile
    */
   async saveUserProfile(profile: UserProfile): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const now = Date.now()
+      const pair = await getUserEncryptionKey(profile.id)
+
+      // Encrypt private fields if present
+      let encryptedEmail = profile.email
+      let encryptedPhone = profile.phone
+
+      if (profile.email) {
+        encryptedEmail = await SEA.encrypt(profile.email, pair)
+      }
+      if (profile.phone) {
+        encryptedPhone = await SEA.encrypt(profile.phone, pair)
+      }
+
       const profileData = {
         ...profile,
+        email: encryptedEmail,
+        phone: encryptedPhone,
         updatedAt: now,
-        createdAt: profile.createdAt || now
+        createdAt: profile.createdAt || now,
+        // Store the public key for verification
+        pub: pair.pub
       }
 
       userNode

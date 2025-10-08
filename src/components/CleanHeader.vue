@@ -12,24 +12,50 @@
 
       <!-- Search Bar (minimal) -->
       <div class="search-bar">
+        <label for="news-search" class="sr-only">Nachrichten durchsuchen</label>
         <input
+          id="news-search"
           v-model="searchQuery"
-          type="text"
+          type="search"
           placeholder="Suche..."
           @input="handleSearch"
+          aria-label="Nachrichten durchsuchen"
         />
       </div>
 
       <!-- Actions -->
       <div class="actions">
         <GunSyncStatus />
-        <button class="action-btn" @click="$emit('refresh')" title="Aktualisieren">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        <!-- Notification Panel -->
+        <NotificationPanel @notification-click="handleNotificationClick" />
+
+        <!-- Community/Discovery Sidebar Toggle -->
+        <button
+          class="action-btn"
+          @click="$emit('toggle-sidebar')"
+          aria-label="Community & Entdeckungen öffnen"
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </button>
+
+        <button
+          class="action-btn"
+          @click="$emit('refresh')"
+          aria-label="Nachrichten aktualisieren"
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
         </button>
-        <button class="action-btn" @click="$emit('settings')" title="Einstellungen">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button
+          class="action-btn"
+          @click="$emit('settings')"
+          aria-label="Einstellungen öffnen"
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
           </svg>
@@ -42,6 +68,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import GunSyncStatus from './GunSyncStatus.vue'
+import NotificationPanel from './NotificationPanel.vue'
+import type { Notification } from '../stores/useNotifications'
 
 defineProps<{
   location?: string
@@ -51,6 +79,8 @@ const emit = defineEmits<{
   search: [query: string]
   refresh: []
   settings: []
+  'notification-click': [notification: Notification]
+  'toggle-sidebar': []
 }>()
 
 const searchQuery = ref('')
@@ -61,6 +91,11 @@ const handleSearch = () => {
   debounce = setTimeout(() => {
     emit('search', searchQuery.value)
   }, 300)
+}
+
+const handleNotificationClick = (notification: Notification) => {
+  emit('notification-click', notification)
+  console.log('Notification clicked:', notification)
 }
 </script>
 
@@ -207,5 +242,18 @@ const handleSearch = () => {
     font-size: 0.875rem;
     padding: 0.5rem 0.875rem;
   }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 </style>

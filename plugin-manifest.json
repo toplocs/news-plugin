@@ -1,0 +1,133 @@
+{
+  "id": "news-plugin",
+  "name": "News Plugin",
+  "version": "2.0.0",
+  "description": "Interest-based news aggregator with P2P chat, user discovery, and personalized recommendations",
+  "author": {
+    "name": "TopLocs Team",
+    "url": "https://github.com/toplocs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toplocs/news-plugin"
+  },
+  "homepage": "https://toplocs.github.io/news-plugin",
+  "category": "social",
+  "tags": [
+    "news",
+    "chat",
+    "discovery",
+    "p2p",
+    "personalization",
+    "interests",
+    "notifications"
+  ],
+  "features": [
+    {
+      "name": "Interest-based News Feed",
+      "description": "Personalized news based on your interests with behavioral learning"
+    },
+    {
+      "name": "P2P Chat",
+      "description": "Real-time messaging with Gun.js, supports message history and typing indicators"
+    },
+    {
+      "name": "User Discovery",
+      "description": "Find users with similar interests based on location and activity"
+    },
+    {
+      "name": "Notifications",
+      "description": "Real-time notifications for new messages, matches, and relevant articles"
+    },
+    {
+      "name": "Profile Management",
+      "description": "Create and edit profiles with avatars, bio, and interests"
+    },
+    {
+      "name": "Responsive Layout",
+      "description": "3-column layout for desktop, adaptive for tablet and mobile"
+    }
+  ],
+  "technologies": [
+    "Vue 3",
+    "TypeScript",
+    "Gun.js",
+    "Tailwind CSS",
+    "Vite",
+    "Module Federation"
+  ],
+  "permissions": [
+    {
+      "name": "location",
+      "description": "Required for location-based news and user discovery",
+      "required": false
+    },
+    {
+      "name": "notifications",
+      "description": "Required for push notifications",
+      "required": false
+    }
+  ],
+  "bundle": {
+    "entry": "./plugin.js",
+    "size": "4.05 KB",
+    "gzipSize": "1.33 KB",
+    "totalSize": "~118 KB (gzip)"
+  },
+  "performance": {
+    "tti": "< 2.5s",
+    "cls": "≤ 0.05",
+    "fps": "≥ 60"
+  },
+  "compatibility": {
+    "toplocs": ">=1.0.0",
+    "browser": [
+      "Chrome >= 90",
+      "Firefox >= 88",
+      "Safari >= 14",
+      "Edge >= 90"
+    ],
+    "node": ">=20.0.0"
+  },
+  "installation": {
+    "url": "https://toplocs.github.io/news-plugin/plugin.js",
+    "method": "module-federation"
+  },
+  "screenshots": [
+    {
+      "url": "https://toplocs.github.io/news-plugin/screenshots/desktop-3col.png",
+      "title": "Desktop 3-Column Layout",
+      "description": "Full desktop experience with settings, feed, and user discovery"
+    },
+    {
+      "url": "https://toplocs.github.io/news-plugin/screenshots/mobile.png",
+      "title": "Mobile Layout",
+      "description": "Responsive mobile layout with stacked feed and bottom sheet"
+    },
+    {
+      "url": "https://toplocs.github.io/news-plugin/screenshots/chat.png",
+      "title": "P2P Chat",
+      "description": "Real-time messaging with typing indicators and message history"
+    }
+  ],
+  "documentation": {
+    "readme": "https://github.com/toplocs/news-plugin/blob/main/README.md",
+    "guide": "https://github.com/toplocs/news-plugin/blob/main/docs/ui-guide.md",
+    "api": "https://github.com/toplocs/news-plugin/blob/main/docs/api.md"
+  },
+  "support": {
+    "issues": "https://github.com/toplocs/news-plugin/issues",
+    "discussions": "https://github.com/toplocs/news-plugin/discussions"
+  },
+  "license": "MIT",
+  "keywords": [
+    "toplocs",
+    "plugin",
+    "news",
+    "p2p",
+    "chat",
+    "discovery",
+    "vue3",
+    "gunjs"
+  ]
+}

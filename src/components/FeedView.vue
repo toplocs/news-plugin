@@ -70,7 +70,7 @@
         :class="layout === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'"
       >
         <NewsCard
-          v-for="article in articles"
+          v-for="article in displayedArticles"
           :key="article.id"
           :article="article"
           :show-image="true"
@@ -79,25 +79,38 @@
         />
       </transition-group>
 
-      <!-- Load More -->
-      <div v-if="hasMore" class="mt-8 text-center">
-        <button
-          @click="$emit('load-more')"
-          class="px-8 py-3 bg-slate-800/50 hover:bg-slate-800/70 backdrop-blur-sm border border-slate-700/50 text-slate-100 rounded-lg transition-all duration-200 font-medium hover:scale-105 transform"
-        >
-          Load More Articles
-        </button>
+      <!-- Infinite Scroll Sentinel -->
+      <div
+        v-if="hasMoreToShow"
+        ref="sentinelRef"
+        class="sentinel mt-8 py-8 text-center"
+      >
+        <div v-if="isLoadingMore" class="flex flex-col items-center gap-3">
+          <div class="spinner"></div>
+          <span class="text-slate-400 text-sm">Lade weitere Artikel...</span>
+        </div>
+        <div v-else class="text-slate-500 text-sm">
+          Scrolle weiter für mehr Artikel
+        </div>
+      </div>
+
+      <!-- End of Feed -->
+      <div v-else class="mt-8 py-8 text-center">
+        <div class="text-slate-400 text-sm">
+          ✓ Alle Artikel geladen
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import NewsCard from './NewsCard.vue'
 import ArticleSkeleton from './ArticleSkeleton.vue'
 import type { NewsArticle } from '../types'
 
-defineProps<{
+const props = defineProps<{
   articles: NewsArticle[]
   loading?: boolean
   error?: string | null
@@ -105,11 +118,68 @@ defineProps<{
   hasMore?: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   'article-click': [article: NewsArticle]
   'load-more': []
   'update:layout': [layout: 'grid' | 'list']
 }>()
+
+const displayCount = ref(12)
+const isLoadingMore = ref(false)
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+const displayedArticles = computed(() => {
+  return props.articles.slice(0, displayCount.value)
+})
+
+const hasMoreToShow = computed(() => {
+  return displayCount.value < props.articles.length || props.hasMore
+})
+
+const loadMore = () => {
+  if (isLoadingMore.value) return
+
+  isLoadingMore.value = true
+
+  // If we have more local articles, just increase display count
+  if (displayCount.value < props.articles.length) {
+    setTimeout(() => {
+      displayCount.value += 12
+      isLoadingMore.value = false
+    }, 300)
+  } else if (props.hasMore) {
+    // Otherwise, request more from parent
+    emit('load-more')
+    setTimeout(() => {
+      isLoadingMore.value = false
+    }, 500)
+  }
+}
+
+onMounted(() => {
+  // Setup Intersection Observer for infinite scroll
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMoreToShow.value && !isLoadingMore.value) {
+        loadMore()
+      }
+    },
+    {
+      rootMargin: '200px' // Start loading 200px before reaching end
+    }
+  )
+
+  if (sentinelRef.value) {
+    observer.observe(sentinelRef.value)
+  }
+})
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+  }
+})
 </script>
 
 <style scoped>
@@ -134,5 +204,26 @@ defineEmits<{
 
 .fade-slide-move {
   transition: transform 0.3s ease;
+}
+
+/* Spinner */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sentinel */
+.sentinel {
+  min-height: 80px;
 }
 </style>

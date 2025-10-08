@@ -75,18 +75,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useNewsStore } from '../stores/useNewsStore'
 import { newsService } from '../services/newsService'
+import { useLocation } from '../composables/useLocation'
 import { useToast } from '../composables/useToast'
 import HeaderBar from '../components/HeaderBar.vue'
 import LocationHeader from '../components/LocationHeader.vue'
 import FeedView from '../components/FeedView.vue'
-import NewsFilter from '../components/NewsFilter.vue'
 import NewsDetailModal from '../components/NewsDetailModal.vue'
 import MobileBottomNav from '../components/MobileBottomNav.vue'
 import SidebarLeft from '../components/SidebarLeft.vue'
 import UserSidebar from '../components/UserSidebar.vue'
 import StatsBar from '../components/StatsBar.vue'
 import ToastContainer from '../components/ToastContainer.vue'
-import type { NewsArticle, NewsFilter as Filter } from '../types'
+import type { NewsArticle } from '../types'
 
 const props = defineProps<{
   parentId?: string
@@ -94,8 +94,8 @@ const props = defineProps<{
 }>()
 
 const store = useNewsStore()
+const { currentLocation, calculateDistance } = useLocation()
 const { success, error: showError, info } = useToast()
-const filter = ref<Filter>({})
 const selectedArticle = ref<NewsArticle | null>(null)
 const feedLayout = ref<'grid' | 'list'>('grid')
 const activeView = ref<'feed' | 'filters' | 'discover'>('feed')
@@ -108,15 +108,80 @@ const error = computed(() => store.error)
 
 const filteredArticles = computed(() => {
   let result = articles.value
+  console.log(`🔍 Filter Start: ${result.length} Artikel total`)
 
+  // Filter by source
+  if (settings.value.sources && settings.value.sources.length > 0) {
+    const before = result.length
+    result = result.filter(article => {
+      const sourceId = article.source.toLowerCase().replace(/\s+/g, '')
+      return settings.value.sources.some(s =>
+        sourceId.includes(s.toLowerCase()) ||
+        article.source.toLowerCase().includes(s.toLowerCase())
+      )
+    })
+    console.log(`  📰 Source Filter: ${before} → ${result.length} (Sources: ${settings.value.sources.join(', ')})`)
+  }
+
+  // Filter by interests (check if article topics match any interest)
+  if (settings.value.interests && settings.value.interests.length > 0) {
+    const before = result.length
+    const filtered = result.filter(article => {
+      return settings.value.interests.some(interest =>
+        article.topics.some(topic =>
+          topic.toLowerCase().includes(interest.toLowerCase())
+        ) ||
+        article.tags?.some(tag =>
+          tag.toLowerCase().includes(interest.toLowerCase())
+        )
+      )
+    })
+
+    console.log(`  🎯 Interest Filter: ${before} → ${filtered.length} matched (Interests: ${settings.value.interests.join(', ')})`)
+
+    // Fallback: Wenn weniger als die Hälfte matchen, zeige alle (zu strikte Filterung)
+    if (filtered.length < Math.ceil(result.length / 2)) {
+      console.warn(`  ⚠️ Interest Filter FALLBACK: ${filtered.length}/${result.length} zu wenig - zeige alle`)
+      // result bleibt unverändert (zeige alle)
+    } else {
+      result = filtered
+    }
+  }
+
+  // Filter by location/radius (if user has location and radius is set)
+  if (currentLocation.value && settings.value.radius) {
+    const before = result.length
+    result = result.filter(article => {
+      // Articles without coordinates pass through (can't filter them)
+      if (!article.coordinates) return true
+
+      // Calculate distance from user location to article location
+      const distance = calculateDistance(
+        currentLocation.value!.lat,
+        currentLocation.value!.lng,
+        article.coordinates.lat,
+        article.coordinates.lng
+      )
+
+      // Only show articles within radius (in km)
+      return distance <= settings.value.radius
+    })
+    console.log(`  📍 Location Filter: ${before} → ${result.length} (Radius: ${settings.value.radius}km)`)
+  }
+
+  // Filter by search query
   if (searchQuery.value) {
+    const before = result.length
     const query = searchQuery.value.toLowerCase()
     result = result.filter(
       a => a.title.toLowerCase().includes(query) ||
-           a.summary.toLowerCase().includes(query)
+           a.summary.toLowerCase().includes(query) ||
+           a.source.toLowerCase().includes(query)
     )
+    console.log(`  🔎 Search Filter: ${before} → ${result.length} (Query: "${searchQuery.value}")`)
   }
 
+  console.log(`✅ Filter End: ${result.length} Artikel final`)
   return result
 })
 
@@ -191,16 +256,15 @@ const rightSidebarClass = computed(() => {
   return ''
 })
 
-const updateFilter = (newFilter: Filter) => {
-  filter.value = newFilter
-}
-
 const handleSearch = (query: string) => {
   searchQuery.value = query
 }
 
 const handleRefresh = async () => {
   try {
+    // Clear old articles first to avoid duplicates
+    store.clearArticles(props.parentId || 'default')
+
     // Try to fetch real RSS feeds first
     const rssArticles = await newsService.fetchAllRSS(locationName.value)
 
@@ -210,12 +274,17 @@ const handleRefresh = async () => {
       }
       success(`${rssArticles.length} neue Artikel geladen`)
     } else {
-      // Fallback to mock data
-      const freshArticles = await newsService.searchByInterests(settings.value.interests)
+      // Fallback to mock data with default interests if empty
+      const interests = settings.value.interests.length > 0
+        ? settings.value.interests
+        : ['community', 'local', 'tech']
+
+      // Generate 20 articles (more variety!)
+      const freshArticles = await newsService.searchByInterests(interests)
       for (const article of freshArticles) {
         await store.addArticle(props.parentId || 'default', article)
       }
-      info(`${freshArticles.length} Artikel geladen (Mock-Daten)`)
+      info(`${freshArticles.length} neue Artikel geladen`)
     }
   } catch (err) {
     console.error('Refresh failed:', err)
@@ -227,13 +296,26 @@ const openArticleDetail = (article: NewsArticle) => {
   selectedArticle.value = article
 }
 
-const loadMore = () => {
-  // TODO: Implement pagination
-  console.log('Load more articles')
-}
+const loadMore = async () => {
+  console.log('Loading more articles...')
 
-const filterByTopic = (topic: string) => {
-  filter.value = { ...filter.value, topics: [topic] }
+  try {
+    // Generate more mock articles (in production, this would fetch from API)
+    const interests = settings.value.interests.length > 0
+      ? settings.value.interests
+      : ['community', 'local', 'tech']
+
+    const moreArticles = await newsService.searchByInterests(interests)
+
+    for (const article of moreArticles) {
+      await store.addArticle(props.parentId || 'default', article)
+    }
+
+    success(`${moreArticles.length} weitere Artikel geladen`)
+  } catch (err) {
+    console.error('Load more failed:', err)
+    showError('Fehler beim Laden weiterer Artikel')
+  }
 }
 
 // Handle responsive breakpoints
@@ -242,12 +324,33 @@ const updateBreakpoints = () => {
   isTablet.value = window.innerWidth >= 768 && window.innerWidth < 1024
 }
 
-onMounted(() => {
+onMounted(async () => {
   updateBreakpoints()
   window.addEventListener('resize', updateBreakpoints)
 
-  // Initial data load
-  store.subscribeToParent(props.parentId || 'default')
-  handleRefresh()
+  // Initialize default settings if not present
+  if (settings.value.interests.length === 0) {
+    await store.updateSettings(props.parentId || 'default', {
+      interests: ['community', 'local', 'tech'],
+      radius: 10,
+      autoRefresh: false
+    })
+  }
+
+  // Subscribe to Gun.js (optional, for P2P sync when online)
+  try {
+    store.subscribeToParent(props.parentId || 'default')
+  } catch (err) {
+    console.warn('Gun.js subscription failed (offline mode):', err)
+  }
+
+  // Load initial articles
+  await handleRefresh()
+
+  // Debug log
+  console.log('NewsLayout mounted')
+  console.log('Settings:', settings.value)
+  console.log('Articles in store:', articles.value.length)
+  console.log('Filtered Articles:', filteredArticles.value.length)
 })
 </script>

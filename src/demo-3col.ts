@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
-import NewsLayout from './views/NewsLayout.vue'
+import CleanLayout from './views/CleanLayout.vue'
 import '@toplocs/plugin-sdk/style.css'
 
-const app = createApp(NewsLayout, {
+const app = createApp(CleanLayout, {
   parentId: 'demo',
   entity: 'Location'
 })

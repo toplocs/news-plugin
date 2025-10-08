@@ -14,10 +14,26 @@ export interface NewsArticle {
   publishedAt: number
   topics: string[]
   locations: string[]
+  coordinates?: { lat: number; lng: number }
   suggestedTopics?: SuggestedTopic[]
   suggestedLocations?: SuggestedLocation[]
   relevance?: number
   tags?: string[]
+  // 📚 ERWEITERTE CONTENT-TYPEN
+  contentType?: 'news' | 'tutorial' | 'case-study' | 'research' | 'library' | 'video' | 'guide'
+  difficulty?: 'beginner' | 'intermediate' | 'advanced'
+  readingTime?: number // Minuten
+  relatedContent?: string[] // IDs von related articles
+  resources?: ResourceLink[] // Externe Ressourcen (Bibliotheken, Tools, etc.)
+}
+
+export interface ResourceLink {
+  type: 'library' | 'tool' | 'documentation' | 'github' | 'video' | 'course'
+  name: string
+  url: string
+  description: string
+  language?: string // Für Code-Bibliotheken
+  stars?: number // GitHub stars
 }
 
 export interface SuggestedTopic {

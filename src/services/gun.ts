@@ -2,8 +2,10 @@ import Gun from 'gun'
 import 'gun/sea'
 
 // Initialize Gun instance
+// For development: localStorage-only mode (no P2P sync errors)
+// For production: Add active relay servers in peers array
 const gun = Gun({
-  peers: ['https://gun-manhattan.herokuapp.com/gun'],
+  peers: [], // Empty = localStorage-only mode (no network errors)
   localStorage: true,
   radisk: true
 })

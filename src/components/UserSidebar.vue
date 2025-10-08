@@ -183,9 +183,12 @@ const nearbyActivity = ref<Activity[]>([
   }
 ])
 
+const emit = defineEmits<{
+  'open-profile': [user: User]
+}>()
+
 const openUserProfile = (user: User) => {
-  info(`Profil von ${user.name} öffnen`)
-  // TODO: Open user profile modal or navigate
+  emit('open-profile', user)
 }
 
 const connect = (user: User) => {

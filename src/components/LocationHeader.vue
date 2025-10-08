@@ -30,10 +30,10 @@
         <div class="slider-container">
           <input
             type="range"
-            v-model="localRadius"
+            v-model.number="localRadius"
             min="1"
             max="100"
-            @input="$emit('update:radius', parseInt(localRadius))"
+            @input="$emit('update:radius', localRadius)"
             class="radius-slider"
           />
           <div class="slider-track-fill" :style="{ width: `${(localRadius / 100) * 100}%` }"></div>

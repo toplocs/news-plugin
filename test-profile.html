@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Profile Save</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+    .test-section {
+      background: rgba(30, 41, 59, 0.6);
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #4f46e5;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    pre {
+      background: #1e293b;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Profile Save Test</h1>
+
+  <div class="test-section">
+    <h2>1. Gun.js Connection Test</h2>
+    <button onclick="testGunConnection()">Test Gun Connection</button>
+    <div id="gun-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>2. Save Test Profile</h2>
+    <button onclick="saveTestProfile()">Save Test Profile</button>
+    <div id="save-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Load Test Profile</h2>
+    <button onclick="loadTestProfile()">Load Test Profile</button>
+    <div id="load-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>4. List All Profiles</h2>
+    <button onclick="listAllProfiles()">List All Profiles</button>
+    <div id="list-result"></div>
+  </div>
+
+  <script type="module">
+    import Gun from 'https://cdn.jsdelivr.net/npm/gun/gun.js'
+    import 'https://cdn.jsdelivr.net/npm/gun/sea.js'
+
+    // Initialize Gun (localStorage-only mode for testing)
+    window.gun = Gun({
+      peers: [], // Empty = localStorage-only (no network errors)
+      localStorage: true,
+      radisk: true
+    })
+
+    const userNode = window.gun.get('news_plugin_users')
+
+    // Test 1: Gun Connection
+    window.testGunConnection = () => {
+      const result = document.getElementById('gun-result')
+      result.innerHTML = '<p>Testing connection...</p>'
+
+      window.gun.on('hi', peer => {
+        result.innerHTML = `<p class="success">✅ Connected to peer: ${peer.url || 'local'}</p>`
+      })
+
+      setTimeout(() => {
+        if (!result.innerHTML.includes('Connected')) {
+          result.innerHTML = '<p class="error">❌ No peers connected (this is OK for local testing)</p>'
+        }
+      }, 2000)
+    }
+
+    // Test 2: Save Profile
+    window.saveTestProfile = async () => {
+      const result = document.getElementById('save-result')
+      result.innerHTML = '<p>Saving profile...</p>'
+
+      const testProfile = {
+        id: 'test-user-' + Date.now(),
+        name: 'Test User',
+        username: 'testuser',
+        bio: 'This is a test profile',
+        interests: ['Vue.js', 'TypeScript'],
+        following: [],
+        followers: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+
+      try {
+        await new Promise((resolve, reject) => {
+          userNode.get(testProfile.id).put(testProfile, (ack) => {
+            if (ack.err) {
+              reject(new Error(ack.err))
+            } else {
+              resolve(ack)
+            }
+          })
+        })
+
+        window.lastTestProfileId = testProfile.id
+        result.innerHTML = `
+          <p class="success">✅ Profile saved!</p>
+          <pre>${JSON.stringify(testProfile, null, 2)}</pre>
+        `
+      } catch (err) {
+        result.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`
+      }
+    }
+
+    // Test 3: Load Profile
+    window.loadTestProfile = async () => {
+      const result = document.getElementById('load-result')
+
+      if (!window.lastTestProfileId) {
+        result.innerHTML = '<p class="error">❌ No test profile saved yet. Save one first!</p>'
+        return
+      }
+
+      result.innerHTML = '<p>Loading profile...</p>'
+
+      try {
+        const profile = await new Promise((resolve) => {
+          userNode.get(window.lastTestProfileId).once((data) => {
+            resolve(data)
+          })
+
+          setTimeout(() => resolve(null), 3000)
+        })
+
+        if (profile) {
+          result.innerHTML = `
+            <p class="success">✅ Profile loaded!</p>
+            <pre>${JSON.stringify(profile, null, 2)}</pre>
+          `
+        } else {
+          result.innerHTML = '<p class="error">❌ Profile not found (Gun.js might need time to sync)</p>'
+        }
+      } catch (err) {
+        result.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`
+      }
+    }
+
+    // Test 4: List All Profiles
+    window.listAllProfiles = () => {
+      const result = document.getElementById('list-result')
+      result.innerHTML = '<p>Loading all profiles...</p>'
+
+      const profiles = []
+
+      userNode.map().once((user, id) => {
+        if (user && typeof user === 'object' && user.name) {
+          profiles.push({ id, name: user.name, username: user.username })
+        }
+      })
+
+      setTimeout(() => {
+        if (profiles.length > 0) {
+          result.innerHTML = `
+            <p class="success">✅ Found ${profiles.length} profiles:</p>
+            <pre>${JSON.stringify(profiles, null, 2)}</pre>
+          `
+        } else {
+          result.innerHTML = '<p class="error">❌ No profiles found</p>'
+        }
+      }, 2000)
+    }
+  </script>
+</body>
+</html>

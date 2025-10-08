@@ -24,9 +24,12 @@ export function useNewsStore() {
 
   // Get articles for specific parent
   const getArticlesByParent = (parentId: string, filter?: NewsFilter) => {
-    let filtered = articles.value.filter(article =>
-      article.topics.includes(parentId) || article.locations.includes(parentId)
-    )
+    // For demo/default parent, show all articles
+    let filtered = parentId === 'demo' || parentId === 'default'
+      ? articles.value
+      : articles.value.filter(article =>
+          article.topics.includes(parentId) || article.locations.includes(parentId)
+        )
 
     if (filter?.search) {
       const search = filter.search.toLowerCase()
@@ -95,10 +98,25 @@ export function useNewsStore() {
     }
   }
 
-  // Add article
+  // Add article directly to local state (for development/offline mode)
+  const addArticleDirectly = (article: NewsArticle) => {
+    state.value.articles.set(article.id, article)
+  }
+
+  // Add article to Gun.js (syncs to P2P network)
   const addArticle = async (parentId: string, article: Omit<NewsArticle, 'id'>) => {
     try {
-      await newsService.addNews(parentId, article)
+      // Generate ID if not present
+      const fullArticle: NewsArticle = {
+        id: `article_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...article
+      }
+
+      // Add to local state immediately (for offline/dev mode)
+      addArticleDirectly(fullArticle)
+
+      // Also sync to Gun.js (for P2P network)
+      await newsService.addNews(parentId, fullArticle)
     } catch (err) {
       state.value.error = err instanceof Error ? err.message : 'Failed to add article'
       throw err
@@ -110,13 +128,32 @@ export function useNewsStore() {
     const current = getSettings(parentId)
     const updated = { ...current, ...settings }
 
+    // Update local state immediately
+    state.value.settings.set(parentId, updated)
+
     try {
+      // Also sync to Gun.js (for P2P network)
       await newsService.saveSettings(parentId, updated)
-      state.value.settings.set(parentId, updated)
     } catch (err) {
       state.value.error = err instanceof Error ? err.message : 'Failed to save settings'
-      throw err
+      // Don't throw - local state is already updated
+      console.error('Gun.js sync failed:', err)
     }
+  }
+
+  // Clear articles for a parent
+  const clearArticles = (parentId: string) => {
+    const articlesToRemove: string[] = []
+
+    // Find all articles for this parent
+    state.value.articles.forEach((article, id) => {
+      if (article.topics.includes(parentId) || article.locations.includes(parentId)) {
+        articlesToRemove.push(id)
+      }
+    })
+
+    // Remove them
+    articlesToRemove.forEach(id => state.value.articles.delete(id))
   }
 
   // Clear error
@@ -137,6 +174,8 @@ export function useNewsStore() {
     // Actions
     subscribeToParent,
     addArticle,
+    addArticleDirectly,
+    clearArticles,
     updateSettings,
     clearError
   }

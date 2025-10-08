@@ -1,28 +1,44 @@
 <template>
   <Teleport to="body">
-    <div v-if="modelValue" class="modal-overlay" @click="close">
-      <div class="modal-content" @click.stop>
+    <div
+      v-if="modelValue"
+      class="modal-overlay"
+      @click="close"
+      @keydown.esc="close"
+    >
+      <div
+        class="modal-content"
+        @click.stop
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-modal-title"
+      >
         <div class="modal-header">
-          <h2>Einstellungen</h2>
-          <button class="close-btn" @click="close">×</button>
+          <h2 id="settings-modal-title">Einstellungen</h2>
+          <button class="close-btn" @click="close" aria-label="Einstellungen schließen">×</button>
         </div>
 
         <div class="modal-body">
           <!-- Radius Settings -->
           <div class="setting-section">
-            <label class="setting-label">
+            <label class="setting-label" for="radius-slider">
               <span class="label-text">Suchradius</span>
               <span class="label-value">{{ localSettings.radius }} km</span>
             </label>
             <input
+              id="radius-slider"
               v-model.number="localSettings.radius"
               type="range"
               min="1"
               max="100"
               step="1"
               class="slider"
+              aria-label="Suchradius in Kilometern"
+              :aria-valuenow="localSettings.radius"
+              aria-valuemin="1"
+              aria-valuemax="100"
             />
-            <div class="slider-labels">
+            <div class="slider-labels" aria-hidden="true">
               <span>1 km</span>
               <span>100 km</span>
             </div>
