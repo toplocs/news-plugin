@@ -47,8 +47,23 @@
             <div class="user-name">{{ user.name }}</div>
             <div class="match-reason">{{ user.matchReason }}</div>
           </div>
-          <button @click="connect(user)" class="connect-btn">
-            +
+          <button
+            v-if="!chatRequests.hasActiveChat(user.id)"
+            @click="sendChatRequest(user)"
+            :disabled="!chatRequests.canSendRequestTo(user.id)"
+            class="connect-btn"
+            :title="chatRequests.canSendRequestTo(user.id) ? 'Chat-Anfrage senden' : 'Anfrage bereits gesendet'"
+          >
+            <span v-if="chatRequests.canSendRequestTo(user.id)">💬</span>
+            <span v-else>⏳</span>
+          </button>
+          <button
+            v-else
+            @click="openExistingChat(user)"
+            class="chat-btn"
+            title="Chat öffnen"
+          >
+            ✓
           </button>
         </div>
       </div>
@@ -82,8 +97,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from '../composables/useToast'
+import { useChatRequests } from '../stores/useChatRequests'
 
 interface User {
   id: string
@@ -104,6 +120,7 @@ interface Activity {
 }
 
 const { success, info } = useToast()
+const chatRequests = useChatRequests()
 
 // Mock data - In production, this would come from Gun.js
 const activeUsers = ref<User[]>([
@@ -191,9 +208,19 @@ const openUserProfile = (user: User) => {
   emit('open-profile', user)
 }
 
-const connect = (user: User) => {
-  success(`Verbindung zu ${user.name} gesendet`)
-  // TODO: Send connection request via Gun.js
+const sendChatRequest = (user: User) => {
+  chatRequests.sendChatRequest({
+    id: user.id,
+    name: user.name,
+    avatar: user.avatar,
+    distance: user.matchReason || '0 km',
+    interests: [] // Will be populated from user data
+  })
+}
+
+const openExistingChat = (user: User) => {
+  emit('open-profile', user)
+  // This will trigger the chat modal
 }
 </script>
 

@@ -313,6 +313,12 @@
 
     <!-- Toast Notifications -->
     <ToastContainer />
+
+    <!-- Chat Request Notifications -->
+    <ChatRequestNotification
+      @accept="handleChatRequestAccept"
+      @decline="handleChatRequestDecline"
+    />
   </div>
 </template>
 
@@ -339,6 +345,7 @@ import InitialSurvey from '../components/InitialSurvey.vue'
 import ProfileEdit from '../views/ProfileEdit.vue'
 import UserProfileModal from '../components/UserProfileModal.vue'
 import ChatModal from '../components/ChatModal.vue'
+import ChatRequestNotification from '../components/ChatRequestNotification.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{
@@ -532,6 +539,17 @@ const handleOpenChat = (user: any) => {
   // Close profile modal if open
   showUserProfileModal.value = false
   console.log('💬 Opening chat with:', user.name)
+}
+
+// 💬 CHAT REQUEST HANDLERS
+const handleChatRequestAccept = (requestId: string) => {
+  // Find the request and open chat
+  // This will be handled by the ChatRequestNotification component
+  console.log('✅ Chat request accepted:', requestId)
+}
+
+const handleChatRequestDecline = (requestId: string) => {
+  console.log('❌ Chat request declined:', requestId)
 }
 
 // 🔍 DISCOVERY HANDLERS
