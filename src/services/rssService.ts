@@ -37,28 +37,55 @@ interface RSSFeed {
 export class RSSService {
   private readonly RSS2JSON_API = 'https://api.rss2json.com/v1/api.json'
   private readonly MAX_ITEMS = 10
+  private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+  private cache = new Map<string, { data: NewsArticle[]; timestamp: number }>()
 
   /**
-   * Fetch and parse RSS feed
+   * Fetch and parse RSS feed with caching
    */
   async fetchFeed(feedUrl: string, location?: string): Promise<NewsArticle[]> {
-    try {
-      const url = `${this.RSS2JSON_API}?rss_url=${encodeURIComponent(feedUrl)}&count=${this.MAX_ITEMS}`
+    // Check cache first
+    const cacheKey = `${feedUrl}_${location || 'default'}`
+    const cached = this.cache.get(cacheKey)
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      console.log(`📦 RSS Cache HIT for ${feedUrl}`)
+      return cached.data
+    }
 
-      const response = await fetch(url)
+    try {
+      const url = `${this.RSS2JSON_API}?rss_url=${encodeURIComponent(feedUrl)}&count=${this.MAX_ITEMS}&api_key=no`
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      })
+
       if (!response.ok) {
-        throw new Error(`RSS fetch failed: ${response.statusText}`)
+        throw new Error(`RSS fetch failed: ${response.status} ${response.statusText}`)
       }
 
       const data: RSSFeed = await response.json()
 
       if (data.status !== 'ok') {
-        throw new Error('RSS feed parsing failed')
+        console.warn(`RSS feed status not OK for ${feedUrl}:`, data.status)
+        return []
       }
 
-      return this.convertToArticles(data, location)
+      const articles = this.convertToArticles(data, location)
+
+      // Cache successful result
+      this.cache.set(cacheKey, {
+        data: articles,
+        timestamp: Date.now()
+      })
+
+      console.log(`✅ RSS fetched ${articles.length} articles from ${feedUrl}`)
+      return articles
+
     } catch (error) {
-      console.error('Failed to fetch RSS feed:', feedUrl, error)
+      console.error(`❌ Failed to fetch RSS feed ${feedUrl}:`, error)
       return []
     }
   }

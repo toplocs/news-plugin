@@ -1,0 +1,433 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: 📰
+          - generic [ref=e8]:
+            - heading "TopLocs News" [level=1] [ref=e9]
+            - text: Berlin Mitte
+        - generic [ref=e10]:
+          - generic [ref=e11]: Nachrichten durchsuchen
+          - searchbox "Nachrichten durchsuchen" [ref=e12]
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - generic [ref=e16]: Lokaler Modus
+            - generic [ref=e17]: ℹ️
+          - button "Benachrichtigungen (4 ungelesen)" [ref=e19] [cursor=pointer]:
+            - generic:
+              - generic:
+                - generic: "4"
+          - button "Community & Entdeckungen öffnen" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+          - button "Nachrichten aktualisieren" [ref=e24] [cursor=pointer]:
+            - img [ref=e25]
+          - button "Einstellungen öffnen" [ref=e27] [cursor=pointer]:
+            - img [ref=e28]
+    - main [ref=e31]:
+      - generic [ref=e32]:
+        - complementary [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - button "Meine Interessen anzeigen" [ref=e36] [cursor=pointer]:
+                - generic [ref=e37]: 🏷️
+                - generic [ref=e38]: Meine Interessen
+                - generic [ref=e39]: "3"
+              - button "Gespeichert anzeigen" [ref=e40] [cursor=pointer]:
+                - generic [ref=e41]: 🔖
+                - generic [ref=e42]: Gespeichert
+              - button "Einstellungen anzeigen" [ref=e44] [cursor=pointer]:
+                - generic [ref=e45]: ⚙️
+                - generic [ref=e46]: Einstellungen
+              - button "Community anzeigen" [ref=e47] [cursor=pointer]:
+                - generic [ref=e48]: ✨
+                - generic [ref=e49]: Community
+            - generic [ref=e51]:
+              - heading "🏷️ Meine Interessen" [level=3] [ref=e52]:
+                - generic [ref=e53]: 🏷️
+                - generic [ref=e54]: Meine Interessen
+              - paragraph [ref=e55]: Verwalte deine Interessen für personalisierte News
+              - generic [ref=e56]:
+                - generic [ref=e57]:
+                  - generic [ref=e58]: community
+                  - button "community entfernen" [ref=e59] [cursor=pointer]: ×
+                - generic [ref=e60]:
+                  - generic [ref=e61]: local
+                  - button "local entfernen" [ref=e62] [cursor=pointer]: ×
+                - generic [ref=e63]:
+                  - generic [ref=e64]: tech
+                  - button "tech entfernen" [ref=e65] [cursor=pointer]: ×
+              - button "+ Neues Interesse hinzufügen" [ref=e66] [cursor=pointer]:
+                - generic [ref=e67]: +
+                - generic [ref=e68]: Neues Interesse hinzufügen
+              - generic [ref=e69]:
+                - heading "Vorschläge" [level=4] [ref=e70]
+                - generic [ref=e71]:
+                  - button "+ Technologie" [ref=e72] [cursor=pointer]
+                  - button "+ Politik" [ref=e73] [cursor=pointer]
+                  - button "+ Sport" [ref=e74] [cursor=pointer]
+                  - button "+ Kultur" [ref=e75] [cursor=pointer]
+                  - button "+ Wissenschaft" [ref=e76] [cursor=pointer]
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e80]: 📊
+              - generic [ref=e81]:
+                - generic [ref=e82]: Gesamt
+                - generic [ref=e83]: "36"
+            - generic [ref=e84]:
+              - generic [ref=e85]: 🔥
+              - generic [ref=e86]:
+                - generic [ref=e87]: Heute
+                - generic [ref=e88]: "33"
+            - generic [ref=e89]:
+              - generic [ref=e90]: 📍
+              - generic [ref=e91]:
+                - generic [ref=e92]: Quellen
+                - generic [ref=e93]: "7"
+            - generic [ref=e94]:
+              - generic [ref=e95]: ⏱️
+              - generic [ref=e96]:
+                - generic [ref=e97]: Letzte Aktualisierung
+                - generic [ref=e98]: Gerade eben
+          - generic [ref=e99]:
+            - generic [ref=e100]:
+              - button "Standort wählen" [ref=e102] [cursor=pointer]:
+                - img [ref=e103]
+                - generic [ref=e106]: Standort wählen
+              - generic [ref=e107]: 10km Umkreis
+              - generic [ref=e108]: 36 Artikel
+            - generic [ref=e109]:
+              - button "Alle" [ref=e110] [cursor=pointer]
+              - button "Breaking" [ref=e111] [cursor=pointer]
+              - button "Lokal" [ref=e112] [cursor=pointer]
+              - button "Community" [ref=e113] [cursor=pointer]
+              - button "Tech" [ref=e114] [cursor=pointer]
+          - generic [ref=e115]:
+            - article [ref=e116] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e117]:
+                - img [ref=e118]
+              - generic [ref=e120]:
+                - img "Datenleck bei Hotelsoftware" [ref=e121]
+                - generic [ref=e123]: 📍 Berlin Mitte
+              - generic [ref=e124]:
+                - generic [ref=e125]:
+                  - generic [ref=e126]: tagesschau.de - Die Nachrichten der ARD
+                  - generic [ref=e127]: 2h
+                - heading "Datenleck bei Hotelsoftware" [level=3] [ref=e128]
+                - paragraph [ref=e129]: "Namen, Ausweis- und Kreditkartendetails: Wegen Sicherheitslücken in einer Hotelbuchungssoftware waren offenbar Millionen Gästedaten online abrufbar. Sicherheitsforscherinnen sprechen von einfachen ..."
+                - generic [ref=e131]:
+                  - generic [ref=e132]: R
+                  - generic [ref=e133]: Redaktion
+            - article [ref=e134] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e135]:
+                - img [ref=e136]
+              - generic [ref=e138]:
+                - img "Drohnen-Technik - wie weit sind deutsche Hersteller?" [ref=e139]
+                - generic [ref=e141]: 📍 Berlin Mitte
+              - generic [ref=e142]:
+                - generic [ref=e143]:
+                  - generic [ref=e144]: tagesschau.de - Die Nachrichten der ARD
+                  - generic [ref=e145]: 2h
+                - heading "Drohnen-Technik - wie weit sind deutsche Hersteller?" [level=3] [ref=e146]
+                - paragraph [ref=e147]: Die Politik debattiert darüber, wie Deutschland vor Drohnenangriffen geschützt werden kann. Dabei könnten eigene Drohnen eine wichtige Rolle spielen. Die Industrie dafür in Deutschland wächst. Von ...
+                - generic [ref=e149]:
+                  - generic [ref=e150]: R
+                  - generic [ref=e151]: Redaktion
+            - article [ref=e152] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e153]:
+                - img [ref=e154]
+              - generic [ref=e156]:
+                - 'img "Innere Sicherheit: So will Deutschland Drohnen bekämpfen" [ref=e157]'
+                - generic [ref=e159]: 📍 Berlin Mitte
+              - generic [ref=e160]:
+                - generic [ref=e161]:
+                  - generic [ref=e162]: tagesschau.de - Die Nachrichten der ARD
+                  - generic [ref=e163]: 2h
+                - 'heading "Innere Sicherheit: So will Deutschland Drohnen bekämpfen" [level=3] [ref=e164]'
+                - paragraph [ref=e165]: Nach Drohnensichtungen in Deutschland will die Bundesregierung das Land besser schützen. Welche neuen Befugnisse soll die Polizei erhalten? Was ist darüber hinaus geplant? Die wichtigsten Punkte au...
+                - generic [ref=e167]:
+                  - generic [ref=e168]: R
+                  - generic [ref=e169]: Redaktion
+            - article [ref=e170] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e171]:
+                - img [ref=e172]
+              - generic [ref=e174]:
+                - img "Schülerin in Paderborn mit Messer schwer verletzt" [ref=e175]
+                - generic [ref=e177]: 📍 Berlin Mitte
+              - generic [ref=e178]:
+                - generic [ref=e179]:
+                  - generic [ref=e180]: tagesschau.de - Die Nachrichten der ARD
+                  - generic [ref=e181]: 2h
+                - heading "Schülerin in Paderborn mit Messer schwer verletzt" [level=3] [ref=e182]
+                - paragraph [ref=e183]: An einer Schule in Paderborn ist eine Schülerin mit einem Messer schwer verletzt worden. Ein Tatverdächtiger wurde festgenommen. Der 25-Jährige soll selbst Schüler an der Berufsschule sein.
+                - generic [ref=e185]:
+                  - generic [ref=e186]: R
+                  - generic [ref=e187]: Redaktion
+            - article [ref=e188] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e189]:
+                - img [ref=e190]
+              - generic [ref=e192]:
+                - img "It's Prime Day, and WIRED is Live-Blogging The Best and Worst Of It" [ref=e193]
+                - generic [ref=e195]: 📍 Berlin Mitte
+              - generic [ref=e196]:
+                - generic [ref=e197]:
+                  - generic [ref=e198]: WIRED
+                  - generic [ref=e199]: 2h
+                - heading "It's Prime Day, and WIRED is Live-Blogging The Best and Worst Of It" [level=3] [ref=e200]
+                - paragraph [ref=e201]: We're tracking Amazon Prime Day deals, trends, and the general state of American capitalism live throughout the Big Deal Days sale.
+                - generic [ref=e202]:
+                  - generic [ref=e203]:
+                    - generic [ref=e204]: R
+                    - generic [ref=e205]: Redaktion
+                  - generic [ref=e206]:
+                    - generic [ref=e207]: "#Gear"
+                    - generic [ref=e208]: "#Prime Day"
+            - article [ref=e209] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e210]:
+                - img [ref=e211]
+              - generic [ref=e213]:
+                - 'img "Kriminalität: Messerangriff auf Bürgermeisterin: Eine Tat in der Familie" [ref=e214]'
+                - generic [ref=e216]: 📍 Berlin Mitte
+              - generic [ref=e217]:
+                - generic [ref=e218]:
+                  - generic [ref=e219]: DIE ZEIT | Nachrichten, News, Hintergründe und Debatten
+                  - generic [ref=e220]: 2h
+                - 'heading "Kriminalität: Messerangriff auf Bürgermeisterin: Eine Tat in der Familie" [level=3] [ref=e221]'
+                - paragraph [ref=e222]: None
+                - generic [ref=e223]:
+                  - generic [ref=e224]:
+                    - generic [ref=e225]: D
+                    - generic [ref=e226]: "DIE ZEIT: News -"
+                  - generic [ref=e228]: "#News"
+            - article [ref=e229] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e230]:
+                - img [ref=e231]
+              - generic [ref=e233]:
+                - 'img "Polizeieinsatz: Eltern ließen Kind im Keller warten - Ermittlungen" [ref=e234]'
+                - generic [ref=e236]: 📍 Berlin Mitte
+              - generic [ref=e237]:
+                - generic [ref=e238]:
+                  - generic [ref=e239]: DIE ZEIT | Nachrichten, News, Hintergründe und Debatten
+                  - generic [ref=e240]: 2h
+                - 'heading "Polizeieinsatz: Eltern ließen Kind im Keller warten - Ermittlungen" [level=3] [ref=e241]'
+                - paragraph [ref=e242]: None
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - generic [ref=e245]: D
+                    - generic [ref=e246]: "DIE ZEIT: News -"
+                  - generic [ref=e248]: "#News"
+            - article [ref=e249] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e250]:
+                - img [ref=e251]
+              - generic [ref=e253]:
+                - 'img "Chatkontrolle: Wenn WhatsApp Ihre Fotos scannen muss" [ref=e254]'
+                - generic [ref=e256]: 📍 Berlin Mitte
+              - generic [ref=e257]:
+                - generic [ref=e258]:
+                  - generic [ref=e259]: DIE ZEIT | Nachrichten, News, Hintergründe und Debatten
+                  - generic [ref=e260]: 2h
+                - 'heading "Chatkontrolle: Wenn WhatsApp Ihre Fotos scannen muss" [level=3] [ref=e261]'
+                - paragraph [ref=e262]: Digitalverbände laufen Sturm gegen eine neue EU-Regulierung zu Kindesmissbrauchsdarstellungen. Denn die würde die Privatsphäre angreifen. Der Protest scheint zu wirken.
+                - generic [ref=e263]:
+                  - generic [ref=e264]:
+                    - generic [ref=e265]: D
+                    - generic [ref=e266]: "DIE ZEIT: Internet - Pauline Schinkels"
+                  - generic [ref=e268]: "#Internet"
+            - article [ref=e269] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e270]:
+                - img [ref=e271]
+              - generic [ref=e273]:
+                - img "11 Best Amazon Deals on Qi2 and MagSafe Accessories" [ref=e274]
+                - generic [ref=e276]: 📍 Berlin Mitte
+              - generic [ref=e277]:
+                - generic [ref=e278]:
+                  - generic [ref=e279]: WIRED
+                  - generic [ref=e280]: 2h
+                - heading "11 Best Amazon Deals on Qi2 and MagSafe Accessories" [level=3] [ref=e281]
+                - paragraph [ref=e282]: Your hard-working iPhone deserves a little love. Why not snag it an assistant with these MagSafe accessory deals?
+                - generic [ref=e283]:
+                  - generic [ref=e284]:
+                    - generic [ref=e285]: S
+                    - generic [ref=e286]: Simon Hill
+                  - generic [ref=e287]:
+                    - generic [ref=e288]: "#Gear"
+                    - generic [ref=e289]: "#Gear / Deals"
+            - article [ref=e290] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e291]:
+                - img [ref=e292]
+              - generic [ref=e294]:
+                - 'img "Kriminalität: Männer auf Supermarktparkplatz angegriffen" [ref=e295]'
+                - generic [ref=e297]: 📍 Berlin Mitte
+              - generic [ref=e298]:
+                - generic [ref=e299]:
+                  - generic [ref=e300]: DIE ZEIT | Nachrichten, News, Hintergründe und Debatten
+                  - generic [ref=e301]: 2h
+                - 'heading "Kriminalität: Männer auf Supermarktparkplatz angegriffen" [level=3] [ref=e302]'
+                - paragraph [ref=e303]: None
+                - generic [ref=e304]:
+                  - generic [ref=e305]:
+                    - generic [ref=e306]: D
+                    - generic [ref=e307]: "DIE ZEIT: News -"
+                  - generic [ref=e309]: "#News"
+            - article [ref=e310] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e311]:
+                - img [ref=e312]
+              - generic [ref=e314]:
+                - img "Netzagentur hat neues Beschwerde-Portal für die Post" [ref=e315]
+                - generic [ref=e317]: 📍 Berlin Mitte
+              - generic [ref=e318]:
+                - generic [ref=e319]:
+                  - generic [ref=e320]: tagesschau.de - Die Nachrichten der ARD
+                  - generic [ref=e321]: 2h
+                - heading "Netzagentur hat neues Beschwerde-Portal für die Post" [level=3] [ref=e322]
+                - paragraph [ref=e323]: "Beschädigte Sendungen oder lange Zustellzeiten: Die Beschwerden über die Post und ihre Wettbewerber sind zuletzt stetig gestiegen. Nun hat die Bundesnetzagentur einen \"Mängelmelder Post\" eingerichtet."
+                - generic [ref=e325]:
+                  - generic [ref=e326]: R
+                  - generic [ref=e327]: Redaktion
+            - article [ref=e328] [cursor=pointer]:
+              - button "Lesezeichen hinzufügen" [ref=e329]:
+                - img [ref=e330]
+              - generic [ref=e332]:
+                - 'img "Horst Seehofer: Mit Fehlern kennt er sich aus" [ref=e333]'
+                - generic [ref=e335]: 📍 Berlin Mitte
+              - generic [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]: DIE ZEIT | Nachrichten, News, Hintergründe und Debatten
+                  - generic [ref=e339]: 2h
+                - 'heading "Horst Seehofer: Mit Fehlern kennt er sich aus" [level=3] [ref=e340]'
+                - paragraph [ref=e341]: Horst Seehofer hat einst gezeigt, wie man noch kurz vor dem Karriereende seinen Ruf ruiniert. Markus Söder sollte hinhören, wenn Seehofer ihn vor Grünen-Bashing warnt.
+                - generic [ref=e342]:
+                  - generic [ref=e343]:
+                    - generic [ref=e344]: D
+                    - generic [ref=e345]: "DIE ZEIT: Kultur - Yasmine M'Barek"
+                  - generic [ref=e347]: "#Kultur"
+        - complementary [ref=e348]:
+          - generic [ref=e349]:
+            - generic [ref=e350]:
+              - heading "👥 Community (4)" [level=3] [ref=e351]:
+                - generic [ref=e352]: 👥
+                - generic [ref=e353]: Community (4)
+              - generic [ref=e354]:
+                - generic [ref=e355] [cursor=pointer]:
+                  - generic [ref=e357]: A
+                  - generic [ref=e358]:
+                    - generic [ref=e359]: Anna Schmidt
+                    - generic [ref=e360]: Teilt gerade einen Artikel
+                  - generic [ref=e361]: "2"
+                - generic [ref=e362] [cursor=pointer]:
+                  - img "Max Müller" [ref=e364]
+                  - generic [ref=e365]:
+                    - generic [ref=e366]: Max Müller
+                    - generic [ref=e367]: Online
+                - generic [ref=e369] [cursor=pointer]:
+                  - generic [ref=e371]: L
+                  - generic [ref=e372]:
+                    - generic [ref=e373]: Lisa Weber
+                    - generic [ref=e374]: Vor 5 Minuten aktiv
+                  - generic [ref=e375]: "1"
+                - generic [ref=e376] [cursor=pointer]:
+                  - img "Tom Fischer" [ref=e378]
+                  - generic [ref=e379]:
+                    - generic [ref=e380]: Tom Fischer
+                    - generic [ref=e381]: Online
+            - generic [ref=e383]:
+              - heading "✨ Empfehlungen" [level=3] [ref=e384]:
+                - generic [ref=e385]: ✨
+                - generic [ref=e386]: Empfehlungen
+              - generic [ref=e387]:
+                - generic [ref=e388]:
+                  - generic [ref=e390]: S
+                  - generic [ref=e391]:
+                    - generic [ref=e392]: Sarah Klein
+                    - generic [ref=e393]: Gleiche Interessen
+                  - button "+" [ref=e394] [cursor=pointer]
+                - generic [ref=e395]:
+                  - img "Paul Richter" [ref=e397]
+                  - generic [ref=e398]:
+                    - generic [ref=e399]: Paul Richter
+                    - generic [ref=e400]: In deiner Nähe
+                  - button "+" [ref=e401] [cursor=pointer]
+            - generic [ref=e402]:
+              - heading "📍 In der Nähe" [level=3] [ref=e403]:
+                - generic [ref=e404]: 📍
+                - generic [ref=e405]: In der Nähe
+              - generic [ref=e406]:
+                - generic [ref=e407] [cursor=pointer]:
+                  - generic [ref=e408]: 🎉
+                  - generic [ref=e409]:
+                    - generic [ref=e410]: Community Treffen in Mitte
+                    - generic [ref=e411]:
+                      - generic [ref=e412]: 1.2 km
+                      - generic [ref=e413]: ·
+                      - generic [ref=e414]: in 2h
+                - generic [ref=e415] [cursor=pointer]:
+                  - generic [ref=e416]: 📰
+                  - generic [ref=e417]:
+                    - generic [ref=e418]: "Breaking News: Neues Tech Event"
+                    - generic [ref=e419]:
+                      - generic [ref=e420]: 0.8 km
+                      - generic [ref=e421]: ·
+                      - generic [ref=e422]: vor 15m
+                - generic [ref=e423] [cursor=pointer]:
+                  - generic [ref=e424]: ☕
+                  - generic [ref=e425]:
+                    - generic [ref=e426]: Coffee & Code Meetup
+                    - generic [ref=e427]:
+                      - generic [ref=e428]: 2.5 km
+                      - generic [ref=e429]: ·
+                      - generic [ref=e430]: morgen
+  - dialog "🎯 Personalisiere deine Nachrichten" [ref=e432]:
+    - generic [ref=e433]:
+      - heading "🎯 Personalisiere deine Nachrichten" [level=2] [ref=e434]
+      - paragraph [ref=e435]: Wähle 3-5 Themen aus, die dich interessieren. Wir lernen automatisch dazu!
+    - generic [ref=e436]:
+      - button "💻 Technologie" [ref=e437] [cursor=pointer]:
+        - generic [ref=e438]: 💻
+        - generic [ref=e439]: Technologie
+      - button "🔬 Wissenschaft" [ref=e440] [cursor=pointer]:
+        - generic [ref=e441]: 🔬
+        - generic [ref=e442]: Wissenschaft
+      - button "🏛️ Politik" [ref=e443] [cursor=pointer]:
+        - generic [ref=e444]: 🏛️
+        - generic [ref=e445]: Politik
+      - button "💼 Wirtschaft" [ref=e446] [cursor=pointer]:
+        - generic [ref=e447]: 💼
+        - generic [ref=e448]: Wirtschaft
+      - button "⚽ Sport" [ref=e449] [cursor=pointer]:
+        - generic [ref=e450]: ⚽
+        - generic [ref=e451]: Sport
+      - button "🎭 Kultur" [ref=e452] [cursor=pointer]:
+        - generic [ref=e453]: 🎭
+        - generic [ref=e454]: Kultur
+      - button "🏥 Gesundheit" [ref=e455] [cursor=pointer]:
+        - generic [ref=e456]: 🏥
+        - generic [ref=e457]: Gesundheit
+      - button "🌍 Umwelt" [ref=e458] [cursor=pointer]:
+        - generic [ref=e459]: 🌍
+        - generic [ref=e460]: Umwelt
+      - button "📚 Bildung" [ref=e461] [cursor=pointer]:
+        - generic [ref=e462]: 📚
+        - generic [ref=e463]: Bildung
+      - button "📍 Lokal" [ref=e464] [cursor=pointer]:
+        - generic [ref=e465]: 📍
+        - generic [ref=e466]: Lokal
+      - button "👥 Community" [ref=e467] [cursor=pointer]:
+        - generic [ref=e468]: 👥
+        - generic [ref=e469]: Community
+      - button "🍽️ Essen & Trinken" [ref=e470] [cursor=pointer]:
+        - generic [ref=e471]: 🍽️
+        - generic [ref=e472]: Essen & Trinken
+    - generic [ref=e473]:
+      - generic [ref=e474]: Weitere Interessen hinzufügen
+      - textbox "Weitere Interessen hinzufügen" [ref=e475]:
+        - /placeholder: Weitere Interessen... (Enter zum Hinzufügen)
+      - button "Interesse hinzufügen" [disabled] [ref=e476]: +
+    - generic [ref=e477]:
+      - button "Überspringen" [ref=e478] [cursor=pointer]
+      - button "Weiter (0/3)" [disabled] [ref=e479]
+    - paragraph [ref=e480]: "💡 Keine Sorge: Wir lernen automatisch aus deinem Leseverhalten und passen die Auswahl an."
+```
