@@ -74,9 +74,27 @@
 
           <!-- Empty State -->
           <div v-if="!isLoading && displayedArticles.length === 0" class="empty-state">
-            <div class="empty-icon">📰</div>
-            <h3>Keine Artikel gefunden</h3>
-            <p>Versuche einen anderen Suchbegriff oder Filter</p>
+            <div class="empty-illustration">
+              <div class="empty-icon-large">📰</div>
+              <div class="empty-sparkles">✨</div>
+            </div>
+            <h3 class="empty-title">Keine passenden Artikel gefunden</h3>
+            <p class="empty-description">
+              Es gibt aktuell keine Artikel, die zu deinen Interessen und Filtern passen.
+            </p>
+            <div class="empty-actions">
+              <button @click="activeLeftTab = 'interests'" class="btn-primary">
+                <span>🎯</span>
+                Interessen anpassen
+              </button>
+              <button @click="currentLocation = null; selectedRadius = 50" class="btn-secondary">
+                <span>🌍</span>
+                Filter erweitern
+              </button>
+            </div>
+            <div class="empty-hint">
+              💡 Tipp: Füge weitere Interessen hinzu oder erhöhe den Umkreis
+            </div>
           </div>
         </div>
 
@@ -1014,8 +1032,105 @@ onUnmounted(() => {
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
+.empty-illustration {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.empty-icon-large {
+  font-size: 5rem;
+  opacity: 0.6;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-sparkles {
+  position: absolute;
+  top: 0;
+  right: 35%;
+  font-size: 2rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 1rem 0;
+}
+
+.empty-description {
+  color: #94a3b8;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.empty-actions button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.empty-hint {
+  color: #64748b;
+  font-size: 0.875rem;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Legacy empty state classes for backward compatibility */
 .empty-icon {
   font-size: 4rem;
   margin-bottom: 1rem;

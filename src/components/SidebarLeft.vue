@@ -113,9 +113,25 @@
         <p class="panel-description">Deine gemerkten Artikel zum späteren Lesen</p>
 
         <!-- Empty State -->
-        <div v-if="bookmarkCount === 0" class="empty-state">
-          <span class="empty-icon">📚</span>
-          <p>Klicke auf das Lesezeichen-Icon bei Artikeln um sie hier zu speichern</p>
+        <div v-if="bookmarkCount === 0" class="bookmarks-empty-state">
+          <div class="empty-illustration-small">
+            <span class="empty-icon-medium">📚</span>
+            <span class="empty-sparkle">✨</span>
+          </div>
+          <p class="empty-text">Noch keine gespeicherten Artikel</p>
+          <p class="empty-hint-small">
+            Hover über einen Artikel im Feed und klicke auf das 🔖 Lesezeichen-Icon, um ihn hier zu speichern
+          </p>
+          <div class="empty-features">
+            <div class="empty-feature-item">
+              <span class="feature-icon">📖</span>
+              <span>Später lesen</span>
+            </div>
+            <div class="empty-feature-item">
+              <span class="feature-icon">🔄</span>
+              <span>Sync über Geräte</span>
+            </div>
+          </div>
         </div>
 
         <!-- Bookmarks List -->
@@ -894,5 +910,75 @@ onMounted(() => {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.4);
   transform: scale(1.05);
+}
+
+/* Bookmarks Empty State */
+.bookmarks-empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.empty-illustration-small {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.empty-icon-medium {
+  font-size: 3rem;
+  opacity: 0.5;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-sparkle {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  font-size: 1.25rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.empty-text {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-hint-small {
+  font-size: 0.8125rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+}
+
+.empty-features {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding-top: 0.5rem;
+}
+
+.empty-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+}
+
+.feature-icon {
+  font-size: 1.125rem;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
 }
 </style>
