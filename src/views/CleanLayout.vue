@@ -59,16 +59,25 @@
               <SkeletonCard v-for="n in 6" :key="`skeleton-${n}`" />
             </template>
 
-            <!-- Actual Articles -->
+            <!-- Actual Articles with Ad Banners -->
             <template v-else>
-              <CleanNewsCard
-                v-for="article in displayedArticles"
-                :key="article.id"
-                :article="article"
-                :isBookmarked="bookmarks.isBookmarked(article.id)"
-                @click="handleArticleClick(article)"
-                @bookmark="handleBookmark"
-              />
+              <template v-for="(article, index) in displayedArticles" :key="article.id">
+                <CleanNewsCard
+                  :article="article"
+                  :isBookmarked="bookmarks.isBookmarked(article.id)"
+                  @click="handleArticleClick(article)"
+                  @bookmark="handleBookmark"
+                />
+
+                <!-- Ad Banner every 4 articles -->
+                <AdBanner
+                  v-if="(index + 1) % 4 === 0 && index < displayedArticles.length - 1"
+                  :key="`ad-${index}`"
+                  :userInterests="interests.interests.value.map(i => i.keyword)"
+                  :articleId="article.id"
+                  :showRevenue="true"
+                />
+              </template>
             </template>
           </div>
 
@@ -346,6 +355,7 @@ import ProfileEdit from '../views/ProfileEdit.vue'
 import UserProfileModal from '../components/UserProfileModal.vue'
 import ChatModal from '../components/ChatModal.vue'
 import ChatRequestNotification from '../components/ChatRequestNotification.vue'
+import AdBanner from '../components/AdBanner.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{

@@ -160,6 +160,16 @@
         </div>
       </div>
 
+      <!-- Revenue View - Einnahmen Dashboard -->
+      <div v-if="activeView === 'revenue'" class="view-panel">
+        <RevenueDashboard />
+      </div>
+
+      <!-- Channels View -->
+      <div v-if="activeView === 'channels'" class="view-panel">
+        <ChannelView />
+      </div>
+
       <!-- Interests View -->
       <div v-if="activeView === 'interests'" class="view-panel">
         <h3 class="panel-title">
@@ -220,7 +230,10 @@
 import { ref, watch, computed, nextTick, onMounted, type ComputedRef } from 'vue'
 import type { NewsSettings } from '../types'
 import DiscoveryPanel from './DiscoveryPanel.vue'
+import RevenueDashboard from './RevenueDashboard.vue'
+import ChannelView from './ChannelView.vue'
 import { useBookmarks } from '../stores/useBookmarks'
+import { useChannels } from '../stores/useChannels'
 
 const props = defineProps<{
   settings: NewsSettings
@@ -237,7 +250,7 @@ const emit = defineEmits<{
   'article-click': [article: any]
 }>()
 
-type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery'
+type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery' | 'revenue' | 'channels'
 
 const activeView = ref<ViewType>('interests') // Start with Interests - most important!
 const localSettings = ref<NewsSettings>({ ...props.settings })
@@ -249,6 +262,9 @@ const interestInput = ref<HTMLInputElement | null>(null)
 const bookmarksStore = useBookmarks()
 const { bookmarks, sortedBookmarks, bookmarkCount, removeBookmark } = bookmarksStore
 
+// Channels management
+const channelsStore = useChannels()
+
 // ONLY ESSENTIAL TABS - Each must have REAL user value!
 const menuItems: Array<{ id: ViewType; icon: string; label: string; badge?: string | ComputedRef<string> }> = [
   {
@@ -258,10 +274,21 @@ const menuItems: Array<{ id: ViewType; icon: string; label: string; badge?: stri
     badge: computed(() => localSettings.value.interests.length.toString())
   },
   {
+    id: 'channels',
+    icon: '🏛️',
+    label: 'Channels',
+    badge: computed(() => channelsStore.myChannels.length > 0 ? channelsStore.myChannels.length.toString() : '')
+  },
+  {
     id: 'bookmarks',
     icon: '🔖',
     label: 'Gespeichert',
     badge: computed(() => bookmarkCount.value > 0 ? bookmarkCount.value.toString() : '')
+  },
+  {
+    id: 'revenue',
+    icon: '💰',
+    label: 'Einnahmen'
   },
   {
     id: 'settings',
