@@ -32,23 +32,115 @@
           <!-- Statistics Bar -->
           <StatsBar :articles="articles" :last-refresh="lastRefreshTime" />
 
-          <!-- Location Bar -->
-          <div class="location-bar">
-            <div class="location-info">
-              <LocationSelector @location-change="handleLocationChange" />
-              <span class="radius">{{ settings.radius }}km Umkreis</span>
-              <span class="count">{{ filteredArticles.length }} Artikel</span>
-            </div>
-            <div class="filters">
-              <button
-                v-for="category in categories"
-                :key="category"
-                @click="toggleFilter(category)"
-                :class="{ active: activeCategories.includes(category) }"
-                class="filter-btn"
-              >
-                {{ category }}
+          <!-- Discovery Banner - Hyperlocal Discovery -->
+          <DiscoveryBanner
+            :radius="settings.radius"
+            :articlesInRadius="articlesInRadius"
+            :totalArticles="articles.length"
+            :closestDistance="closestDistance"
+            @update-radius="handleRadiusUpdate"
+          />
+
+          <!-- Prominent Filter Controls -->
+          <div class="filter-control-bar">
+            <!-- Header Row -->
+            <div class="filter-header">
+              <div class="filter-title">
+                <span class="filter-icon">🎯</span>
+                <h3>Filter & Sortierung</h3>
+                <span v-if="activeFilterCount > 0" class="active-filter-badge">
+                  {{ activeFilterCount }} aktiv
+                </span>
+              </div>
+              <button v-if="activeFilterCount > 0" @click="clearAllFilters" class="clear-filters-btn">
+                <span>✕</span>
+                <span>Alle zurücksetzen</span>
               </button>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="filter-section">
+              <label class="filter-label">📊 Sortierung</label>
+              <div class="sort-options">
+                <button
+                  @click="sortBy = 'distance'"
+                  :class="{ active: sortBy === 'distance' }"
+                  class="sort-btn"
+                >
+                  <span>📍</span>
+                  <span>Distanz</span>
+                </button>
+                <button
+                  @click="sortBy = 'match'"
+                  :class="{ active: sortBy === 'match' }"
+                  class="sort-btn"
+                >
+                  <span>🔥</span>
+                  <span>Match Score</span>
+                </button>
+                <button
+                  @click="sortBy = 'time'"
+                  :class="{ active: sortBy === 'time' }"
+                  class="sort-btn"
+                >
+                  <span>🕒</span>
+                  <span>Zeit</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Interest Filters -->
+            <div v-if="interests.interests.value.length > 0" class="filter-section">
+              <label class="filter-label">
+                💫 Interessen filtern
+                <span class="filter-hint">(Klicke zum An/Ausschalten)</span>
+              </label>
+              <div class="interest-chips">
+                <button
+                  v-for="interest in interests.interests.value.slice(0, 8)"
+                  :key="interest.keyword"
+                  @click="toggleInterestFilter(interest.keyword)"
+                  :class="{ active: !disabledInterests.includes(interest.keyword) }"
+                  class="interest-chip"
+                >
+                  <span class="chip-icon">
+                    {{ !disabledInterests.includes(interest.keyword) ? '✓' : '○' }}
+                  </span>
+                  <span class="chip-label">{{ interest.keyword }}</span>
+                  <span class="chip-score">{{ Math.round(interest.score * 100) }}%</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Category Filters (keeping existing functionality) -->
+            <div class="filter-section">
+              <label class="filter-label">🏷️ Kategorien</label>
+              <div class="category-filters">
+                <button
+                  v-for="category in categories"
+                  :key="category"
+                  @click="toggleFilter(category)"
+                  :class="{ active: activeCategories.includes(category) }"
+                  class="category-btn"
+                >
+                  {{ category }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Result Count & Location Info -->
+            <div class="filter-footer">
+              <div class="filter-stats">
+                <LocationSelector @location-change="handleLocationChange" />
+                <span class="stat-item">
+                  <span class="stat-icon">📍</span>
+                  <span>{{ settings.radius }}km Umkreis</span>
+                </span>
+                <span class="stat-item">
+                  <span class="stat-icon">📰</span>
+                  <span>{{ filteredArticles.length }} Artikel</span>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -65,6 +157,8 @@
                 <CleanNewsCard
                   :article="article"
                   :isBookmarked="bookmarks.isBookmarked(article.id)"
+                  :distance="getArticleDistance(article)"
+                  :matchScore="getArticleMatchScore(article)"
                   @click="handleArticleClick(article)"
                   @bookmark="handleBookmark"
                 />
@@ -79,6 +173,46 @@
                 />
               </template>
             </template>
+          </div>
+
+          <!-- Feed End Message (Anti-Infinite-Scroll) -->
+          <div v-if="!isLoading && displayedArticles.length > 0" class="feed-end">
+            <div class="feed-end-icon">🎉</div>
+            <h3 class="feed-end-title">Du bist auf dem neuesten Stand!</h3>
+            <p class="feed-end-subtitle">
+              Das war's – keine endlose Scroll-Falle hier.
+            </p>
+            <div class="feed-end-stats">
+              <div class="feed-stat">
+                <span class="feed-stat-value">{{ displayedArticles.length }}</span>
+                <span class="feed-stat-label">Artikel gelesen</span>
+              </div>
+              <div class="feed-stat">
+                <span class="feed-stat-value">{{ Math.round(articlesInRadius / articles.length * 100) }}%</span>
+                <span class="feed-stat-label">In deinem Umkreis</span>
+              </div>
+            </div>
+            <div class="feed-end-message">
+              <div class="feed-end-transparency">
+                <span class="transparency-badge">✨ Transparenz</span>
+                <p class="transparency-text">
+                  Im Gegensatz zu Instagram zeigen wir dir <strong>ALLE relevanten Artikel</strong> –
+                  keine versteckten Inhalte, kein endloser Feed.
+                  Du hast jetzt alles gesehen, was zu deinen Interessen und deinem Umkreis passt.
+                </p>
+              </div>
+              <div class="feed-end-cta">
+                <div class="cta-icon">🌍</div>
+                <h4 class="cta-title">Zeit, rauszugehen!</h4>
+                <p class="cta-text">
+                  Schau dir die Events in deiner Nähe an und triff echte Menschen.
+                </p>
+                <button @click="handleRefresh" class="btn-refresh">
+                  <span>🔄</span>
+                  <span>Neue Artikel laden</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Empty State -->
@@ -356,6 +490,7 @@ import UserProfileModal from '../components/UserProfileModal.vue'
 import ChatModal from '../components/ChatModal.vue'
 import ChatRequestNotification from '../components/ChatRequestNotification.vue'
 import AdBanner from '../components/AdBanner.vue'
+import DiscoveryBanner from '../components/DiscoveryBanner.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{
@@ -372,6 +507,8 @@ const { currentLocation, calculateDistance } = useLocation()
 const { success, error, info } = useToast()
 const searchQuery = ref('')
 const activeCategories = ref<string[]>([])
+const sortBy = ref<'distance' | 'match' | 'time'>('distance')
+const disabledInterests = ref<string[]>([])
 const selectedArticle = ref<NewsArticle | null>(null)
 const showSettings = ref(false)
 const showUserSidebar = ref(false)
@@ -412,13 +549,23 @@ const locationName = computed(() => {
 const filteredArticles = computed(() => {
   let result = articles.value
 
-  // 🎯 SMART FILTERING: Filter by interest score (STRICT - no fallback)
+  // 🎯 SMART FILTERING: Filter by interest score with enabled interests only
   if (interests.isInitialized.value && interests.interests.value.length > 0) {
-    const filtered = interests.filterArticlesByInterests(result, 0.10) // Lower threshold = more matches
-    console.log(`📊 Interest Filter: ${filtered.length}/${articles.value.length} Artikel matchen deine Interessen:`, interests.interests.value.map(i => i.keyword))
+    const enabledInterests = interests.interests.value.filter(
+      i => !disabledInterests.value.includes(i.keyword)
+    )
 
-    // KEIN Fallback - zeige NUR relevante Artikel!
-    result = filtered
+    if (enabledInterests.length > 0) {
+      // Create temp interest store with only enabled interests
+      const filtered = result.filter(article => {
+        const score = interests.calculateArticleScore(article)
+        return score > 0.10
+      })
+      console.log(`📊 Interest Filter: ${filtered.length}/${articles.value.length} Artikel matchen aktive Interessen`)
+      result = filtered
+    } else {
+      console.log(`ℹ️ Alle Interessen deaktiviert - zeige alle ${result.length} Artikel`)
+    }
   } else {
     console.log(`ℹ️ Keine Interessen definiert - zeige alle ${result.length} Artikel`)
   }
@@ -463,13 +610,134 @@ const filteredArticles = computed(() => {
     )
   }
 
+  // 🎯 SORTING: Sort based on selected option
+  if (sortBy.value === 'distance' && currentLocation.value) {
+    result = result.sort((a, b) => {
+      // Articles without coordinates go to end
+      if (!a.coordinates && !b.coordinates) return 0
+      if (!a.coordinates) return 1
+      if (!b.coordinates) return -1
+
+      const distA = calculateDistance(
+        currentLocation.value!.lat,
+        currentLocation.value!.lng,
+        a.coordinates.lat,
+        a.coordinates.lng
+      )
+
+      const distB = calculateDistance(
+        currentLocation.value!.lat,
+        currentLocation.value!.lng,
+        b.coordinates.lat,
+        b.coordinates.lng
+      )
+
+      return distA - distB
+    })
+  } else if (sortBy.value === 'match') {
+    result = result.sort((a, b) => {
+      const scoreA = interests.calculateArticleScore(a)
+      const scoreB = interests.calculateArticleScore(b)
+      return scoreB - scoreA // Higher match score first
+    })
+  } else if (sortBy.value === 'time') {
+    result = result.sort((a, b) => b.publishedAt - a.publishedAt) // Newest first
+  }
+
   return result
 })
 
 const displayedArticles = computed(() => filteredArticles.value.slice(0, 12))
 
+// 📍 DISCOVERY BANNER COMPUTED PROPERTIES
+const articlesInRadius = computed(() => {
+  if (!currentLocation.value) return articles.value.length
+
+  return articles.value.filter(article => {
+    if (!article.coordinates) return false
+
+    const distance = calculateDistance(
+      currentLocation.value!.lat,
+      currentLocation.value!.lng,
+      article.coordinates.lat,
+      article.coordinates.lng
+    )
+
+    return distance <= settings.value.radius
+  }).length
+})
+
+const closestDistance = computed(() => {
+  if (!currentLocation.value) return 0
+
+  let minDistance = Infinity
+
+  for (const article of articles.value) {
+    if (!article.coordinates) continue
+
+    const distance = calculateDistance(
+      currentLocation.value.lat,
+      currentLocation.value.lng,
+      article.coordinates.lat,
+      article.coordinates.lng
+    )
+
+    if (distance < minDistance) {
+      minDistance = distance
+    }
+  }
+
+  return minDistance === Infinity ? 0 : Math.round(minDistance * 10) / 10
+})
+
+// 🎯 Active Filter Count
+const activeFilterCount = computed(() => {
+  let count = 0
+
+  // Count disabled interests
+  count += disabledInterests.value.length
+
+  // Count active categories (excluding "Alle")
+  count += activeCategories.value.filter(c => c !== 'Alle').length
+
+  // Count search query
+  if (searchQuery.value) count++
+
+  // Count non-default sort
+  if (sortBy.value !== 'distance') count++
+
+  return count
+})
+
 const handleSearch = (query: string) => {
   searchQuery.value = query
+}
+
+const handleRadiusUpdate = (newRadius: number) => {
+  store.updateSettings(props.parentId || 'default', {
+    ...settings.value,
+    radius: newRadius
+  })
+  info(`Suchradius auf ${newRadius}km aktualisiert`)
+}
+
+// 📍 Calculate distance for an article
+const getArticleDistance = (article: NewsArticle): number | undefined => {
+  if (!currentLocation.value || !article.coordinates) return undefined
+
+  const distance = calculateDistance(
+    currentLocation.value.lat,
+    currentLocation.value.lng,
+    article.coordinates.lat,
+    article.coordinates.lng
+  )
+
+  return Math.round(distance * 10) / 10  // Round to 1 decimal
+}
+
+// 🎯 Calculate match score for an article
+const getArticleMatchScore = (article: NewsArticle): number => {
+  return interests.calculateArticleScore(article)
 }
 
 const handleLocationChange = async (location: { lat: number; lng: number; name?: string } | null) => {
@@ -616,6 +884,29 @@ const toggleFilter = (category: string) => {
       activeCategories.value.push(category)
     }
   }
+}
+
+// 🎯 Toggle Interest Filter
+const toggleInterestFilter = (interest: string) => {
+  const index = disabledInterests.value.indexOf(interest)
+  if (index > -1) {
+    // Re-enable interest
+    disabledInterests.value.splice(index, 1)
+    info(`Interesse "${interest}" aktiviert`)
+  } else {
+    // Disable interest
+    disabledInterests.value.push(interest)
+    info(`Interesse "${interest}" deaktiviert`)
+  }
+}
+
+// 🎯 Clear All Filters
+const clearAllFilters = () => {
+  disabledInterests.value = []
+  activeCategories.value = []
+  searchQuery.value = ''
+  sortBy.value = 'distance'
+  info('Alle Filter zurückgesetzt')
 }
 
 const formatDate = (timestamp: number): string => {
@@ -994,41 +1285,219 @@ onUnmounted(() => {
   }
 }
 
-.location-bar {
+/* ========== PROMINENT FILTER CONTROLS ========== */
+.filter-control-bar {
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  backdrop-filter: blur(16px);
+}
+
+/* Header Row */
+.filter-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
-  margin-bottom: 2rem;
-  padding: 1rem 1.5rem;
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.location-info {
+.filter-title {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  font-size: 0.9375rem;
+  gap: 0.75rem;
 }
 
-.radius {
-  color: #6366f1;
-  font-weight: 600;
+.filter-icon {
+  font-size: 1.5rem;
 }
 
-.count {
-  color: #94a3b8;
+.filter-title h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
 }
 
-.filters {
+.active-filter-badge {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.clear-filters-btn {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.clear-filters-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  transform: scale(1.05);
+}
+
+/* Filter Sections */
+.filter-section {
+  margin-bottom: 1.25rem;
+}
+
+.filter-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #64748b;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Sort Options */
+.sort-options {
+  display: flex;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
-.filter-btn {
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.sort-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.sort-btn:hover::before {
+  left: 100%;
+}
+
+.sort-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.sort-btn.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: #6366f1;
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* Interest Chips */
+.interest-chips {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.interest-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 999px;
+  color: #a78bfa;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.interest-chip:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+  transform: scale(1.05);
+}
+
+.interest-chip.active {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  border-color: #8b5cf6;
+  color: white;
+}
+
+.chip-icon {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.chip-label {
+  flex: 1;
+}
+
+.chip-score {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* Category Filters */
+.category-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.category-btn {
   padding: 0.5rem 1rem;
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1040,21 +1509,188 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 
-.filter-btn:hover {
+.category-btn:hover {
   background: rgba(99, 102, 241, 0.2);
   border-color: #6366f1;
 }
 
-.filter-btn.active {
+.category-btn.active {
   background: #6366f1;
   border-color: #6366f1;
   color: white;
+}
+
+/* Filter Footer */
+.filter-footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filter-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.stat-icon {
+  font-size: 1rem;
 }
 
 .news-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
+}
+
+/* Feed End Message (Anti-Infinite-Scroll) */
+.feed-end {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(99, 102, 241, 0.08));
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 1rem;
+  text-align: center;
+}
+
+.feed-end-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feed-end-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 0.5rem 0;
+}
+
+.feed-end-subtitle {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 0 0 2rem 0;
+}
+
+.feed-end-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.feed-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feed-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.feed-stat-label {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.feed-end-message {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feed-end-transparency {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.transparency-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.transparency-text {
+  font-size: 0.9375rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.transparency-text strong {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.feed-end-cta {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+
+.cta-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cta-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 0.5rem 0;
+}
+
+.cta-text {
+  font-size: 0.9375rem;
+  color: #94a3b8;
+  margin: 0 0 1.5rem 0;
+}
+
+.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.4);
 }
 
 .empty-state {

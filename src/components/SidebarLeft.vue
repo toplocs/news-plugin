@@ -165,6 +165,16 @@
         <RevenueDashboard />
       </div>
 
+      <!-- Transparency Dashboard View -->
+      <div v-if="activeView === 'transparency'" class="view-panel">
+        <TransparencyDashboard
+          :parent-id="'default'"
+          :sort-by="'distance'"
+          @edit-interests="activeView = 'interests'"
+          @view-algorithm="activeView = 'transparency'"
+        />
+      </div>
+
       <!-- Channels View -->
       <div v-if="activeView === 'channels'" class="view-panel">
         <ChannelView />
@@ -231,6 +241,7 @@ import { ref, watch, computed, nextTick, onMounted, type ComputedRef } from 'vue
 import type { NewsSettings } from '../types'
 import DiscoveryPanel from './DiscoveryPanel.vue'
 import RevenueDashboard from './RevenueDashboard.vue'
+import TransparencyDashboard from './TransparencyDashboard.vue'
 import ChannelView from './ChannelView.vue'
 import { useBookmarks } from '../stores/useBookmarks'
 import { useChannels } from '../stores/useChannels'
@@ -250,7 +261,7 @@ const emit = defineEmits<{
   'article-click': [article: any]
 }>()
 
-type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery' | 'revenue' | 'channels'
+type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery' | 'revenue' | 'channels' | 'transparency'
 
 const activeView = ref<ViewType>('interests') // Start with Interests - most important!
 const localSettings = ref<NewsSettings>({ ...props.settings })
@@ -289,6 +300,11 @@ const menuItems: Array<{ id: ViewType; icon: string; label: string; badge?: stri
     id: 'revenue',
     icon: '💰',
     label: 'Einnahmen'
+  },
+  {
+    id: 'transparency',
+    icon: '🔍',
+    label: 'Transparenz'
   },
   {
     id: 'settings',
