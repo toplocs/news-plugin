@@ -154,8 +154,14 @@ export const useChannels = defineStore('channels', () => {
           name: 'Berlin Mitte'
         },
         radius: 10,
-        memberCount: 247,
-        members: [],
+        memberCount: 248,
+        members: [{
+          userId: userId.value,
+          username: 'You',
+          joinedAt: Date.now() - 30 * 24 * 60 * 60 * 1000,
+          role: 'member',
+          contribution: 12.50
+        }],
         events: [
           {
             id: 'ev-1',
@@ -213,8 +219,14 @@ export const useChannels = defineStore('channels', () => {
           name: 'Berlin Mitte'
         },
         radius: 15,
-        memberCount: 134,
-        members: [],
+        memberCount: 135,
+        members: [{
+          userId: userId.value,
+          username: 'You',
+          joinedAt: Date.now() - 60 * 24 * 60 * 60 * 1000,
+          role: 'member',
+          contribution: 8.30
+        }],
         events: [
           {
             id: 'ev-2',
@@ -243,7 +255,15 @@ export const useChannels = defineStore('channels', () => {
     ]
 
     allChannels.value = demoChannels
+
+    // Auto-join user to 2 demo channels for better UX
+    userChannels.value = [
+      demoChannels.find(c => c.id === 'ch-tech-berlin')!,
+      demoChannels.find(c => c.id === 'ch-urban-gardening')!
+    ]
+
     saveChannels()
+    console.log('✅ Demo channels loaded, user auto-joined to 2 channels')
   }
 
   const saveChannels = () => {

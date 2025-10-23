@@ -1,0 +1,2 @@
+// Stub file - Confetti removed
+<template><div></div></template><script setup lang="ts"></script>

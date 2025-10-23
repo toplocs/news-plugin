@@ -1,3 +1,82 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - userService.ts (PHASE 2) - 295 ZEILEN + SEA!
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Gun.js User Profile CRUD (Create, Read, Update)
+- 🔐 SEA Encryption für private Felder (email, phone)
+- Encryption Key Management (localStorage per userId)
+- Avatar Upload (Base64)
+- Follow/Unfollow System
+- User Search (name, username)
+- User Settings (privacy, notifications, visibility)
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ getUserProfile(id): Lädt Profil, decrypted email + phone
+✅ saveUserProfile(): Speichert mit SEA encrypted email + phone
+✅ SEA Encryption: email/phone start mit "SEA{" (encrypted)
+✅ SEA Decryption: Returned plaintext email/phone
+✅ Encryption Key: Unique per userId, stored in localStorage
+✅ Avatar Upload: Base64 string → Gun.js avatar node
+✅ Follow/Unfollow: Bidirectional (following + followers)
+✅ User Search: Case-insensitive name/username search
+
+🔧 WIE ZU TESTEN:
+1. Save Profile Test:
+   - profile = { id: 'user1', email: 'test@example.com', phone: '+49123' }
+   - await userService.saveUserProfile(profile)
+   - Gun.js Browser Extension → Check users/user1
+   - email sollte starten mit "SEA{" (encrypted!)
+   - phone sollte starten mit "SEA{" (encrypted!)
+2. Load Profile Test:
+   - profile = await userService.getUserProfile('user1')
+   - profile.email sollte "test@example.com" sein (decrypted!)
+   - profile.phone sollte "+49123" sein (decrypted!)
+3. Encryption Key Test:
+   - localStorage → Check "news_plugin_key_user1"
+   - Sollte JSON-Stringified SEA pair sein { pub, priv, epub, epriv }
+4. Avatar Upload:
+   - base64 = "data:image/png;base64,..."
+   - await userService.uploadAvatar('user1', base64)
+   - Gun.js → users/user1/avatar sollte base64 sein
+5. Follow Test:
+   - await userService.followUser('user1', 'user2')
+   - Gun.js → users/user1/following/user2 = true
+   - Gun.js → users/user2/followers/user1 = true
+6. Unfollow Test:
+   - await userService.unfollowUser('user1', 'user2')
+   - Gun.js → users/user1/following/user2 = null
+   - Gun.js → users/user2/followers/user1 = null
+7. Search Test:
+   - await userService.searchUsers('alice')
+   - Sollte alle Users mit "alice" in name/username returnen
+
+🔐 SEA ENCRYPTION DETAILS:
+- Encryption: await SEA.encrypt(plaintext, pair)
+- Decryption: await SEA.decrypt(ciphertext, pair)
+- Key Generation: await SEA.pair() → { pub, priv, epub, epriv }
+- Storage: localStorage: news_plugin_key_{userId}
+- Encrypted Format: "SEA{..." (String starting mit SEA{)
+
+📊 GUN.JS NODES:
+- Users: gun.get('news_plugin_users').get(userId)
+- Avatar: .get(userId).get('avatar')
+- Following: .get(userId).get('following').get(targetId)
+- Followers: .get(targetId).get('followers').get(userId)
+- Settings: .get(userId).get('settings')
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+🔒 SECURITY NOTES:
+- In Production: Keys sollten von WebAuthn/Passkey derived werden
+- Demo: Keys in localStorage (nicht production-safe!)
+- Private Fields: Nur email + phone encrypted
+- Public Fields: name, username, bio, avatar (not encrypted)
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
 import gun from './gun'
 import 'gun/sea'
 import type { UserProfile, UserSettings } from '../types/user'

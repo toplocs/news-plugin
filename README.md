@@ -2,6 +2,18 @@
 
 A local news discovery and community journalism plugin for the TopLocs platform. Brings location-based news aggregation, semantic search, and community publishing to your TopLocs spheres.
 
+---
+
+## 🎮 **TESTING & QA**
+
+**📊 Current Test Status:** ⚠️ 2 Blockers found
+**🎯 Control Center:** [`CONTROL-CENTER.md`](./CONTROL-CENTER.md) ← **All test results here!**
+**📖 Testing Guide:** [`README-TESTING.md`](./README-TESTING.md)
+
+**Quick Fix:** `./fix-port-mismatch.sh` (Port 5175 → 5173)
+
+---
+
 ## ✨ Features
 
 - **📍 Location-Based News** - Discover news relevant to your location with radius-based filtering

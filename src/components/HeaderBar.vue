@@ -1,3 +1,61 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - HeaderBar.vue (PHASE 2)
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Gradient Header (indigo-600 → purple-600 → violet-600)
+- Search Funktionalität (Desktop + Mobile)
+- NotificationPanel Integration
+- LevelIndicator Integration
+- Sticky Positioning (bleibt oben beim Scrollen)
+- Responsive Design (Desktop vs Mobile Search)
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ Gradient: Smooth Übergang indigo → purple → violet
+✅ Desktop: Suchfeld in Center, 300px Debounce
+✅ Mobile: Suchfeld unten (md:hidden), volle Breite
+✅ Sticky: Header bleibt oben beim Scrollen
+✅ NotificationPanel: Öffnet Top-Right Popover
+✅ LevelIndicator: Zeigt Punkte + Level (pulsiert bei neuem Level)
+✅ Refresh Button: Spinner beim Refresh, hover → rotate-180
+✅ Settings Button: hover → rotate-90
+
+🔧 WIE ZU TESTEN:
+1. Gradient prüfen:
+   - Header sollte smooth gradient haben (links indigo, rechts violet)
+   - Border-bottom: weiß mit 10% opacity
+2. Search Desktop:
+   - Eingeben → 300ms Debounce → emit('search')
+   - Lupe-Icon links, Placeholder "Search news articles..."
+3. Search Mobile:
+   - Fenster < 768px → Search-Bar verschwindet oben
+   - Erscheint unten unter Header (md:hidden)
+4. Sticky Test:
+   - Feed nach unten scrollen
+   - Header sollte oben bleiben (sticky top-0)
+5. NotificationPanel:
+   - Bell-Icon klicken → Panel öffnet rechts
+   - UnreadBadge zeigt Count (rot, 20×20px)
+6. LevelIndicator:
+   - Sollte Punkte + Level anzeigen
+   - Bei Level-Up: pulsiert + goldener Glow
+7. Buttons:
+   - Refresh: Klick → Spinner animation, emit('refresh')
+   - Settings: Klick → emit('settings'), hover → rotate
+
+📊 DESIGN-SPECS:
+- Gradient: from-indigo-600 via-purple-600 to-violet-600
+- Height: py-4 (4rem padding)
+- Shadow: shadow-2xl
+- Border: border-white/10
+- Search: w-full max-w-xl (Desktop), w-full (Mobile)
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <template>
   <header class="sticky top-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600 shadow-2xl border-b border-white/10">
     <div class="container mx-auto px-4 py-4">

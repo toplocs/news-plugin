@@ -59,7 +59,7 @@
 
     <!-- Image -->
     <div v-if="article.imageUrl" class="card-image">
-      <img :src="article.imageUrl" :alt="article.title" />
+      <img :src="article.imageUrl" :alt="article.title" loading="lazy" decoding="async" />
       <div class="image-overlay">
         <span class="location-tag">📍 {{ article.locations?.[0] || 'Lokal' }}</span>
       </div>

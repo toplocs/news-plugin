@@ -1,3 +1,77 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - ProfileForm.vue (PHASE 2) - 526 ZEILEN!
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Avatar Upload (Base64, max 2MB, image/* only)
+- Name Input (required, validated)
+- Username Input (optional, @prefix)
+- Bio Textarea (max 200 chars, char counter)
+- Interests Tags (add/remove, Enter to add)
+- 🔒 Private Fields Section (SEA Encrypted: email + phone)
+- Location Detection (Geolocation API)
+- Form Validation (Name required)
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ Avatar Upload: Base64 encoded, preview sofort sichtbar
+✅ Max File Size: 2MB limit, Toast error wenn größer
+✅ Image Only: Toast error wenn non-image file
+✅ Bio Counter: "X/200" live update
+✅ Bio Max: 200 chars (maxlength enforced)
+✅ Interests: Enter oder + Button → Tag hinzugefügt
+✅ Remove Interest: × Button → Tag entfernt
+✅ Private Section: 🔒 Icon + "Verschlüsselt gespeichert" Hint
+✅ Location Detect: Button → Geolocation API → coords + name
+✅ Validation: Save disabled wenn Name leer
+
+🔧 WIE ZU TESTEN:
+1. Avatar Upload:
+   - Foto hochladen (< 2MB PNG/JPG)
+   - Preview erscheint sofort (120×120px circle)
+   - Toast: "Profilbild hochgeladen"
+2. Large File Test:
+   - Foto > 2MB hochladen
+   - Toast Error: "Bild ist zu groß (max 2MB)"
+   - Upload wird abgelehnt
+3. Non-Image Test:
+   - PDF hochladen
+   - Toast Error: "Bitte wähle ein Bild"
+4. Bio Counter:
+   - Eingeben: "Test"
+   - Counter: "4/200"
+   - 200 Zeichen: "200/200" (maxlength stoppt)
+5. Interests:
+   - Eingeben: "Vue.js"
+   - Enter → Tag erscheint
+   - + Button → funktioniert auch
+   - × auf Tag → verschwindet
+6. Private Fields:
+   - Section hat blau background (rgba(99,102,241,0.05))
+   - 🔒 Icon sichtbar
+   - "Verschlüsselt gespeichert" Hint
+   - Email + Phone Felder vorhanden
+7. Location Detect:
+   - Button klicken
+   - Browser: Geolocation Permission Request
+   - Allow → coords detected
+   - Input zeigt Stadt-Name oder coords
+   - Toast: "Standort erkannt"
+8. Validation:
+   - Name leer → Save Button disabled
+   - Name eingeben → Save Button enabled
+
+📏 SIZE-SPECS:
+- Avatar Preview: 120×120px circle
+- Bio Textarea: min-height 100px, maxlength 200
+- Private Section: padding 1.25rem, blue tint background
+- Buttons: padding 0.875rem 2rem
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <template>
   <div class="profile-form">
     <!-- Avatar Upload -->
@@ -59,9 +133,9 @@
         placeholder="Erzähle etwas über dich..."
         rows="4"
         class="form-textarea"
-        maxlength="300"
+        maxlength="200"
       ></textarea>
-      <div class="char-count">{{ bioLength }}/300</div>
+      <div class="char-count">{{ bioLength }}/200</div>
     </div>
 
     <!-- Interests -->

@@ -1,3 +1,73 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - useNotifications.ts (PHASE 2) - 253 ZEILEN
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Notification State Management (notifications + dmThreads)
+- Unread Count Tracking (notifications + DMs)
+- localStorage Persistence (throttled saves 1000ms)
+- Gun.js Real-time Subscription (news_plugin/notifications)
+- DM Thread Management
+- Mark as Read/All/Clear All
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ addNotification(): Neue Notification mit unique ID + timestamp
+✅ unreadCount: Filter (n => !n.read).length
+✅ totalUnreadCount: unreadCount + unreadDMCount
+✅ Throttle: localStorage save max 1x pro 1000ms
+✅ Gun.js: Subscription filtert Notifications < 7 Tage
+✅ markAsRead(id): notification.read = true
+✅ markAllAsRead(): Alle read = true
+✅ DM Threads: updateDMThread(), incrementDMUnread()
+
+🔧 WIE ZU TESTEN:
+1. addNotification Test:
+   - addNotification({ type: 'article', title: 'Test', message: 'Msg' })
+   - notification.id sollte unique sein (notif_{timestamp}_{random})
+   - notifications.value.length += 1
+   - localStorage updated (nach 1000ms throttle)
+2. Unread Count:
+   - 5 Notifications hinzufügen
+   - unreadCount.value sollte 5 sein
+   - markAsRead(id) → unreadCount.value = 4
+3. Throttle Test:
+   - 10x addNotification in 100ms
+   - localStorage sollte NICHT 10x updated werden
+   - setTimeout 1000ms → 1x save
+4. Gun.js Subscription:
+   - subscribeToGun() aufrufen
+   - Console: "📡 Subscribed to Gun.js notifications"
+   - Andere Instanz: gun.get('news_plugin').get('notifications').set({ ... })
+   - Sollte erscheinen in notifications.value
+5. 7-Day Filter:
+   - Old notification: timestamp = Date.now() - (86400000 * 8) // 8 Tage
+   - subscribeToGun() → sollte NICHT hinzugefügt werden
+6. DM Thread Test:
+   - updateDMThread({ userId: 'user1', userName: 'Alice', ... })
+   - dmThreads.value sollte 1 Thread haben
+   - incrementDMUnread('user1')
+   - dmThreads.value[0].unreadCount += 1
+7. Mark All:
+   - 5 unread Notifications
+   - markAllAsRead()
+   - unreadCount.value = 0
+
+📊 STORAGE KEYS:
+- STORAGE_KEY: 'news_plugin_notifications'
+- DM_STORAGE_KEY: 'news_plugin_dm_threads'
+- THROTTLE_MS: 1000ms
+
+🔌 GUN.JS:
+- Node: gun.get('news_plugin').get('notifications')
+- Filter: timestamp < 7 Tage werden ignoriert
+- map().on() listener für real-time updates
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
 import { ref, computed } from 'vue'
 import gun from '../services/gun'
 

@@ -1,7 +1,30 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import ChatModal from '../../../src/components/ChatModal.vue'
+
+// Mock Gun.js
+vi.mock('../../../src/services/gun', () => {
+  const mockChain = {
+    get: vi.fn(() => mockChain),
+    put: vi.fn(() => mockChain),
+    on: vi.fn(() => ({ off: vi.fn() })),
+    map: vi.fn(() => mockChain),
+    off: vi.fn()
+  }
+  return {
+    default: mockChain
+  }
+})
+
+// Mock useToast
+vi.mock('../../../src/composables/useToast', () => ({
+  useToast: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn()
+  })
+}))
 
 describe('ChatModal', () => {
   const mockPartner = {
@@ -14,6 +37,21 @@ describe('ChatModal', () => {
 
   const mockCurrentUserId = 'user-456'
 
+  // Create teleport target for tests
+  beforeEach(() => {
+    const el = document.createElement('div')
+    el.id = 'teleport-target'
+    document.body.appendChild(el)
+  })
+
+  afterEach(() => {
+    const el = document.getElementById('teleport-target')
+    if (el) {
+      document.body.removeChild(el)
+    }
+    vi.clearAllMocks()
+  })
+
   describe('Rendering', () => {
     it('should not render when modelValue is false', () => {
       const wrapper = mount(ChatModal, {
@@ -24,19 +62,23 @@ describe('ChatModal', () => {
         }
       })
 
-      expect(wrapper.find('.chat-modal').exists()).toBe(false)
+      expect(wrapper.find('.chat-container').exists()).toBe(false)
     })
 
-    it('should render when modelValue is true', () => {
+    it('should render when modelValue is true', async () => {
       const wrapper = mount(ChatModal, {
         props: {
           modelValue: true,
           partner: mockPartner,
           currentUserId: mockCurrentUserId
-        }
+        },
+        attachTo: document.body
       })
 
-      expect(wrapper.find('.chat-modal').exists()).toBe(true)
+      await nextTick()
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      expect(wrapper.find('.chat-container').exists()).toBe(true)
     })
 
     it('should display partner name in header', () => {

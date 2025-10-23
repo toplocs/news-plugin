@@ -1,0 +1,485 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]: 📰
+          - heading "TopLocs News" [level=1] [ref=e9]
+        - generic [ref=e10]:
+          - generic [ref=e11]: Nachrichten durchsuchen
+          - searchbox "Nachrichten durchsuchen" [ref=e12]
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - generic [ref=e16]: Lokaler Modus
+            - generic [ref=e17]: ℹ️
+          - button "Benachrichtigungen (4 ungelesen)" [ref=e19] [cursor=pointer]:
+            - generic:
+              - generic:
+                - generic: "4"
+          - button "Community & Entdeckungen öffnen" [ref=e21] [cursor=pointer]:
+            - img [ref=e22]
+          - button "Nachrichten aktualisieren" [ref=e24] [cursor=pointer]:
+            - img [ref=e25]
+          - button "Einstellungen öffnen" [ref=e27] [cursor=pointer]:
+            - img [ref=e28]
+    - main [ref=e31]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]: 📊
+            - generic [ref=e37]:
+              - generic [ref=e38]: Gesamt
+              - generic [ref=e39]: "15"
+          - generic [ref=e40]:
+            - generic [ref=e41]: 🔥
+            - generic [ref=e42]:
+              - generic [ref=e43]: Heute
+              - generic [ref=e44]: "2"
+          - generic [ref=e45]:
+            - generic [ref=e46]: 📍
+            - generic [ref=e47]:
+              - generic [ref=e48]: Quellen
+              - generic [ref=e49]: "8"
+          - generic [ref=e50]:
+            - generic [ref=e51]: ⏱️
+            - generic [ref=e52]:
+              - generic [ref=e53]: Letzte Aktualisierung
+              - generic [ref=e54]: Gerade eben
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57]: 🗺️
+            - generic [ref=e58]:
+              - heading "Entdecke deinen Kiez" [level=3] [ref=e59]
+              - paragraph [ref=e60]:
+                - text: 15 Artikel in
+                - strong [ref=e61]: 10km
+                - text: Umkreis von dir
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - generic [ref=e64]: Suchradius
+              - generic [ref=e65]: 10 km
+            - slider "Suchradius 10 km" [ref=e66] [cursor=pointer]: "10"
+            - generic [ref=e67]:
+              - generic [ref=e68]: 1km
+              - generic [ref=e69]: 10km
+              - generic [ref=e70]: 25km
+              - generic [ref=e71]: 50km
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - generic [ref=e74]: 📍
+              - generic [ref=e75]: 0km
+              - generic [ref=e76]: Nächster
+            - generic [ref=e77]:
+              - generic [ref=e78]: 🎯
+              - generic [ref=e79]: "15"
+              - generic [ref=e80]: Im Umkreis
+            - generic [ref=e81]:
+              - generic [ref=e82]: 📰
+              - generic [ref=e83]: "15"
+              - generic [ref=e84]: Gesamt
+          - generic [ref=e85]:
+            - generic [ref=e86]: ✨
+            - generic [ref=e87]:
+              - text: Alle Artikel sind nach
+              - strong [ref=e88]: Distanz sortiert
+              - text: (nächste zuerst)
+        - generic [ref=e89]:
+          - generic [ref=e91]:
+            - generic [ref=e92]: 🎯
+            - heading "Filter & Sortierung" [level=3] [ref=e93]
+          - generic [ref=e94]:
+            - generic [ref=e95]: 📊 Sortierung
+            - generic [ref=e96]:
+              - button "📍 Distanz" [ref=e97] [cursor=pointer]:
+                - generic [ref=e98]: 📍
+                - generic [ref=e99]: Distanz
+              - button "🔥 Match Score" [ref=e100] [cursor=pointer]:
+                - generic [ref=e101]: 🔥
+                - generic [ref=e102]: Match Score
+              - button "🕒 Zeit" [ref=e103] [cursor=pointer]:
+                - generic [ref=e104]: 🕒
+                - generic [ref=e105]: Zeit
+          - generic [ref=e106]:
+            - generic [ref=e107]: 🏷️ Kategorien
+            - generic [ref=e108]:
+              - button "Alle" [ref=e109] [cursor=pointer]
+              - button "Breaking" [ref=e110] [cursor=pointer]
+              - button "Lokal" [ref=e111] [cursor=pointer]
+              - button "Community" [ref=e112] [cursor=pointer]
+              - button "Tech" [ref=e113] [cursor=pointer]
+          - generic [ref=e115]:
+            - button "Standort wählen" [ref=e117] [cursor=pointer]:
+              - img [ref=e118]
+              - generic [ref=e121]: Standort wählen
+            - generic [ref=e122]:
+              - generic [ref=e123]: 📍
+              - generic [ref=e124]: 10km Umkreis
+            - generic [ref=e125]:
+              - generic [ref=e126]: 📰
+              - generic [ref=e127]: 15 Artikel
+        - generic [ref=e128]:
+          - article [ref=e129] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e130]:
+              - img [ref=e131]
+            - button "Warum sehe ich das?" [ref=e133]:
+              - generic [ref=e134]: "?"
+            - generic [ref=e135]:
+              - 'img "📚 Guide: Satellite internet brings connectivity to remote areas" [ref=e136]'
+              - generic [ref=e138]: 📍 Hannover
+            - generic [ref=e139]:
+              - generic [ref=e140]:
+                - generic [ref=e141]: Heise Online
+                - generic [ref=e142]: 4h
+                - generic [ref=e143]: 🔥 100% Match
+              - 'heading "📚 Guide: Satellite internet brings connectivity to remote areas" [level=3] [ref=e144]'
+              - paragraph [ref=e145]: "Heise Online investigativ: Interviews mit Entwicklern, Nutzern und Kritikern zeichnen ein differenziertes Bild dieser Entwicklung. Die Balance zwischen Innovation und gesellschaftlicher Verantwortung steht im Mittelpunkt der Debatte."
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - generic [ref=e148]: J
+                  - generic [ref=e149]: James Smith
+                - generic [ref=e150]:
+                  - generic [ref=e151]: "#news"
+                  - generic [ref=e152]: "#tech"
+          - article [ref=e153] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e154]:
+              - img [ref=e155]
+            - button "Warum sehe ich das?" [ref=e157]:
+              - generic [ref=e158]: "?"
+            - generic [ref=e159]:
+              - 'img "📖 Tutorial: Youth sports program promotes inclusivity" [ref=e160]'
+              - generic [ref=e162]: 📍 Hamburg
+            - generic [ref=e163]:
+              - generic [ref=e164]:
+                - generic [ref=e165]: Tagesschau
+                - generic [ref=e166]: 12h
+                - generic [ref=e167]: 🔥 100% Match
+              - 'heading "📖 Tutorial: Youth sports program promotes inclusivity" [level=3] [ref=e168]'
+              - paragraph [ref=e169]: "Tagesschau analysiert: Hintergründe, Zusammenhänge und mögliche Konsequenzen - eine umfassende Betrachtung, die verschiedene Standpunkte würdigt und zum Nachdenken anregt."
+              - generic [ref=e170]:
+                - generic [ref=e171]:
+                  - generic [ref=e172]: J
+                  - generic [ref=e173]: James Smith
+                - generic [ref=e174]:
+                  - generic [ref=e175]: "#news"
+                  - generic [ref=e176]: "#sport"
+          - article [ref=e177] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e178]:
+              - img [ref=e179]
+            - button "Warum sehe ich das?" [ref=e181]:
+              - generic [ref=e182]: "?"
+            - generic [ref=e183]:
+              - img "Local food cooperative supports regional farmers" [ref=e184]
+              - generic [ref=e186]: 📍 München
+            - generic [ref=e187]:
+              - generic [ref=e188]:
+                - generic [ref=e189]: Süddeutsche Zeitung
+                - generic [ref=e190]: 3d
+                - generic [ref=e191]: 🔥 100% Match
+              - heading "Local food cooperative supports regional farmers" [level=3] [ref=e192]
+              - paragraph [ref=e193]: "Süddeutsche Zeitung dokumentiert: Persönliche Geschichten der Beteiligten zeigen den menschlichen Aspekt hinter den Zahlen. Von der ersten Idee bis zur erfolgreichen Umsetzung - ein inspirierendes Beispiel für Community-Power."
+              - generic [ref=e194]:
+                - generic [ref=e195]:
+                  - generic [ref=e196]: "Y"
+                  - generic [ref=e197]: Yuki Tanaka
+                - generic [ref=e198]:
+                  - generic [ref=e199]: "#news"
+                  - generic [ref=e200]: "#local"
+          - article [ref=e201] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e202]:
+              - img [ref=e203]
+            - button "Warum sehe ich das?" [ref=e205]:
+              - generic [ref=e206]: "?"
+            - generic [ref=e207]:
+              - 'img "📚 Guide: AI breakthrough enables natural language understanding" [ref=e208]'
+              - generic [ref=e210]: 📍 Hamburg
+            - generic [ref=e211]:
+              - generic [ref=e212]:
+                - generic [ref=e213]: Tagesschau
+                - generic [ref=e214]: 4d
+                - generic [ref=e215]: 🔥 100% Match
+              - 'heading "📚 Guide: AI breakthrough enables natural language understanding" [level=3] [ref=e216]'
+              - paragraph [ref=e217]: "Exklusive Analyse von Tagesschau: Diese technologische Neuerung verspricht nicht nur technische Verbesserungen, sondern könnte ganze Industriezweige transformieren. Erste Pilotprojekte zeigen vielversprechende Ergebnisse, während Datenschutzexperten wichtige Fragen zur Regulierung aufwerfen."
+              - generic [ref=e218]:
+                - generic [ref=e219]:
+                  - generic [ref=e220]: T
+                  - generic [ref=e221]: Tom Fischer
+                - generic [ref=e222]:
+                  - generic [ref=e223]: "#news"
+                  - generic [ref=e224]: "#tech"
+          - generic [ref=e225]:
+            - link "Urban Gardening Workshop Anzeige Urban Gardening Workshop Sustainable City Farming - This Weekend" [ref=e226] [cursor=pointer]:
+              - /url: https://example.com/urban-gardening
+              - img "Urban Gardening Workshop" [ref=e228]
+              - generic [ref=e229]:
+                - generic [ref=e230]: Anzeige
+                - heading "Urban Gardening Workshop" [level=3] [ref=e231]
+                - paragraph [ref=e232]: Sustainable City Farming - This Weekend
+            - generic [ref=e233]:
+              - generic [ref=e234]: 💰
+              - generic [ref=e235]: +€0.0004
+          - article [ref=e236] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e237]:
+              - img [ref=e238]
+            - button "Warum sehe ich das?" [ref=e240]:
+              - generic [ref=e241]: "?"
+            - generic [ref=e242]:
+              - 'img "📊 Fallstudie: Public transport expansion connects communities" [ref=e243]'
+              - generic [ref=e245]: 📍 New York
+            - generic [ref=e246]:
+              - generic [ref=e247]:
+                - generic [ref=e248]: New York Times
+                - generic [ref=e249]: 6d
+                - generic [ref=e250]: 🔥 100% Match
+              - 'heading "📊 Fallstudie: Public transport expansion connects communities" [level=3] [ref=e251]'
+              - paragraph [ref=e252]: "New York Times vor Ort: Diese Initiative zeigt, wie lokales Engagement konkrete Verbesserungen bewirken kann. Anwohner berichten von positiven Veränderungen im Alltag, während Organisatoren bereits Pläne für die Ausweitung des Projekts schmieden."
+              - generic [ref=e253]:
+                - generic [ref=e254]:
+                  - generic [ref=e255]: M
+                  - generic [ref=e256]: Maria Garcia
+                - generic [ref=e257]:
+                  - generic [ref=e258]: "#news"
+                  - generic [ref=e259]: "#local"
+          - article [ref=e260] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e261]:
+              - img [ref=e262]
+            - button "Warum sehe ich das?" [ref=e264]:
+              - generic [ref=e265]: "?"
+            - generic [ref=e266]:
+              - 'img "📚 Guide: Local hackerspace teaches coding to seniors" [ref=e267]'
+              - generic [ref=e269]: 📍 San Francisco
+            - generic [ref=e270]:
+              - generic [ref=e271]:
+                - generic [ref=e272]: TechCrunch
+                - generic [ref=e273]: 12.10.2025
+                - generic [ref=e274]: 🔥 100% Match
+              - 'heading "📚 Guide: Local hackerspace teaches coding to seniors" [level=3] [ref=e275]'
+              - paragraph [ref=e276]: "Reportage von TechCrunch: Was als kleine Nachbarschaftsidee begann, entwickelt sich zu einem Modell mit Vorbildcharakter. Die Kombination aus Basisdemokratie und praktischer Umsetzung inspiriert andere Gemeinden zur Nachahmung."
+              - generic [ref=e277]:
+                - generic [ref=e278]:
+                  - generic [ref=e279]: L
+                  - generic [ref=e280]: Lisa Weber
+                - generic [ref=e281]:
+                  - generic [ref=e282]: "#news"
+                  - generic [ref=e283]: "#local"
+          - article [ref=e284] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e285]:
+              - img [ref=e286]
+            - button "Warum sehe ich das?" [ref=e288]:
+              - generic [ref=e289]: "?"
+            - generic [ref=e290]:
+              - 'img "🔬 Forschung: New vaccine shows promise in clinical trials" [ref=e291]'
+              - generic [ref=e293]: 📍 Hamburg
+            - generic [ref=e294]:
+              - generic [ref=e295]:
+                - generic [ref=e296]: Tagesschau
+                - generic [ref=e297]: 12.10.2025
+                - generic [ref=e298]: 🔥 100% Match
+              - 'heading "🔬 Forschung: New vaccine shows promise in clinical trials" [level=3] [ref=e299]'
+              - paragraph [ref=e300]: "Tiefenanalyse Tagesschau: Die Methodik, die Ergebnisse, die nächsten Schritte - ein umfassender Überblick über Forschung, die Geschichte schreiben könnte. Inklusive kritischer Einordnung und Expertenmeinungen."
+              - generic [ref=e301]:
+                - generic [ref=e302]:
+                  - generic [ref=e303]: M
+                  - generic [ref=e304]: Maria Garcia
+                - generic [ref=e305]:
+                  - generic [ref=e306]: "#news"
+                  - generic [ref=e307]: "#science"
+          - article [ref=e308] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e309]:
+              - img [ref=e310]
+            - button "Warum sehe ich das?" [ref=e312]:
+              - generic [ref=e313]: "?"
+            - generic [ref=e314]:
+              - img "Youth program breaks participation records" [ref=e315]
+              - generic [ref=e317]: 📍 München
+            - generic [ref=e318]:
+              - generic [ref=e319]:
+                - generic [ref=e320]: Süddeutsche Zeitung
+                - generic [ref=e321]: 10.10.2025
+                - generic [ref=e322]: 🔥 100% Match
+              - heading "Youth program breaks participation records" [level=3] [ref=e323]
+              - paragraph [ref=e324]: "Reportage von Süddeutsche Zeitung: Was als kleine Nachbarschaftsidee begann, entwickelt sich zu einem Modell mit Vorbildcharakter. Die Kombination aus Basisdemokratie und praktischer Umsetzung inspiriert andere Gemeinden zur Nachahmung."
+              - generic [ref=e325]:
+                - generic [ref=e326]:
+                  - generic [ref=e327]: M
+                  - generic [ref=e328]: Maria Garcia
+                - generic [ref=e329]:
+                  - generic [ref=e330]: "#news"
+                  - generic [ref=e331]: "#local"
+          - generic [ref=e332]:
+            - link "Nachbarschafts-App Anzeige Nachbarschafts-App Vernetze dich mit deiner Nachbarschaft" [ref=e333] [cursor=pointer]:
+              - /url: https://example.com/community-app
+              - img "Nachbarschafts-App" [ref=e335]
+              - generic [ref=e336]:
+                - generic [ref=e337]: Anzeige
+                - heading "Nachbarschafts-App" [level=3] [ref=e338]
+                - paragraph [ref=e339]: Vernetze dich mit deiner Nachbarschaft
+            - generic [ref=e340]:
+              - generic [ref=e341]: 💰
+              - generic [ref=e342]: +€0.0006
+          - article [ref=e343] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e344]:
+              - img [ref=e345]
+            - button "Warum sehe ich das?" [ref=e347]:
+              - generic [ref=e348]: "?"
+            - generic [ref=e349]:
+              - img "New vaccine shows promise in clinical trials" [ref=e350]
+              - generic [ref=e352]: 📍 London
+            - generic [ref=e353]:
+              - generic [ref=e354]:
+                - generic [ref=e355]: The Guardian
+                - generic [ref=e356]: 9.10.2025
+                - generic [ref=e357]: 🔥 100% Match
+              - heading "New vaccine shows promise in clinical trials" [level=3] [ref=e358]
+              - paragraph [ref=e359]: "The Guardian exklusiv: Im Gespräch mit führenden Wissenschaftlern wird deutlich, welche Tragweite diese Entdeckung haben könnte. Von medizinischen Anwendungen bis zu philosophischen Implikationen - die Diskussion hat gerade erst begonnen."
+              - generic [ref=e360]:
+                - generic [ref=e361]:
+                  - generic [ref=e362]: A
+                  - generic [ref=e363]: Ahmed Hassan
+                - generic [ref=e364]:
+                  - generic [ref=e365]: "#news"
+                  - generic [ref=e366]: "#science"
+          - article [ref=e367] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e368]:
+              - img [ref=e369]
+            - button "Warum sehe ich das?" [ref=e371]:
+              - generic [ref=e372]: "?"
+            - generic [ref=e373]:
+              - img "🔥 Startup ecosystem thrives in emerging markets" [ref=e374]
+              - generic [ref=e376]: 📍 San Francisco
+            - generic [ref=e377]:
+              - generic [ref=e378]:
+                - generic [ref=e379]: TechCrunch
+                - generic [ref=e380]: 8.10.2025
+                - generic [ref=e381]: 🔥 100% Match
+              - heading "🔥 Startup ecosystem thrives in emerging markets" [level=3] [ref=e382]
+              - paragraph [ref=e383]: "TechCrunch Wirtschaft: Diese Entwicklung sendet Signale weit über die betroffene Branche hinaus. Marktbeobachter analysieren Chancen und Risiken, während Unternehmen ihre Strategien neu ausrichten. Die wirtschaftlichen Folgen werden intensiv diskutiert."
+              - generic [ref=e384]:
+                - generic [ref=e385]:
+                  - generic [ref=e386]: A
+                  - generic [ref=e387]: Anna Schmidt
+                - generic [ref=e388]:
+                  - generic [ref=e389]: "#news"
+                  - generic [ref=e390]: "#business"
+          - article [ref=e391] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e392]:
+              - img [ref=e393]
+            - button "Warum sehe ich das?" [ref=e395]:
+              - generic [ref=e396]: "?"
+            - generic [ref=e397]:
+              - img "Archaeological discovery rewrites ancient history" [ref=e398]
+              - generic [ref=e400]: 📍 New York
+            - generic [ref=e401]:
+              - generic [ref=e402]:
+                - generic [ref=e403]: New York Times
+                - generic [ref=e404]: 8.10.2025
+                - generic [ref=e405]: 🔥 100% Match
+              - heading "Archaeological discovery rewrites ancient history" [level=3] [ref=e406]
+              - paragraph [ref=e407]: "New York Times exklusiv: Im Gespräch mit führenden Wissenschaftlern wird deutlich, welche Tragweite diese Entdeckung haben könnte. Von medizinischen Anwendungen bis zu philosophischen Implikationen - die Diskussion hat gerade erst begonnen."
+              - generic [ref=e408]:
+                - generic [ref=e409]:
+                  - generic [ref=e410]: A
+                  - generic [ref=e411]: Ahmed Hassan
+                - generic [ref=e412]:
+                  - generic [ref=e413]: "#news"
+                  - generic [ref=e414]: "#science"
+          - article [ref=e415] [cursor=pointer]:
+            - button "Lesezeichen hinzufügen" [ref=e416]:
+              - img [ref=e417]
+            - button "Warum sehe ich das?" [ref=e419]:
+              - generic [ref=e420]: "?"
+            - generic [ref=e421]:
+              - img "Wildlife corridor protects migration routes" [ref=e422]
+              - generic [ref=e424]: 📍 London
+            - generic [ref=e425]:
+              - generic [ref=e426]:
+                - generic [ref=e427]: The Guardian
+                - generic [ref=e428]: 7.10.2025
+                - generic [ref=e429]: 🔥 100% Match
+              - heading "Wildlife corridor protects migration routes" [level=3] [ref=e430]
+              - paragraph [ref=e431]: "The Guardian vor Ort: Augenschein zeigt die konkreten Auswirkungen auf Natur und Lebensqualität. Die Kombination aus wissenschaftlicher Fundierung und breiter Beteiligung macht dieses Projekt zum Vorbild."
+              - generic [ref=e432]:
+                - generic [ref=e433]:
+                  - generic [ref=e434]: C
+                  - generic [ref=e435]: Carlos Rodriguez
+                - generic [ref=e436]:
+                  - generic [ref=e437]: "#news"
+                  - generic [ref=e438]: "#environment"
+        - generic [ref=e439]:
+          - generic [ref=e440]: 🎉
+          - heading "Du bist auf dem neuesten Stand!" [level=3] [ref=e441]
+          - paragraph [ref=e442]: Das war's – keine endlose Scroll-Falle hier.
+          - generic [ref=e443]:
+            - generic [ref=e444]:
+              - generic [ref=e445]: "12"
+              - generic [ref=e446]: Artikel gelesen
+            - generic [ref=e447]:
+              - generic [ref=e448]: 100%
+              - generic [ref=e449]: In deinem Umkreis
+          - generic [ref=e450]:
+            - generic [ref=e451]:
+              - generic [ref=e452]: ✨ Transparenz
+              - paragraph [ref=e453]:
+                - text: Im Gegensatz zu Instagram zeigen wir dir
+                - strong [ref=e454]: ALLE relevanten Artikel
+                - text: – keine versteckten Inhalte, kein endloser Feed. Du hast jetzt alles gesehen, was zu deinen Interessen und deinem Umkreis passt.
+            - generic [ref=e455]:
+              - generic [ref=e456]: 🌍
+              - heading "Zeit, rauszugehen!" [level=4] [ref=e457]
+              - paragraph [ref=e458]: Schau dir die Events in deiner Nähe an und triff echte Menschen.
+              - button "🔄 Neue Artikel laden" [ref=e459] [cursor=pointer]:
+                - generic [ref=e460]: 🔄
+                - generic [ref=e461]: Neue Artikel laden
+  - dialog "🎯 Personalisiere deine Nachrichten" [ref=e463]:
+    - generic [ref=e464]:
+      - heading "🎯 Personalisiere deine Nachrichten" [level=2] [ref=e465]
+      - paragraph [ref=e466]: Wähle 3-5 Themen aus, die dich interessieren. Wir lernen automatisch dazu!
+    - generic [ref=e467]:
+      - button "💻 Technologie" [ref=e468] [cursor=pointer]:
+        - generic [ref=e469]: 💻
+        - generic [ref=e470]: Technologie
+      - button "🔬 Wissenschaft" [ref=e471] [cursor=pointer]:
+        - generic [ref=e472]: 🔬
+        - generic [ref=e473]: Wissenschaft
+      - button "🏛️ Politik" [ref=e474] [cursor=pointer]:
+        - generic [ref=e475]: 🏛️
+        - generic [ref=e476]: Politik
+      - button "💼 Wirtschaft" [ref=e477] [cursor=pointer]:
+        - generic [ref=e478]: 💼
+        - generic [ref=e479]: Wirtschaft
+      - button "⚽ Sport" [ref=e480] [cursor=pointer]:
+        - generic [ref=e481]: ⚽
+        - generic [ref=e482]: Sport
+      - button "🎭 Kultur" [ref=e483] [cursor=pointer]:
+        - generic [ref=e484]: 🎭
+        - generic [ref=e485]: Kultur
+      - button "🏥 Gesundheit" [ref=e486] [cursor=pointer]:
+        - generic [ref=e487]: 🏥
+        - generic [ref=e488]: Gesundheit
+      - button "🌍 Umwelt" [ref=e489] [cursor=pointer]:
+        - generic [ref=e490]: 🌍
+        - generic [ref=e491]: Umwelt
+      - button "📚 Bildung" [ref=e492] [cursor=pointer]:
+        - generic [ref=e493]: 📚
+        - generic [ref=e494]: Bildung
+      - button "📍 Lokal" [ref=e495] [cursor=pointer]:
+        - generic [ref=e496]: 📍
+        - generic [ref=e497]: Lokal
+      - button "👥 Community" [ref=e498] [cursor=pointer]:
+        - generic [ref=e499]: 👥
+        - generic [ref=e500]: Community
+      - button "🍽️ Essen & Trinken" [ref=e501] [cursor=pointer]:
+        - generic [ref=e502]: 🍽️
+        - generic [ref=e503]: Essen & Trinken
+    - generic [ref=e504]:
+      - generic [ref=e505]: Weitere Interessen hinzufügen
+      - textbox "Weitere Interessen hinzufügen" [ref=e506]:
+        - /placeholder: Weitere Interessen... (Enter zum Hinzufügen)
+      - button "Interesse hinzufügen" [disabled] [ref=e507]: +
+    - generic [ref=e508]:
+      - button "Überspringen" [ref=e509] [cursor=pointer]
+      - button "Weiter (0/3)" [disabled] [ref=e510]
+    - paragraph [ref=e511]: "💡 Keine Sorge: Wir lernen automatisch aus deinem Leseverhalten und passen die Auswahl an."
+```

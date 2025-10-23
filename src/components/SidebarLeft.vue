@@ -112,8 +112,14 @@
         </h3>
         <p class="panel-description">Deine gemerkten Artikel zum späteren Lesen</p>
 
+        <!-- Loading State -->
+        <div v-if="bookmarksStore.isLoading.value" class="bookmarks-loading-state">
+          <div class="loading-spinner"></div>
+          <p>Lade Lesezeichen...</p>
+        </div>
+
         <!-- Empty State -->
-        <div v-if="bookmarkCount === 0" class="bookmarks-empty-state">
+        <div v-else-if="bookmarkCount === 0" class="bookmarks-empty-state">
           <div class="empty-illustration-small">
             <span class="empty-icon-medium">📚</span>
             <span class="empty-sparkle">✨</span>
@@ -180,6 +186,11 @@
         <ChannelView />
       </div>
 
+      <!-- Auto-Promote Curation View -->
+      <div v-if="activeView === 'curation'" class="view-panel">
+        <CurationDashboard />
+      </div>
+
       <!-- Interests View -->
       <div v-if="activeView === 'interests'" class="view-panel">
         <h3 class="panel-title">
@@ -243,8 +254,12 @@ import DiscoveryPanel from './DiscoveryPanel.vue'
 import RevenueDashboard from './RevenueDashboard.vue'
 import TransparencyDashboard from './TransparencyDashboard.vue'
 import ChannelView from './ChannelView.vue'
+import CurationDashboard from './CurationDashboard.vue'
+// import ControlCenter from './ControlCenter.vue' // Removed - no gaming dashboard
 import { useBookmarks } from '../stores/useBookmarks'
 import { useChannels } from '../stores/useChannels'
+import { useSuggestedTopics } from '../stores/useSuggestedTopics'
+import { useSuggestedLocations } from '../stores/useSuggestedLocations'
 
 const props = defineProps<{
   settings: NewsSettings
@@ -261,7 +276,7 @@ const emit = defineEmits<{
   'article-click': [article: any]
 }>()
 
-type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery' | 'revenue' | 'channels' | 'transparency'
+type ViewType = 'interests' | 'settings' | 'bookmarks' | 'discovery' | 'revenue' | 'channels' | 'transparency' | 'curation'
 
 const activeView = ref<ViewType>('interests') // Start with Interests - most important!
 const localSettings = ref<NewsSettings>({ ...props.settings })
@@ -276,8 +291,21 @@ const { bookmarks, sortedBookmarks, bookmarkCount, removeBookmark } = bookmarksS
 // Channels management
 const channelsStore = useChannels()
 
+// Auto-Promote stores
+const topicsStore = useSuggestedTopics()
+const locationsStore = useSuggestedLocations()
+
 // ONLY ESSENTIAL TABS - Each must have REAL user value!
 const menuItems: Array<{ id: ViewType; icon: string; label: string; badge?: string | ComputedRef<string> }> = [
+  {
+    id: 'curation',
+    icon: '🚀',
+    label: 'Auto-Promote',
+    badge: computed(() => {
+      const total = (topicsStore.readyForPromotionCount || 0) + (locationsStore.readyForPromotionCount || 0)
+      return total > 0 ? total.toString() : ''
+    })
+  },
   {
     id: 'interests',
     icon: '🏷️',
@@ -1023,5 +1051,34 @@ onMounted(() => {
 @keyframes sparkle {
   0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
   50% { opacity: 1; transform: scale(1.2) rotate(15deg); }
+}
+
+/* Bookmarks Loading State */
+.bookmarks-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99, 102, 241, 0.2);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin-loader 1s linear infinite;
+}
+
+@keyframes spin-loader {
+  to { transform: rotate(360deg); }
+}
+
+.bookmarks-loading-state p {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin: 0;
 }
 </style>

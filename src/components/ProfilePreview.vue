@@ -1,3 +1,64 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - ProfilePreview.vue (PHASE 2)
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Live Preview Card (updates bei ProfileForm Änderungen)
+- Gradient Cover Header (indigo → purple → pink)
+- Avatar Display (120×120px circle, -60px margin-top overlap)
+- Name + Username + Bio
+- Stats (Following, Followers, Interessen)
+- Interest Badges (max 5 visible, "+X" more badge)
+- Location Icon + Name
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ Cover: Gradient header 120px height
+✅ Avatar: 120×120px circle, overlap über Cover (-60px margin-top)
+✅ Name: 1.5rem, bold, white
+✅ Username: @prefix, indigo color
+✅ Bio: max 200 chars display
+✅ Stats: Following | Followers | Interessen (3 columns)
+✅ Interest Badges: max 5, dann "+X mehr"
+✅ Location: Pin-Icon + Name (wenn vorhanden)
+
+🔧 WIE ZU TESTEN:
+1. Cover Gradient:
+   - Header sollte gradient haben: indigo → purple → pink
+   - Height: 120px
+   - Opacity: 0.8
+2. Avatar Overlap:
+   - Avatar sollte ÜBER Cover sein (overlap)
+   - Center aligned
+   - margin-top: -60px (half of 120px height)
+   - Border: 4px solid #1e293b
+3. Live Update:
+   - ProfileForm: Name ändern
+   - Preview: Name updated sofort
+   - Kein Reload nötig!
+4. Stats Test:
+   - Following: Anzahl aus profile.following.length
+   - Followers: Anzahl aus profile.followers.length
+   - Interessen: profile.interests.length
+5. Interest Badges:
+   - 3 Interests: Alle 3 sichtbar
+   - 7 Interests: 5 sichtbar + "+2"
+   - Badge Style: indigo gradient, pill-shaped
+6. Location:
+   - location.name vorhanden → Pin-Icon + Name
+   - location.name leer → nicht sichtbar
+
+📊 SIZE-SPECS:
+- Cover: 120px height
+- Avatar: 120×120px, -60px margin-top
+- Stats: 3 columns, 2rem gap
+- Interest Badge: padding 0.375rem 0.75rem, pill (border-radius 999px)
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <template>
   <div class="profile-preview">
     <!-- Cover/Header -->

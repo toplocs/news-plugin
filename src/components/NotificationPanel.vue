@@ -1,3 +1,85 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - NotificationPanel.vue (PHASE 2) - 727 ZEILEN!
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Top-Right Popover (420px breit, max-height 600px)
+- 4 Tabs (All, Discovery, Users, System) mit Badge-Counts
+- Gun.js Real-time Subscription (news_plugin/notifications)
+- Discovery Polling alle 60 Sekunden
+- UnreadBadge Integration
+- ARIA Labels + Keyboard Navigation (ESC, Enter, Space)
+- Backdrop mit Blur
+- Mark as Read/Mark All/Clear All
+- Throttled localStorage saves (1000ms)
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ Bell Icon: Puls-Animation wenn unreadCount > 0
+✅ Panel öffnet Top-Right (absolute, right: 0, top: calc(100% + 0.5rem))
+✅ Tabs: 4 sichtbar mit korrekten Counts
+✅ Gun.js: Subscription aktiv (Console: "📡 Subscribed to Gun.js notifications")
+✅ Discovery: High-Score Matches (>0.9) erscheinen als Notifications
+✅ Polling: Discovery check alle 60 Sekunden
+✅ ESC: Schließt Panel
+✅ Backdrop: Click schließt Panel
+✅ Mark All: Alle unread → read, Toast "Alle als gelesen markiert"
+✅ Clear All: notifications.value = [], Toast "Alle gelöscht"
+
+🔧 WIE ZU TESTEN:
+1. Bell Icon Test:
+   - Sollte UnreadBadge haben (rot, 20×20px)
+   - Bei unread > 0: Puls-Animation (box-shadow glow)
+2. Panel öffnen:
+   - Bell-Icon klicken → Panel erscheint rechts
+   - Width: 420px, max-height: 600px
+   - Glassmorphism: rgba(30, 41, 59, 0.95) + backdrop-blur(16px)
+3. Tabs Test:
+   - 4 Tabs: All | Entdecken | Nutzer | System
+   - Active Tab: Gradient (indigo → purple)
+   - Badge Count: Zeigt unread count pro Tab
+4. Gun.js Subscription:
+   - Console öffnen → sollte "📡 Subscribed to Gun.js notifications" sehen
+   - Andere Instanz sendet Notification → sollte erscheinen
+5. Discovery Polling:
+   - Warte 60 Sekunden → Discovery check sollte laufen
+   - High-Score Match (>0.9) → Notification erscheint
+   - Gun.js publishMatch() wird aufgerufen
+6. Keyboard Navigation:
+   - Panel geöffnet
+   - ESC → Panel schließt
+   - Tab durch Buttons → Enter/Space aktiviert
+7. Mark All Test:
+   - 5 unread Notifications
+   - "Alle gelesen" klicken → Alle read = true
+   - Toast: "Alle als gelesen markiert"
+8. Clear All Test:
+   - "Alle löschen" klicken → notifications.value = []
+   - localStorage cleared
+
+📊 DESIGN-SPECS:
+- Panel Width: 420px (Mobile: calc(100vw - 2rem))
+- Panel max-height: 600px
+- Backdrop: rgba(0,0,0,0.3) + blur(2px)
+- Tabs Gradient: linear-gradient(135deg, #6366f1, #8b5cf6)
+- Notification Icons: 40×40px circles
+- Transitions: slide-fade 0.3s, list-enter 0.3s
+
+🎬 ANIMATIONS:
+- Slide-fade: translateY(-10px) opacity 0 → 0
+- List-enter: translateX(-20px) opacity 0 → 1
+- Badge Pulse: box-shadow 0 → 8px glow, 2s infinite
+
+🔌 GUN.JS INTEGRATION:
+- Subscribe: gun.get('news_plugin').get('notifications').map().on()
+- Filter: nur Notifications < 7 Tage alt
+- Auto-add: Neue Notifications von anderen Users
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <template>
   <div class="notification-panel">
     <!-- Notification Button -->

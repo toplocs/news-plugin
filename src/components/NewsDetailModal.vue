@@ -25,6 +25,8 @@
               :src="article.imageUrl"
               :alt="article.title"
               class="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </div>
 
@@ -80,6 +82,22 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>
+
+              <!-- Bookmark Button -->
+              <button
+                @click="handleBookmarkToggle"
+                class="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 font-medium"
+                :class="isBookmarked ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-100'"
+                :aria-label="isBookmarked ? 'Lesezeichen entfernen' : 'Zu Lesezeichen hinzufügen'"
+              >
+                <svg v-if="!isBookmarked" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                <span>{{ isBookmarked ? 'Gespeichert' : 'Speichern' }}</span>
+              </button>
 
               <!-- Share Button with Dropdown -->
               <div class="relative">
@@ -149,6 +167,16 @@
                 </Transition>
               </div>
             </div>
+
+            <!-- Reactions -->
+            <div class="mt-8">
+              <ReactionBar :article-id="article.id" />
+            </div>
+
+            <!-- Comments Section -->
+            <div class="mt-8 pt-8 border-t border-slate-700/50">
+              <CommentSection :article-id="article.id" :show-emoji-picker="true" />
+            </div>
           </div>
         </div>
       </div>
@@ -157,9 +185,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { NewsArticle } from '../types'
 import { useShare } from '../composables/useShare'
+import { useBookmarks } from '../stores/useBookmarks'
+import CommentSection from './CommentSection.vue'
+import ReactionBar from './ReactionBar.vue'
 
 const props = defineProps<{
   article: NewsArticle
@@ -170,7 +201,16 @@ const emit = defineEmits<{
 }>()
 
 const { share, copyToClipboard, shareToSocial, canShare } = useShare()
+const bookmarksStore = useBookmarks()
 const showShareMenu = ref(false)
+
+// Check if article is bookmarked
+const isBookmarked = computed(() => bookmarksStore.isBookmarked(props.article.id))
+
+// Toggle bookmark
+const handleBookmarkToggle = () => {
+  bookmarksStore.toggleBookmark(props.article)
+}
 
 const formatDate = (timestamp: number): string => {
   return new Date(timestamp).toLocaleDateString('en-US', {

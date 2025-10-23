@@ -1,22 +1,24 @@
 <template>
   <Teleport to="body">
-    <div class="toast-container">
+    <div class="toast-container" role="region" aria-label="Benachrichtigungen" aria-live="polite">
       <TransitionGroup name="toast">
         <div
           v-for="toast in toasts"
           :key="toast.id"
           class="toast"
           :class="`toast-${toast.type}`"
+          role="alert"
+          :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
           @click="remove(toast.id)"
         >
-          <div class="toast-icon">
+          <div class="toast-icon" aria-hidden="true">
             <span v-if="toast.type === 'success'">✓</span>
             <span v-else-if="toast.type === 'error'">✕</span>
             <span v-else-if="toast.type === 'warning'">⚠</span>
             <span v-else>ℹ</span>
           </div>
           <div class="toast-message">{{ toast.message }}</div>
-          <button class="toast-close" @click.stop="remove(toast.id)">×</button>
+          <button class="toast-close" @click.stop="remove(toast.id)" aria-label="Benachrichtigung schließen">×</button>
         </div>
       </TransitionGroup>
     </div>

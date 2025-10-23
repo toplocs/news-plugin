@@ -13,8 +13,12 @@ const isLoading = ref(false)
  */
 export function useBookmarks() {
   // Load from localStorage
-  const loadBookmarks = () => {
+  const loadBookmarks = async () => {
+    isLoading.value = true
     try {
+      // Small delay for UX (show loading state)
+      await new Promise(resolve => setTimeout(resolve, 300))
+
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         bookmarks.value = JSON.parse(stored)
@@ -22,6 +26,8 @@ export function useBookmarks() {
       }
     } catch (err) {
       console.error('Failed to load bookmarks:', err)
+    } finally {
+      isLoading.value = false
     }
   }
 

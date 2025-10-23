@@ -1,3 +1,82 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - FeedView.vue (PHASE 2) - 230 ZEILEN
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- Grid/List Layout Toggle
+- Infinite Scroll (IntersectionObserver + Sentinel)
+- Loading States (Skeleton Loader)
+- Error State (Red border + icon)
+- Empty State (No articles)
+- Fade-Slide Transitions
+- Load More (incremental 12 articles at a time)
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ Layout Toggle: Grid (2 cols) vs List (single col)
+✅ Infinite Scroll: Sentinel 200px vor Ende → loadMore()
+✅ Loading: ArticleSkeleton (3x) während loading
+✅ Error: Red border, error icon, error message
+✅ Empty: "No news articles yet" + Configure button
+✅ Transitions: fade-slide (translateY + opacity)
+✅ Load More: +12 articles pro Scroll
+
+🔧 WIE ZU TESTEN:
+1. Layout Toggle:
+   - Grid Button klicken → grid-cols-1 md:grid-cols-2
+   - List Button klicken → space-y-4 (single column)
+   - Active Button: bg-indigo-600 text-white
+2. Infinite Scroll:
+   - 50 Artikel laden
+   - Nur 12 initial sichtbar (displayCount = 12)
+   - Scroll nach unten → Sentinel IntersectionObserver
+   - Wenn Sentinel 200px vor viewport → loadMore()
+   - displayCount += 12
+3. Loading State:
+   - :loading="true" + articles.length === 0
+   - ArticleSkeleton (3x) erscheint
+   - Pulsing animation
+4. Error State:
+   - :error="'Failed to load'"
+   - Red border (border-red-500/20)
+   - Error Icon (⚠️)
+   - Error Message
+5. Empty State:
+   - :articles="[]" + !loading + !error
+   - "📰" Icon (opacity 50%)
+   - "No news articles yet"
+   - "Configure Settings" Button
+6. Transitions:
+   - New article erscheint → fade-slide-enter
+   - translateY(20px) + opacity 0 → 0
+   - Duration: 0.3s ease-out
+7. Sentinel Test:
+   - IntersectionObserver rootMargin: '200px'
+   - Startet load 200px VOR Ende
+   - isLoadingMore: true während loading
+   - Spinner + "Lade weitere Artikel..."
+
+📊 LAYOUT-SPECS:
+- Grid: grid grid-cols-1 md:grid-cols-2 gap-4
+- List: space-y-4
+- Toggle Buttons: p-2 rounded, active: bg-indigo-600
+
+🎬 ANIMATIONS:
+- fade-slide-enter: translateY(20px) opacity 0 → 0 (0.3s ease-out)
+- fade-slide-leave: translateY(-20px) opacity 1 → 0 (0.3s ease-in)
+- Spinner: border-top-color rotate 360deg (1s linear infinite)
+
+🔄 INFINITE SCROLL:
+- IntersectionObserver: rootMargin 200px
+- displayCount: initial 12, increment +12
+- Sentinel: div ref="sentinelRef" beobachtet
+- loadMore(): emit('load-more') wenn hasMore
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <template>
   <div class="space-y-6">
     <!-- Feed Header -->

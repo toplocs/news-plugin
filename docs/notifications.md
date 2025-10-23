@@ -1,64 +1,103 @@
-# Notifications & Discovery System
+# 🔔 Notifications & Badge System - TopLocs News Plugin
 
-## Unread Badge System
+**Version:** 2.0
+**Last Updated:** 2025-10-24
 
-### Implementation: `UnreadBadge.vue`
+---
 
-**Features:**
-- Fixed 16×16px box (no CLS)
-- Throttled updates (debounced 300ms)
-- Pulse animation on new messages
-- Glow effect (2s duration)
+## 📊 System Overview
 
-**Usage:**
-```vue
-<UnreadBadge :count="unreadCount" />
+### Unread Badge System
+
+**Purpose:** Track unread DM threads & notifications
+
+**Components:**
+- `UnreadBadge.vue` - Visual badge (16×16px fixed)
+- `useNotifications.ts` - Store (Gun.js + localStorage)
+- `NotificationPanel.vue` - Notification list
+
+---
+
+## 🎯 Badge Flow
+
+### 1. New Notification Arrives
+```
+Gun.js Event → useNotifications.ts → UnreadBadge.vue
+                      ↓
+              +1 unread count
+                      ↓
+        Badge animates (glow/pulse)
 ```
 
-### Store: `useNotifications.ts`
+### 2. User Opens Notification
+```
+User clicks NotificationPanel
+        ↓
+Mark notification as read
+        ↓
+-1 unread count
+        ↓
+Badge updates (or hides if 0)
+```
 
-**State:**
+### 3. Throttled Updates
+```
+New notifications → Debounce 500ms → Update UI
+```
+**Why?** Prevents layout shift from rapid updates
+
+---
+
+## 📡 Real-time Gun.js Subscription
+
+### Subscribe to Notifications
 ```typescript
-{
-  notifications: Notification[],
-  unreadCount: number,
-  lastUpdate: timestamp
+gun.get('news_plugin')
+   .get('notifications')
+   .get(userId)
+   .on((data) => {
+     // Real-time notification update
+     notifications.value.push(data)
+     unreadCount.value++
+   })
+```
+
+### Data Structure
+```typescript
+interface Notification {
+  id: string
+  type: 'dm' | 'comment' | 'reaction' | 'mention'
+  fromUser: string
+  message: string
+  articleId?: string
+  timestamp: number
+  read: boolean
 }
 ```
 
-**Methods:**
-- `addNotification(n: Notification)`
-- `markAsRead(id: string)`
-- `clearAll()`
+---
 
-## Discovery System
+## 🎨 UI Components
 
-### Store: `useDiscovery.ts`
-
-**Matching Algorithm:**
-1. Calculate interest overlap (40% weight)
-2. Calculate location proximity (30% weight)
-3. Calculate activity match (20% weight)
-4. Calculate trust score (10% weight)
-
-**Events:**
-- `user-match` - New user discovered
-- `article-match` - Relevant article found
-- `location-update` - User moved
-
-### Gun.js Subscriptions
-
-```typescript
-gun.get('news_plugin/notifications')
-  .on((data) => {
-    notificationStore.addNotification(data)
-  })
+### UnreadBadge
+```vue
+<div class="relative">
+  <BellIcon />
+  <span v-if="count > 0" class="badge">
+    {{ count > 9 ? '9+' : count }}
+  </span>
+</div>
 ```
 
-**Thread ID Generation:**
-```typescript
-const threadId = [userId1, userId2].sort().join('_')
-```
+**Fixed 16×16px prevents layout shift!**
 
 ---
-**Performance:** Real-time updates via Gun.js with 50ms throttle
+
+## 📚 API Reference
+
+### Store Methods
+- `addNotification(notification)` - Add new
+- `markAsRead(id)` - Mark single as read
+- `markAllAsRead()` - Clear all unread
+- `getUnreadCount()` - Get count
+

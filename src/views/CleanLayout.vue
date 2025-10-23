@@ -1,5 +1,8 @@
 <template>
   <div class="clean-layout">
+    <!-- Offline Indicator -->
+    <OfflineIndicator />
+
     <!-- Header -->
     <CleanHeader
       :location="locationName"
@@ -10,10 +13,10 @@
     />
 
     <!-- Main Content - 3 Column Layout -->
-    <main class="main-content">
+    <main class="main-content" role="main" aria-label="News Content">
       <div class="container-3col">
         <!-- Left Sidebar - Settings & Navigation -->
-        <aside class="sidebar-left">
+        <aside class="sidebar-left" role="complementary" aria-label="Einstellungen und Navigation">
           <SidebarLeft
             :settings="settings"
             :discoveryMatches="discovery.matches.value"
@@ -28,7 +31,7 @@
         </aside>
 
         <!-- Center Column - News Feed -->
-        <div class="center-column">
+        <div class="center-column" role="feed" aria-label="News Artikel Feed">
           <!-- Statistics Bar -->
           <StatsBar :articles="articles" :last-refresh="lastRefreshTime" />
 
@@ -42,18 +45,18 @@
           />
 
           <!-- Prominent Filter Controls -->
-          <div class="filter-control-bar">
+          <div class="filter-control-bar" role="search" aria-label="Artikel filtern und sortieren">
             <!-- Header Row -->
             <div class="filter-header">
               <div class="filter-title">
-                <span class="filter-icon">🎯</span>
+                <span class="filter-icon" aria-hidden="true">🎯</span>
                 <h3>Filter & Sortierung</h3>
-                <span v-if="activeFilterCount > 0" class="active-filter-badge">
+                <span v-if="activeFilterCount > 0" class="active-filter-badge" role="status" aria-live="polite">
                   {{ activeFilterCount }} aktiv
                 </span>
               </div>
-              <button v-if="activeFilterCount > 0" @click="clearAllFilters" class="clear-filters-btn">
-                <span>✕</span>
+              <button v-if="activeFilterCount > 0" @click="clearAllFilters" class="clear-filters-btn" aria-label="Alle Filter zurücksetzen">
+                <span aria-hidden="true">✕</span>
                 <span>Alle zurücksetzen</span>
               </button>
             </div>
@@ -462,6 +465,9 @@
       @accept="handleChatRequestAccept"
       @decline="handleChatRequestDecline"
     />
+
+    <!-- Confetti Effect for Gamification -->
+    <ConfettiEffect />
   </div>
 </template>
 
@@ -491,6 +497,8 @@ import ChatModal from '../components/ChatModal.vue'
 import ChatRequestNotification from '../components/ChatRequestNotification.vue'
 import AdBanner from '../components/AdBanner.vue'
 import DiscoveryBanner from '../components/DiscoveryBanner.vue'
+import ConfettiEffect from '../components/ConfettiEffect.vue'
+import OfflineIndicator from '../components/OfflineIndicator.vue'
 import type { NewsArticle } from '../types'
 
 const props = defineProps<{

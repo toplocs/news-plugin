@@ -70,7 +70,7 @@ export function useInterests() {
    */
   const initializeWithSurvey = (keywords: string[]) => {
     const surveyInterests: Interest[] = keywords.map(keyword => ({
-      keyword: keyword.toLowerCase(),
+      keyword: keyword.trim(), // Preserve capitalization
       confidence: 0.8, // High confidence for explicit input
       source: 'survey',
       lastUpdated: Date.now()
@@ -315,16 +315,16 @@ export function useInterests() {
    * Add manual interest
    */
   const addInterest = (keyword: string) => {
-    const normalized = keyword.toLowerCase().trim()
+    const normalized = keyword.trim()
     if (!normalized) return
 
-    const existing = interests.value.find(i => i.keyword === normalized)
+    const existing = interests.value.find(i => i.keyword.toLowerCase() === normalized.toLowerCase())
     if (existing) {
       existing.confidence = Math.min(1.0, existing.confidence + 0.2)
       existing.lastUpdated = Date.now()
     } else {
       interests.value.push({
-        keyword: normalized,
+        keyword: normalized, // Preserve capitalization
         confidence: 0.9,
         source: 'survey',
         lastUpdated: Date.now()
@@ -338,7 +338,7 @@ export function useInterests() {
    * Remove interest
    */
   const removeInterest = (keyword: string) => {
-    const index = interests.value.findIndex(i => i.keyword === keyword.toLowerCase())
+    const index = interests.value.findIndex(i => i.keyword.toLowerCase() === keyword.toLowerCase())
     if (index > -1) {
       interests.value.splice(index, 1)
       saveInterests()

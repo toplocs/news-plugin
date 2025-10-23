@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Sidebar Tabs - Complete Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5174/')
+    await page.goto('http://localhost:5175/')
     await page.waitForLoadState('networkidle')
   })
 

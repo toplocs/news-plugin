@@ -53,39 +53,88 @@ export class RSSService {
     }
 
     try {
+      // ✅ Validate feed URL
+      if (!feedUrl || !feedUrl.startsWith('http')) {
+        console.error(`❌ Invalid RSS feed URL: ${feedUrl}`)
+        return []
+      }
+
       const url = `${this.RSS2JSON_API}?rss_url=${encodeURIComponent(feedUrl)}&count=${this.MAX_ITEMS}&api_key=no`
+
+      // ✅ Add timeout to fetch (10 seconds)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
 
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
         },
+        signal: controller.signal
       })
 
+      clearTimeout(timeoutId)
+
       if (!response.ok) {
-        throw new Error(`RSS fetch failed: ${response.status} ${response.statusText}`)
+        // ✅ Detailed error messages
+        if (response.status === 429) {
+          console.error(`❌ RSS rate limit exceeded for ${feedUrl}`)
+        } else if (response.status === 404) {
+          console.error(`❌ RSS feed not found: ${feedUrl}`)
+        } else if (response.status >= 500) {
+          console.error(`❌ RSS server error (${response.status}) for ${feedUrl}`)
+        } else {
+          console.error(`❌ RSS fetch failed: ${response.status} ${response.statusText}`)
+        }
+        return []
       }
 
       const data: RSSFeed = await response.json()
 
+      // ✅ Validate RSS response
+      if (!data || typeof data !== 'object') {
+        console.error(`❌ Invalid RSS response format for ${feedUrl}`)
+        return []
+      }
+
       if (data.status !== 'ok') {
-        console.warn(`RSS feed status not OK for ${feedUrl}:`, data.status)
+        console.warn(`⚠️  RSS feed status not OK for ${feedUrl}: ${data.status}`)
+        return []
+      }
+
+      if (!data.items || !Array.isArray(data.items)) {
+        console.error(`❌ RSS feed has no items array for ${feedUrl}`)
         return []
       }
 
       const articles = this.convertToArticles(data, location)
 
-      // Cache successful result
-      this.cache.set(cacheKey, {
-        data: articles,
-        timestamp: Date.now()
-      })
+      // ✅ Only cache if we got valid articles
+      if (articles.length > 0) {
+        this.cache.set(cacheKey, {
+          data: articles,
+          timestamp: Date.now()
+        })
+        console.log(`✅ RSS fetched ${articles.length} articles from ${feedUrl}`)
+      } else {
+        console.warn(`⚠️  RSS returned 0 articles from ${feedUrl}`)
+      }
 
-      console.log(`✅ RSS fetched ${articles.length} articles from ${feedUrl}`)
       return articles
 
     } catch (error) {
-      console.error(`❌ Failed to fetch RSS feed ${feedUrl}:`, error)
+      // ✅ Detailed error handling
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          console.error(`❌ RSS fetch timeout (10s) for ${feedUrl}`)
+        } else if (error.message.includes('Failed to fetch')) {
+          console.error(`❌ Network error fetching RSS ${feedUrl}`)
+        } else {
+          console.error(`❌ RSS fetch error for ${feedUrl}:`, error.message)
+        }
+      } else {
+        console.error(`❌ Unknown error fetching RSS ${feedUrl}:`, error)
+      }
       return []
     }
   }

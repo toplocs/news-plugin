@@ -237,3 +237,77 @@
 .stagger-item:nth-child(3) { animation-delay: 0.3s; }
 .stagger-item:nth-child(4) { animation-delay: 0.4s; }
 .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Accessibility: Focus States */
+/* These styles ensure all interactive elements have visible focus indicators for keyboard navigation */
+
+/* Remove default outline and add custom focus styles */
+button:focus,
+a:focus,
+input:focus,
+textarea:focus,
+select:focus,
+[role="button"]:focus,
+[tabindex]:not([tabindex="-1"]):focus {
+  outline: none;
+}
+
+/* Modern focus-visible (only shows when keyboard is used, not on mouse click) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.8);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+/* Focus states for buttons with specific styles */
+button.nav-item:focus-visible,
+button.reaction-btn:focus-visible,
+button.bookmark-button:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 1);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+}
+
+/* Focus states for inputs and textareas */
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.8);
+  outline-offset: 0;
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Focus states for cards and interactive containers */
+.news-card:focus-visible,
+.bookmark-item:focus-visible,
+article:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.8);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+/* Focus states for links */
+a:focus-visible {
+  outline: 2px dashed rgba(99, 102, 241, 0.8);
+  outline-offset: 2px;
+  text-decoration: underline;
+}
+
+/* High contrast focus for better visibility */
+@media (prefers-contrast: high) {
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 3px solid #6366f1;
+    outline-offset: 3px;
+  }
+}

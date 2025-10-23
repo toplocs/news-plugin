@@ -1,0 +1,156 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - 'heading "🎮 Phase 3: Gamification & Engagement Demo" [level=1] [ref=e6]'
+        - paragraph [ref=e7]: Teste alle implementierten Features der User-Engagement-Strategie
+    - generic [ref=e8]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: 🎯
+          - heading "Dein Fortschritt" [level=3] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: "50"
+            - generic [ref=e17]: Punkte
+          - generic [ref=e18]:
+            - generic [ref=e19]: Level 1
+            - generic [ref=e20]: Neuling
+          - generic [ref=e21]:
+            - generic [ref=e22]: 0/6
+            - generic [ref=e23]: Achievements
+        - paragraph [ref=e26]: 50 Punkte bis Level 2
+      - generic [ref=e27]:
+        - generic [ref=e28] [cursor=pointer]:
+          - generic [ref=e29]: 🎁
+          - heading "Punkte & Levels" [level=3] [ref=e30]
+          - paragraph [ref=e31]: Verdiene Punkte durch Aktionen und steige in Levels auf
+          - generic [ref=e32]: ✅ Implementiert
+          - button "Punkte testen" [ref=e33]
+        - generic [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]: 💬
+          - heading "Real-time Chat" [level=3] [ref=e36]
+          - paragraph [ref=e37]: P2P Chat mit Gun.js + Rewards Integration
+          - generic [ref=e38]: ✅ Implementiert
+          - button "Chat öffnen" [ref=e39]
+        - generic [ref=e40] [cursor=pointer]:
+          - generic [ref=e41]: 🏆
+          - heading "Achievements" [level=3] [ref=e42]
+          - paragraph [ref=e43]: 6 Achievements freischalten durch verschiedene Aktionen
+          - generic [ref=e44]: ✅ Implementiert
+          - button "Achievements ansehen" [ref=e45]
+        - generic [ref=e46] [cursor=pointer]:
+          - generic [ref=e47]: 📅
+          - heading "Event System" [level=3] [ref=e48]
+          - paragraph [ref=e49]: Events mit RSVP, Countdown und Quick-Meet Button
+          - generic [ref=e50]: 🔧 In Entwicklung
+          - button "Events ansehen" [ref=e51]
+        - generic [ref=e52] [cursor=pointer]:
+          - generic [ref=e53]: 🗳️
+          - heading "Voting System" [level=3] [ref=e54]
+          - paragraph [ref=e55]: Community-Abstimmungen mit +5 Punkte pro Vote
+          - generic [ref=e56]: 🔧 In Entwicklung
+          - button "Voting testen" [ref=e57]
+        - generic [ref=e58] [cursor=pointer]:
+          - generic [ref=e59]: 📊
+          - heading "Live Activity Feed" [level=3] [ref=e60]
+          - paragraph [ref=e61]: Echtzeitaktivitäten der Community (Social Proof)
+          - generic [ref=e62]: 🔧 In Entwicklung
+          - button "Activity Feed" [ref=e63]
+        - generic [ref=e64] [cursor=pointer]:
+          - generic [ref=e65]: 🎯
+          - heading "Onboarding" [level=3] [ref=e66]
+          - paragraph [ref=e67]: Progress Bar für neue User (0-100%)
+          - generic [ref=e68]: 🔧 In Entwicklung
+          - button "Onboarding testen" [ref=e69]
+        - generic [ref=e70] [cursor=pointer]:
+          - generic [ref=e71]: ⏰
+          - heading "FOMO Triggers" [level=3] [ref=e72]
+          - paragraph [ref=e73]: Countdowns, Limited Spots, Streak Warnings
+          - generic [ref=e74]: 🔧 In Entwicklung
+          - button "FOMO testen" [ref=e75]
+        - generic [ref=e76] [cursor=pointer]:
+          - generic [ref=e77]: 🎊
+          - heading "Confetti Animation" [level=3] [ref=e78]
+          - paragraph [ref=e79]: Feiere Level-Ups und Achievements
+          - generic [ref=e80]: ✅ Implementiert
+          - button "Konfetti auslösen" [ref=e81]
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - heading "🎯 Onboarding Progress" [level=2] [ref=e84]
+          - button "×" [ref=e85] [cursor=pointer]
+        - generic [ref=e87]:
+          - paragraph [ref=e89]: 🎯 Onboarding Progress - Motiviere Nutzer zum Abschluss
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - heading "Willkommen bei LocalConnect! 👋" [level=4] [ref=e92]
+              - paragraph [ref=e93]: Vervollständige dein Profil für die beste Erfahrung
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - generic [ref=e96]: Gesamtfortschritt
+                - generic [ref=e97]: 20%
+              - paragraph [ref=e100]: Noch 4 Schritte übrig
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - generic [ref=e104]: ✅
+                - generic [ref=e105]:
+                  - heading "Profil anlegen" [level=5] [ref=e106]
+                  - paragraph [ref=e107]: Erstelle dein persönliches Profil mit Namen und Avatar
+                  - generic [ref=e109]: +50 Punkte
+                - generic [ref=e111]: Abgeschlossen
+              - generic [ref=e112]:
+                - generic [ref=e114]: 🎯
+                - generic [ref=e115]:
+                  - heading "Interessen auswählen" [level=5] [ref=e116]
+                  - paragraph [ref=e117]: Wähle mindestens 3 Interessen, um passende Inhalte zu sehen
+                  - generic [ref=e119]: +30 Punkte
+                - button "Erledigen" [ref=e121] [cursor=pointer]
+              - generic [ref=e122]:
+                - generic [ref=e124]: 📍
+                - generic [ref=e125]:
+                  - heading "Standort freigeben" [level=5] [ref=e126]
+                  - paragraph [ref=e127]: Erlaube Standortzugriff für lokale Nachrichten und Events
+                  - generic [ref=e129]: +20 Punkte
+                - button "Gesperrt" [disabled] [ref=e131]
+              - generic [ref=e132]:
+                - generic [ref=e134]: 💬
+                - generic [ref=e135]:
+                  - heading "Erste Nachricht senden" [level=5] [ref=e136]
+                  - paragraph [ref=e137]: Starte deine erste Unterhaltung mit der Community
+                  - generic [ref=e139]: +10 Punkte
+                - button "Gesperrt" [disabled] [ref=e141]
+              - generic [ref=e142]:
+                - generic [ref=e144]: 📅
+                - generic [ref=e145]:
+                  - heading "Einem Event beitreten" [level=5] [ref=e146]
+                  - paragraph [ref=e147]: Nimm an deinem ersten lokalen Event teil
+                  - generic [ref=e149]: +20 Punkte
+                - button "Gesperrt" [disabled] [ref=e151]
+      - generic [ref=e152]:
+        - heading "📝 Test-Anleitung" [level=2] [ref=e153]
+        - generic [ref=e154]:
+          - generic [ref=e155]:
+            - heading "1. Punkte System testen" [level=4] [ref=e156]
+            - paragraph [ref=e157]: Klicke auf "Punkte testen" → Du erhältst +50 Punkte → Toast-Notification erscheint
+          - generic [ref=e158]:
+            - heading "2. Chat testen" [level=4] [ref=e159]
+            - paragraph [ref=e160]: Klicke auf "Chat öffnen" → Sende eine Nachricht → +10 Punkte bei erster Nachricht
+          - generic [ref=e161]:
+            - heading "3. Level-Up auslösen" [level=4] [ref=e162]
+            - paragraph [ref=e163]: Sammle 100 Punkte → Konfetti-Animation → Level 2 erreicht
+          - generic [ref=e164]:
+            - heading "4. Achievements freischalten" [level=4] [ref=e165]
+            - paragraph [ref=e166]: Klicke auf "Achievements" → Sehe welche noch locked sind → Schalte sie durch Aktionen frei
+  - generic:
+    - generic [ref=e167] [cursor=pointer]:
+      - generic [ref=e169]: ✓
+      - generic [ref=e170]: 🎉 +50 Punkte! Profil vervollständigt
+      - button "×" [ref=e171]
+    - generic [ref=e172] [cursor=pointer]:
+      - generic [ref=e174]: ✓
+      - generic [ref=e175]: ✅ Profil anlegen abgeschlossen! +50 Punkte
+      - button "×" [ref=e176]
+```

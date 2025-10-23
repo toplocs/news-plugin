@@ -275,13 +275,22 @@
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Chat Modal -->
+    <ChatModal
+      v-if="chatPartner"
+      v-model="showChatModal"
+      :partner="chatPartner"
+      :current-user-id="channels.userId"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useChannels } from '../stores/useChannels'
 import { useLocation } from '../composables/useLocation'
+import ChatModal from './ChatModal.vue'
 import type { Channel } from '../stores/useChannels'
 
 const emit = defineEmits<{
@@ -501,10 +510,22 @@ const nearbyMembers = computed<MemberWithDistance[]>(() => {
     .slice(0, 8)
 })
 
+// Chat Modal State
+const showChatModal = ref(false)
+const chatPartner = ref<any>(null)
+
 // Start chat with member
 const startChatWithMember = (member: MemberWithDistance) => {
   console.log('💬 Starting chat with:', member.username)
-  // TODO: Integrate with chat system
+
+  chatPartner.value = {
+    id: member.userId,
+    name: member.username,
+    avatar: member.avatar,
+    online: Math.random() > 0.3 // Mock online status
+  }
+
+  showChatModal.value = true
 }
 </script>
 

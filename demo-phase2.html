@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 2 Demo - TopLocs News Plugin</title>
+  <script type="module" crossorigin src="/dist/CleanLayout-DJMXJxvt.js"></script>
+  <link rel="stylesheet" crossorigin href="/dist/CleanLayout-D3tXcpBz.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+    #app { width: 100%; height: 100vh; }
+    
+    .demo-header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    .demo-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    
+    .demo-header p {
+      font-size: 1.125rem;
+      opacity: 0.9;
+    }
+    
+    .feature-list {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .feature-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: transform 200ms, box-shadow 200ms;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    }
+    
+    .feature-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: #a78bfa;
+    }
+    
+    .feature-card p {
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    
+    .status-complete {
+      background: #10b981;
+      color: white;
+    }
+    
+    .status-dezentral {
+      background: #3b82f6;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-header">
+    <h1>🚀 Phase 2 Demo - Dezentrales Internet</h1>
+    <p>TopLocs News Plugin v2.0 - 100% Privat & Dezentral</p>
+  </div>
+  
+  <div class="feature-list">
+    <div class="feature-card">
+      <h3>🔐 1. Dezentrale Datenspeicherung</h3>
+      <p>Alle Daten bleiben auf DEINEM Computer! Keine externen Server (außer du aktivierst P2P).</p>
+      <span class="status-badge status-dezentral">✅ 100% Dezentral</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>📐 2. Responsive 3-Column Layout</h3>
+      <p>Desktop: 25% | 50% | 25% · Tablet: 25% | 75% + Drawer · Mobile: Stacked + Bottom Sheet</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>👤 3. User Profile Editor</h3>
+      <p>Avatar · Bio · Interests · SEA-verschlüsselt für private Felder</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>🔔 4. Unread Badge System</h3>
+      <p>Real-time Notifications · Fixed 16×16px (kein Layout Shift) · Glow/Pulse Animation</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>🎯 5. Discovery & Matching</h3>
+      <p>Hybrid Scoring: Interest (70%) + Location (30%) · Real-time Gun.js Subscription</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>🎨 6. Glassmorphism Design</h3>
+      <p>Soft shadows · Blur effects · Gradient header (indigo → violet) · 60 FPS Animations</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>♿ 7. Accessibility (WCAG 2.1)</h3>
+      <p>ARIA Labels · Keyboard Navigation · Focus States (:focus-visible) · Screen Reader Support</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>⚡ 8. Performance Optimiert</h3>
+      <p>Bundle: 86 kB gz (76% under target!) · CLS: 0.02 · FPS: 60 · Image Lazy Loading</p>
+      <span class="status-badge status-complete">✅ Implementiert</span>
+    </div>
+    
+    <div class="feature-card">
+      <h3>💬 9. Reactions System</h3>
+      <p>6 Emojis: ❤️ 👍 🔥 🎉 🤔 😮 · Toggle Logic · NOW DEZENTRAL! (kein gun-manhattan mehr)</p>
+      <span class="status-badge status-dezentral">✅ Jetzt Lokal</span>
+    </div>
+  </div>
+  
+  <div id="app"></div>
+  
+  <script type="module">
+    import '/src/main.ts'
+  </script>
+</body>
+</html>

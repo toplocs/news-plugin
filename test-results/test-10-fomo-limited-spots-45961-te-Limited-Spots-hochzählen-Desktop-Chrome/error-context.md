@@ -1,0 +1,189 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - 'heading "🎮 Phase 3: Gamification & Engagement Demo" [level=1] [ref=e6]'
+      - paragraph [ref=e7]: Teste alle implementierten Features der User-Engagement-Strategie
+  - generic [ref=e8]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: 🎯
+        - heading "Dein Fortschritt" [level=3] [ref=e13]
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: "0"
+          - generic [ref=e17]: Punkte
+        - generic [ref=e18]:
+          - generic [ref=e19]: Level 1
+          - generic [ref=e20]: Neuling
+        - generic [ref=e21]:
+          - generic [ref=e22]: 0/6
+          - generic [ref=e23]: Achievements
+      - paragraph [ref=e25]: 100 Punkte bis Level 2
+    - generic [ref=e26]:
+      - generic [ref=e27] [cursor=pointer]:
+        - generic [ref=e28]: 🎁
+        - heading "Punkte & Levels" [level=3] [ref=e29]
+        - paragraph [ref=e30]: Verdiene Punkte durch Aktionen und steige in Levels auf
+        - generic [ref=e31]: ✅ Implementiert
+        - button "Punkte testen" [ref=e32]
+      - generic [ref=e33] [cursor=pointer]:
+        - generic [ref=e34]: 💬
+        - heading "Real-time Chat" [level=3] [ref=e35]
+        - paragraph [ref=e36]: P2P Chat mit Gun.js + Rewards Integration
+        - generic [ref=e37]: ✅ Implementiert
+        - button "Chat öffnen" [ref=e38]
+      - generic [ref=e39] [cursor=pointer]:
+        - generic [ref=e40]: 🏆
+        - heading "Achievements" [level=3] [ref=e41]
+        - paragraph [ref=e42]: 6 Achievements freischalten durch verschiedene Aktionen
+        - generic [ref=e43]: ✅ Implementiert
+        - button "Achievements ansehen" [ref=e44]
+      - generic [ref=e45] [cursor=pointer]:
+        - generic [ref=e46]: 📅
+        - heading "Event System" [level=3] [ref=e47]
+        - paragraph [ref=e48]: Events mit RSVP, Countdown und Quick-Meet Button
+        - generic [ref=e49]: 🔧 In Entwicklung
+        - button "Events ansehen" [ref=e50]
+      - generic [ref=e51] [cursor=pointer]:
+        - generic [ref=e52]: 🗳️
+        - heading "Voting System" [level=3] [ref=e53]
+        - paragraph [ref=e54]: Community-Abstimmungen mit +5 Punkte pro Vote
+        - generic [ref=e55]: 🔧 In Entwicklung
+        - button "Voting testen" [ref=e56]
+      - generic [ref=e57] [cursor=pointer]:
+        - generic [ref=e58]: 📊
+        - heading "Live Activity Feed" [level=3] [ref=e59]
+        - paragraph [ref=e60]: Echtzeitaktivitäten der Community (Social Proof)
+        - generic [ref=e61]: 🔧 In Entwicklung
+        - button "Activity Feed" [ref=e62]
+      - generic [ref=e63] [cursor=pointer]:
+        - generic [ref=e64]: 🎯
+        - heading "Onboarding" [level=3] [ref=e65]
+        - paragraph [ref=e66]: Progress Bar für neue User (0-100%)
+        - generic [ref=e67]: 🔧 In Entwicklung
+        - button "Onboarding testen" [ref=e68]
+      - generic [ref=e69] [cursor=pointer]:
+        - generic [ref=e70]: ⏰
+        - heading "FOMO Triggers" [level=3] [ref=e71]
+        - paragraph [ref=e72]: Countdowns, Limited Spots, Streak Warnings
+        - generic [ref=e73]: 🔧 In Entwicklung
+        - button "FOMO testen" [active] [ref=e74]
+      - generic [ref=e75] [cursor=pointer]:
+        - generic [ref=e76]: 🎊
+        - heading "Confetti Animation" [level=3] [ref=e77]
+        - paragraph [ref=e78]: Feiere Level-Ups und Achievements
+        - generic [ref=e79]: ✅ Implementiert
+        - button "Konfetti auslösen" [ref=e80]
+    - generic [ref=e81]:
+      - generic [ref=e82]:
+        - heading "⏰ FOMO Triggers" [level=2] [ref=e83]
+        - button "×" [ref=e84] [cursor=pointer]
+      - generic [ref=e86]:
+        - paragraph [ref=e88]: ⚡ FOMO Triggers - Urgenz, Knappheit & Social Proof
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - generic [ref=e91]: ⏰ Begrenzte Zeit
+            - heading "🎁 Double Points Weekend" [level=4] [ref=e92]
+            - paragraph [ref=e93]: Verdiene diese Woche doppelte Punkte für alle Aktivitäten!
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - generic [ref=e96]: "23"
+                - generic [ref=e97]: Stunden
+              - generic [ref=e98]: ":"
+              - generic [ref=e99]:
+                - generic [ref=e100]: "45"
+                - generic [ref=e101]: Minuten
+              - generic [ref=e102]: ":"
+              - generic [ref=e103]:
+                - generic [ref=e104]: "21"
+                - generic [ref=e105]: Sekunden
+            - button "🔥 Jetzt aktivieren" [ref=e106] [cursor=pointer]
+          - generic [ref=e107]:
+            - generic [ref=e108]: 👥 Begrenzte Plätze
+            - heading "🚀 Premium Community Beta" [level=4] [ref=e109]
+            - paragraph [ref=e110]: Sei einer der ersten 50 Beta-Tester für exklusive Features!
+            - generic [ref=e112]:
+              - generic [ref=e113]: 43/50 Plätze belegt
+              - generic [ref=e114]: 7 übrig
+            - generic [ref=e117]:
+              - generic [ref=e118]:
+                - generic [ref=e119]: 👨‍💼
+                - generic [ref=e120]: 👩‍💻
+                - generic [ref=e121]: 👨‍🎓
+                - generic [ref=e122]: 👩‍🎨
+                - generic [ref=e123]: 👨‍🔬
+              - generic [ref=e124]: +43 Nutzer sind bereits dabei
+            - button "✨ Beta beitreten" [ref=e125] [cursor=pointer]
+          - generic [ref=e126]:
+            - generic [ref=e127]: 🔥 Streak Alert
+            - heading "⚠️ Dein Streak läuft ab!" [level=4] [ref=e128]
+            - paragraph [ref=e129]: Du hast 7 Tage in Folge teilgenommen. Verpasse heute nicht deinen Streak!
+            - generic [ref=e130]:
+              - generic [ref=e131]:
+                - generic [ref=e132]: "7"
+                - generic [ref=e133]: Tage Streak
+              - generic [ref=e134]: →
+              - generic [ref=e135]:
+                - generic [ref=e136]: "8"
+                - generic [ref=e137]: Möglicher Streak
+            - generic [ref=e138]:
+              - generic [ref=e139]: ⏰
+              - generic [ref=e140]: Noch 23h bis Mitternacht!
+            - button "✅ Streak sichern (+200 Punkte)" [ref=e141] [cursor=pointer]
+          - generic [ref=e142]:
+            - generic [ref=e143]: 🌟 Trending
+            - heading "🔥 Diese Woche beliebt" [level=4] [ref=e144]
+            - paragraph [ref=e145]: "Über 150 Nutzer haben diese Achievements freigeschaltet:"
+            - generic [ref=e146]:
+              - generic [ref=e147]:
+                - generic [ref=e148]: 🦋
+                - generic [ref=e149]:
+                  - generic [ref=e150]: Social Butterfly
+                  - generic [ref=e151]:
+                    - generic [ref=e152]: 89 mal freigeschaltet
+                    - generic [ref=e153]: +100 Punkte
+              - generic [ref=e154]:
+                - generic [ref=e155]: 🎉
+                - generic [ref=e156]:
+                  - generic [ref=e157]: Event Master
+                  - generic [ref=e158]:
+                    - generic [ref=e159]: 67 mal freigeschaltet
+                    - generic [ref=e160]: +150 Punkte
+              - generic [ref=e161]:
+                - generic [ref=e162]: 🤝
+                - generic [ref=e163]:
+                  - generic [ref=e164]: Helpful Neighbor
+                  - generic [ref=e165]:
+                    - generic [ref=e166]: 54 mal freigeschaltet
+                    - generic [ref=e167]: +75 Punkte
+            - button "📊 Alle Achievements ansehen" [ref=e168] [cursor=pointer]
+          - generic [ref=e169]:
+            - generic [ref=e170]: ⭐ Exklusiv
+            - heading "🎤 VIP Community Call" [level=4] [ref=e171]
+            - paragraph [ref=e172]: "Nur für Level 3+ Nutzer: Exklusives Q&A mit den Gründern!"
+            - generic [ref=e173]:
+              - generic [ref=e175]: "Level { \"level\": 1, \"points\": 0, \"title\": \"Neuling\", \"color\": \"#94a3b8\" }"
+              - generic [ref=e176]: 🔒 Level 3 benötigt (300 Punkte fehlen)
+            - generic [ref=e177]:
+              - generic [ref=e178]: ●
+              - generic [ref=e179]: 18 Nutzer warten bereits
+            - button "🔒 Level 3 benötigt" [ref=e180] [cursor=pointer]
+    - generic [ref=e181]:
+      - heading "📝 Test-Anleitung" [level=2] [ref=e182]
+      - generic [ref=e183]:
+        - generic [ref=e184]:
+          - heading "1. Punkte System testen" [level=4] [ref=e185]
+          - paragraph [ref=e186]: Klicke auf "Punkte testen" → Du erhältst +50 Punkte → Toast-Notification erscheint
+        - generic [ref=e187]:
+          - heading "2. Chat testen" [level=4] [ref=e188]
+          - paragraph [ref=e189]: Klicke auf "Chat öffnen" → Sende eine Nachricht → +10 Punkte bei erster Nachricht
+        - generic [ref=e190]:
+          - heading "3. Level-Up auslösen" [level=4] [ref=e191]
+          - paragraph [ref=e192]: Sammle 100 Punkte → Konfetti-Animation → Level 2 erreicht
+        - generic [ref=e193]:
+          - heading "4. Achievements freischalten" [level=4] [ref=e194]
+          - paragraph [ref=e195]: Klicke auf "Achievements" → Sehe welche noch locked sind → Schalte sie durch Aktionen frei
+```

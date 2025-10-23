@@ -1,3 +1,47 @@
+<!--
+🎯 CLEAN HEADER - SELF-DOC
+═══════════════════════════════════════════════════════════════
+
+✅ IMPLEMENTIERT:
+- Logo + Location Badge
+- Search Bar (Debounced 300ms)
+- GunSyncStatus Indicator
+- NotificationPanel Integration (Bell-Icon)
+- Community Toggle Button (UserSidebar öffnen)
+- Refresh Button (Feed aktualisieren)
+- Settings Button (Einstellungen öffnen)
+- Sticky Positioning (bleibt oben beim Scrollen)
+- ARIA Labels für Accessibility
+
+🧪 ZU TESTEN:
+1. Search Input → emit('search') nach 300ms
+2. Bell-Icon → NotificationPanel öffnet sich
+3. Community Button → emit('toggle-sidebar')
+4. Refresh Button → emit('refresh')
+5. Settings Button → emit('settings')
+6. GunSyncStatus zeigt Connection Status
+7. Header sticky beim Scrollen
+8. ARIA Labels vorhanden (Screen Reader Test)
+
+🔧 ZU FIXEN:
+- Keine Issues ✅
+
+📖 USAGE:
+<CleanHeader
+  :location="locationName"
+  @search="handleSearch"
+  @refresh="handleRefresh"
+  @settings="showSettings = true"
+  @toggle-sidebar="showUserSidebar = !showUserSidebar"
+  @notification-click="handleNotificationClick"
+/>
+
+🔌 INTEGRATION:
+- CleanLayout.vue als Header-Component
+- NotificationPanel.vue (Zeile 31)
+- GunSyncStatus.vue (Zeile 28)
+═══════════════════════════════════════════════════════════════
+-->
 <template>
   <header class="clean-header">
     <div class="container">

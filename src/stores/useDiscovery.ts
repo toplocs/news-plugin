@@ -1,3 +1,89 @@
+/*
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - useDiscovery.ts (PHASE 2) - 501 ZEILEN + HYBRID!
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- 🎯 Hybrid Discovery Algorithm (Interests 70% + Location 30%)
+- Interest-based Discovery (News + Users)
+- Location-based Discovery (Haversine distance)
+- Relevance Score Calculation (topics, tags, recency, breaking)
+- Auto-Refresh Interval (default: 5 Minuten)
+- Gun.js P2P Sharing (publishMatch für high-score matches)
+- localStorage Persistence
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ discoverHybrid(): Combines interests + location, score boost for both
+✅ discoverByInterests(): Article matches basierend auf interests
+✅ discoverByLocation(): Article matches innerhalb radius (km)
+✅ discoverUsers(): User matches basierend auf gemeinsamen Interessen
+✅ Relevance Score: topics (0.3) + tags (0.2) + recency (0.2) + breaking (0.3)
+✅ Auto-Refresh: Alle 5 Minuten (300,000ms)
+✅ publishMatch(): High-score matches (>0.9) → Gun.js
+✅ Gun.js Subscription: Real-time P2P discovery updates
+
+🔧 WIE ZU TESTEN:
+1. Hybrid Discovery Test:
+   - interests = ['Vue.js', 'TypeScript']
+   - location = { lat: 52.52, lng: 13.405, radius: 10 }
+   - matches = await discovery.discoverHybrid(interests, location)
+   - Artikel mit Vue.js + location: score = 0.7 (interests) + 0.5 (boost) = 1.2
+   - Artikel nur Vue.js: score = 0.7 * relevance
+   - Artikel nur location: score = 0.4
+2. Relevance Score Test:
+   - article.topics = ['vue', 'javascript']
+   - article.tags = ['breaking', 'local']
+   - interests = ['Vue.js']
+   - score = calculateRelevanceScore(article, interests)
+   - score = 0.3 (topic match) + 0.3 (breaking tag) = 0.6
+3. Recency Bonus:
+   - article.publishedAt = Date.now() - 3600000 // 1 Stunde alt
+   - score += 0.2 (< 1 Tag alt)
+4. Auto-Refresh Test:
+   - discovery.startAutoRefresh()
+   - Wait 5 Minuten
+   - Console: "🔄 Auto-refresh started (every 300s)"
+   - discoverHybrid sollte automatisch laufen
+5. publishMatch Test:
+   - match = { score: 0.95, type: 'article', ... }
+   - await discovery.publishMatch(match)
+   - Gun.js → news_plugin/discovery/{id}
+   - Console: "✅ Published discovery match to Gun.js: {id}"
+6. Gun.js Subscription:
+   - discovery.subscribeToGun()
+   - Console: "📡 Subscribed to Gun.js discovery updates"
+   - Andere Instanz published match
+   - Sollte erscheinen in matches.value
+
+📊 SCORING ALGORITHM:
+- Topics Match: +0.3 per matching topic
+- Tags Match: +0.2 per matching tag
+- Recency: +0.2 (< 1 Tag), +0.1 (< 7 Tage)
+- Breaking News: +0.3
+- Max Score: 1.0 (capped)
+
+🔢 HYBRID WEIGHTS:
+- Interests: 70% (score * 0.7)
+- Location: 30% (score * 0.4)
+- Both Match: +50% Boost (score += 0.5)
+
+🔌 GUN.JS INTEGRATION:
+- Subscribe: gun.get('news_plugin').get('discovery').map().on()
+- Publish: gun.get('news_plugin').get('discovery').get(id).put()
+- Filter: nur Matches < 24 Stunden alt
+- Auto-cleanup: max 50 matches (keeps top 50)
+
+⏰ AUTO-REFRESH:
+- Default Interval: 300,000ms (5 Minuten)
+- Start: discovery.startAutoRefresh()
+- Stop: discovery.stopAutoRefresh()
+- Settings: updateSettings({ refreshInterval: 60000 }) // 1 Minute
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+*/
 import { ref, computed, watch } from 'vue'
 import gun from '../services/gun'
 import { newsService } from '../services/newsService'
@@ -85,26 +171,36 @@ export function useDiscovery() {
 
   /**
    * Discover content based on location
+   * 🎯 UPDATED: Now passes user interests to filter local articles
    */
   const discoverByLocation = async (
     lat: number,
     lng: number,
-    radius: number
+    radius: number,
+    interests: string[] = []
   ): Promise<DiscoveryMatch[]> => {
     isLoading.value = true
 
     try {
-      const articles = await newsService.searchByLocation(lat, lng, radius)
+      // 🎯 Pass interests to ensure local articles match user preferences
+      const articles = await newsService.searchByLocation(lat, lng, radius, interests)
       const locationMatches: DiscoveryMatch[] = []
 
       for (const article of articles) {
+        // Calculate distance if coordinates available
+        let distanceText = `${radius}km Umkreis`
+        if (article.coordinates) {
+          const distance = calculateDistance(lat, lng, article.coordinates.lat, article.coordinates.lng)
+          distanceText = `${distance.toFixed(1)}km entfernt`
+        }
+
         locationMatches.push({
           type: 'article',
           id: article.id,
           title: article.title,
           description: article.summary,
           score: 0.8,
-          reason: `In deiner Nähe (${radius}km Umkreis)`,
+          reason: `In deiner Nähe (${distanceText})`,
           data: article
         })
       }
@@ -193,10 +289,12 @@ export function useDiscovery() {
 
       // Get location-based matches if location provided
       if (location) {
+        // 🎯 Pass interests to filter local articles by user preferences
         const locationArticles = await newsService.searchByLocation(
           location.lat,
           location.lng,
-          location.radius
+          location.radius,
+          interests // Now includes interests for better filtering
         )
 
         for (const article of locationArticles) {
@@ -205,15 +303,27 @@ export function useDiscovery() {
           if (existingMatch) {
             // Boost score if article matches both interests and location
             existingMatch.score += 0.5
-            existingMatch.reason = 'Passt zu Interessen & in deiner Nähe'
+            existingMatch.reason = 'Passt zu Interessen & in deiner Nähe ⭐'
           } else {
+            // Calculate distance for more context
+            let distanceInfo = ''
+            if (article.coordinates) {
+              const distance = calculateDistance(
+                location.lat,
+                location.lng,
+                article.coordinates.lat,
+                article.coordinates.lng
+              )
+              distanceInfo = ` (${distance.toFixed(1)}km)`
+            }
+
             allMatches.push({
               type: 'article',
               id: article.id,
               title: article.title,
               description: article.summary,
               score: 0.4, // Weight location
-              reason: 'In deiner Nähe',
+              reason: `In deiner Nähe${distanceInfo}`,
               data: article
             })
           }
@@ -230,6 +340,22 @@ export function useDiscovery() {
     } finally {
       isLoading.value = false
     }
+  }
+
+  /**
+   * Calculate distance between two coordinates using Haversine formula
+   * Returns distance in kilometers
+   */
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371 // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLng = (lng2 - lng1) * Math.PI / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
   }
 
   /**

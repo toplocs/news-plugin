@@ -2,7 +2,12 @@
   <article
     class="news-card"
     :class="{ 'breaking': article.tags?.includes('breaking'), 'featured': featured }"
+    role="button"
+    tabindex="0"
+    :aria-label="`Artikel: ${article.title}. Von ${article.source}. ${formatTimeAgo(article.publishedAt)}.`"
     @click="$emit('click', article)"
+    @keydown.enter="$emit('click', article)"
+    @keydown.space.prevent="$emit('click', article)"
   >
     <!-- Image avec Location Overlay -->
     <div v-if="article.imageUrl && showImage" class="card-image-container">
@@ -10,6 +15,8 @@
         :src="article.imageUrl"
         :alt="article.title"
         class="card-image"
+        loading="lazy"
+        decoding="async"
         @error="imageError = true"
       />
 
@@ -28,6 +35,22 @@
         <span class="breaking-pulse"></span>
         BREAKING
       </div>
+
+      <!-- Bookmark Button -->
+      <button
+        @click.stop="handleBookmarkToggle"
+        class="bookmark-button"
+        :class="{ bookmarked: isBookmarked }"
+        :aria-label="isBookmarked ? 'Lesezeichen entfernen' : 'Zu Lesezeichen hinzufügen'"
+        :title="isBookmarked ? 'Lesezeichen entfernen' : 'Zu Lesezeichen hinzufügen'"
+      >
+        <svg v-if="!isBookmarked" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+        <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+      </button>
     </div>
 
     <!-- Card Content -->
@@ -76,6 +99,11 @@
           </span>
         </div>
       </div>
+
+      <!-- Reactions (prevent card click) -->
+      <div @click.stop class="card-reactions">
+        <ReactionBar :article-id="article.id" />
+      </div>
     </div>
 
     <!-- Read More Indicator -->
@@ -88,10 +116,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { NewsArticle } from '../types'
+import ReactionBar from './ReactionBar.vue'
+import { useBookmarks } from '../stores/useBookmarks'
 
-defineProps<{
+const props = defineProps<{
   article: NewsArticle
   showImage?: boolean
   featured?: boolean
@@ -102,6 +132,15 @@ defineEmits<{
 }>()
 
 const imageError = ref(false)
+const bookmarksStore = useBookmarks()
+
+// Check if article is bookmarked
+const isBookmarked = computed(() => bookmarksStore.isBookmarked(props.article.id))
+
+// Toggle bookmark
+const handleBookmarkToggle = () => {
+  bookmarksStore.toggleBookmark(props.article)
+}
 
 const formatTimeAgo = (timestamp: number): string => {
   const now = Date.now()
@@ -136,10 +175,13 @@ const getSourceColor = (source: string): string => {
   backdrop-filter: blur(12px);
 }
 
-.news-card:hover {
+.news-card:hover,
+.news-card:focus-visible {
   transform: translateY(-6px) scale(1.02);
   box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.4);
   border-color: rgba(99, 102, 241, 0.5);
+  outline: 2px solid rgba(99, 102, 241, 0.8);
+  outline-offset: 2px;
 }
 
 .news-card.breaking {
@@ -234,6 +276,51 @@ const getSourceColor = (source: string): string => {
   50% { opacity: 0.5; transform: scale(1.3); }
 }
 
+.bookmark-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.bookmark-button:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: scale(1.1);
+  color: #a5b4fc;
+}
+
+.bookmark-button.bookmarked {
+  background: rgba(99, 102, 241, 0.9);
+  border-color: rgba(99, 102, 241, 0.7);
+  color: white;
+  animation: bookmark-pop 0.3s ease-out;
+}
+
+.bookmark-button.bookmarked:hover {
+  background: rgba(129, 140, 248, 0.95);
+  transform: scale(1.1);
+}
+
+@keyframes bookmark-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
 .card-content {
   padding: 1.25rem;
 }
@@ -304,6 +391,10 @@ const getSourceColor = (source: string): string => {
   gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-reactions {
+  margin-top: 0.75rem;
 }
 
 .author-info {

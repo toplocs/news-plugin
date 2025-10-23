@@ -1,3 +1,62 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+🧪 TEST-DOKUMENTATION - ProfileEdit.vue (PHASE 2)
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 WAS WIRD HIER GETESTET:
+- 2-Column Layout (Form | Preview)
+- ProfileForm Integration
+- ProfilePreview Integration (Live Preview!)
+- userService.saveUserProfile() mit SEA Encryption
+- Loading Overlay beim Speichern
+- Toast Notifications (Success/Error)
+- Auto-Close nach 1 Sekunde
+
+🎯 ERWARTETE ERGEBNISSE:
+✅ Layout: 2 Spalten (Form links, Preview rechts sticky)
+✅ Preview: Live-Update bei Änderungen
+✅ Save: userService.saveUserProfile() aufgerufen
+✅ SEA Encryption: email + phone werden encrypted gespeichert
+✅ Loading: Overlay mit Spinner während Speichern
+✅ Success Toast: "Profil erfolgreich gespeichert"
+✅ Auto-Close: Schließt nach 1000ms
+✅ Error Toast: "Fehler beim Speichern" bei Fehler
+
+🔧 WIE ZU TESTEN:
+1. Layout Test:
+   - Desktop: 2 Spalten (Form | Preview 400px)
+   - Tablet/Mobile: 1 Spalte (Preview unten)
+2. Live Preview:
+   - Name ändern → Preview updated sofort
+   - Avatar upload → Preview zeigt neues Bild
+   - Interests hinzufügen → Preview zeigt Tags
+3. SEA Encryption Test:
+   - Email eingeben: "test@example.com"
+   - Speichern klicken
+   - Gun.js Browser Extension → Check encrypted field
+   - Sollte nicht plaintext sein!
+4. Loading Overlay:
+   - Speichern klicken → Overlay erscheint
+   - Spinner animation + "Speichere Profil..."
+5. Success Flow:
+   - Speichern erfolgreich
+   - Toast: "Profil erfolgreich gespeichert"
+   - Nach 1s: emit('close')
+6. Error Flow:
+   - Netzwerk-Fehler simulieren (offline)
+   - Toast: "Fehler beim Speichern"
+   - Overlay verschwindet, Form bleibt offen
+
+📊 GRID-SPECS:
+- Desktop: grid-template-columns: 1fr 400px
+- Tablet (<1024px): grid-template-columns: 1fr (single column)
+- Gap: 2rem
+
+🚨 BEKANNTE ISSUES:
+- Keine (Phase 2 vollständig implementiert ✅)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <template>
   <div class="profile-edit">
     <div class="container">

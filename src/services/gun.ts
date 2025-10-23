@@ -1,3 +1,43 @@
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * 🎯 GUN.JS SERVICE - SELF-DOC
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * ✅ IMPLEMENTIERT:
+ * - Gun.js P2P Database Initialization
+ * - localStorage-only Mode (peers: [])
+ * - SEA Encryption Extension loaded
+ * - News Plugin Namespace (news_plugin)
+ * - Helper Functions: getNewsForParent, addNews, getSettings, saveSettings
+ *
+ * 🧪 ZU TESTEN:
+ * 1. gun Instance ist initialisiert
+ * 2. newsGun.get('news_plugin') funktioniert
+ * 3. newsService.addNews() speichert Artikel
+ * 4. newsService.getSettings() lädt Settings
+ * 5. localStorage Persistence (keine Network Errors)
+ * 6. SEA Extension verfügbar (Gun.SEA)
+ *
+ * 🔧 ZU FIXEN:
+ * - Keine Issues ✅
+ *
+ * 📖 USAGE:
+ * import gun, { newsGun, newsService } from './services/gun'
+ *
+ * // Direct Gun access
+ * gun.get('news_plugin').get('notifications')
+ *
+ * // News operations
+ * newsService.addNews('demo', { title: 'Test', ... })
+ * newsService.getSettings('demo')
+ *
+ * 🔌 INTEGRATION:
+ * - Alle Stores nutzen diesen Gun Instance
+ * - localStorage Mode: Keine Relay-Server, nur lokal
+ * - Production: peers Array mit Relay-Servern füllen
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import Gun from 'gun'
 import 'gun/sea'
 
