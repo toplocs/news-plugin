@@ -212,13 +212,28 @@
             </template>
           </div>
 
-          <!-- Feed End Message (Anti-Infinite-Scroll) -->
+          <!-- 🔥 INFINITE SCROLL: Load More Button -->
           <div v-if="!isLoading && displayedArticles.length > 0" class="feed-end">
-            <div class="feed-end-icon">🎉</div>
-            <h3 class="feed-end-title">Du bist auf dem neuesten Stand!</h3>
-            <p class="feed-end-subtitle">
-              Das war's – keine endlose Scroll-Falle hier.
-            </p>
+            <template v-if="canLoadMore">
+              <button @click="loadMore" class="load-more-btn">
+                <span class="load-more-icon">📜</span>
+                <span class="load-more-text">
+                  Mehr laden ({{ filteredArticles.length - displayLimit }} weitere)
+                </span>
+              </button>
+              <p class="load-more-hint">
+                Zeige {{ displayLimit }} von {{ filteredArticles.length }} Artikeln
+              </p>
+            </template>
+
+            <template v-else>
+              <div class="feed-end-icon">🎉</div>
+              <h3 class="feed-end-title">Alle {{ filteredArticles.length }} Artikel geladen!</h3>
+              <p class="feed-end-subtitle">
+                Das ist alles – keine weiteren Artikel verfügbar.
+              </p>
+            </template>
+
             <div class="feed-end-stats">
               <div class="feed-stat">
                 <span class="feed-stat-value">{{ displayedArticles.length }}</span>
@@ -564,6 +579,8 @@ const isLoading = ref(false)
 const hyperLocalMode = ref(false) // 🎯 Hyper-local mode toggle
 const hyperLocalRadius = ref(0.5) // 🎯 Default 500m radius for hyper-local
 const lastRefreshTime = ref<number>(0)
+const displayLimit = ref(20) // 🔥 INFINITE SCROLL: Start with 20, load more
+const infiniteScrollEnabled = ref(true) // 🔥 Toggle infinite scroll
 // Initialize or load user ID from localStorage
 const initializeUserId = () => {
   const stored = localStorage.getItem('news_plugin_user_id')
@@ -691,7 +708,26 @@ const filteredArticles = computed(() => {
   return result
 })
 
-const displayedArticles = computed(() => filteredArticles.value.slice(0, 12))
+// 🔥 INFINITE SCROLL: Display articles based on displayLimit (not fixed at 12)
+const displayedArticles = computed(() => {
+  if (infiniteScrollEnabled.value) {
+    return filteredArticles.value.slice(0, displayLimit.value)
+  }
+  return filteredArticles.value // Show all if infinite scroll disabled
+})
+
+// 🔥 Can load more?
+const canLoadMore = computed(() => {
+  return filteredArticles.value.length > displayLimit.value
+})
+
+// 🔥 Load more articles
+const loadMore = () => {
+  if (canLoadMore.value) {
+    displayLimit.value += 20
+    console.log(`📜 [INFINITE SCROLL] Loading more... now showing ${displayLimit.value}`)
+  }
+}
 
 // 📍 DISCOVERY BANNER COMPUTED PROPERTIES
 const articlesInRadius = computed(() => {
@@ -2564,5 +2600,63 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 🔥 INFINITE SCROLL: Load More Button */
+.load-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.load-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+}
+
+.load-more-btn:active {
+  transform: translateY(0);
+}
+
+.load-more-icon {
+  font-size: 1.25rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.load-more-text {
+  font-size: 1rem;
+}
+
+.load-more-hint {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  opacity: 0.8;
+}
+
+.feed-end {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>
