@@ -25,6 +25,7 @@
  */
 
 import type { NewsArticle } from '../types'
+import { eventAggregationService } from './eventAggregationService'
 
 export interface POI {
   id: string
@@ -78,7 +79,7 @@ class OpenDataService {
     interests: string[],
     location: { lat: number; lng: number; city?: string },
     radiusKm: number = 1,
-    minResults: number = 30
+    minResults: number = 200
   ): Promise<NewsArticle[]> {
     console.log(`🌍 [OPEN DATA] Aggregating ALL content...`)
     console.log(`   Interests: ${interests.join(', ')}`)
@@ -129,7 +130,18 @@ class OpenDataService {
 
     allContent.push(...newsArticles)
 
-    // 4️⃣ If still not enough, generate intelligent content
+    // 4️⃣ Get Events from Event Aggregation Service
+    const events = await eventAggregationService.getAllEvents(
+      interests,
+      location,
+      currentRadius, // Use expanded radius
+      Math.ceil(minResults / 4) // Request 25% of minResults in events
+    )
+    console.log(`✅ [EVENTS] Found ${events.length} events`)
+
+    allContent.push(...events)
+
+    // 5️⃣ If still not enough, generate intelligent content
     if (allContent.length < minResults) {
       console.log(`⚠️  Only ${allContent.length} articles, generating ${minResults - allContent.length} more...`)
       const generated = this.generateIntelligentContent(
@@ -217,7 +229,7 @@ class OpenDataService {
     amenityTypes: string[]
   ): POI[] {
     const pois: POI[] = []
-    const poisPerType = Math.ceil(15 / amenityTypes.length)
+    const poisPerType = Math.ceil(100 / amenityTypes.length) // 100 POIs total, distributed across types
 
     for (const amenity of amenityTypes) {
       for (let i = 0; i < poisPerType; i++) {
@@ -273,8 +285,8 @@ class OpenDataService {
         imageUrl: `https://picsum.photos/seed/${location.city}/800/600`
       })
 
-      // Add interest-specific articles
-      for (const interest of interests.slice(0, 3)) {
+      // Add interest-specific articles (ALL interests, not just first 3)
+      for (const interest of interests) {
         articles.push({
           title: `${interest} in ${location.city}`,
           summary: `Entdecke ${interest} in ${location.city}. Die Stadt bietet vielfältige Möglichkeiten.`,
@@ -283,6 +295,25 @@ class OpenDataService {
           categories: [interest, location.city],
           imageUrl: `https://picsum.photos/seed/${interest}/800/600`
         })
+
+        // Add topic variations for each interest
+        const variations = [
+          `Geschichte von ${interest}`,
+          `${interest} - Aktuelle Trends`,
+          `Die besten ${interest} Orte`,
+          `${interest} Guide für ${location.city}`
+        ]
+
+        for (const variation of variations) {
+          articles.push({
+            title: variation,
+            summary: `Alles über ${variation} in ${location.city} und Umgebung.`,
+            url: `https://de.wikipedia.org/wiki/${interest}`,
+            coordinates: location,
+            categories: [interest, location.city, 'guide'],
+            imageUrl: `https://picsum.photos/seed/${variation}/800/600`
+          })
+        }
       }
     }
 
@@ -299,24 +330,41 @@ class OpenDataService {
     // NewsAPI.org - free tier available!
     // Requires API key
 
-    // For now, generate news-like content
+    // For now, generate news-like content (10 articles per interest)
     const articles: NewsArticle[] = []
 
     for (const interest of interests) {
-      const article: NewsArticle = {
-        id: `news_${interest}_${Date.now()}`,
-        title: `Neueste Entwicklungen: ${interest}`,
-        summary: `Aktuelle News zum Thema ${interest}${city ? ` in ${city}` : ''}.`,
-        content: `Detaillierter Bericht über ${interest}...`,
-        source: 'NewsAPI',
-        sourceUrl: `https://newsapi.org`,
-        imageUrl: `https://picsum.photos/seed/news-${interest}/800/600`,
-        publishedAt: Date.now() - Math.random() * 86400000,
-        topics: [interest, 'news', 'aktuell'],
-        tags: [interest, 'breaking', 'trending']
-      }
+      // Generate multiple news types per interest
+      const newsTypes = [
+        { type: 'breaking', title: `🔴 BREAKING: ${interest} News ${city || ''}`, tag: 'breaking' },
+        { type: 'trending', title: `📈 Trending: ${interest} in ${city || 'deiner Region'}`, tag: 'trending' },
+        { type: 'local', title: `📍 Lokal: ${interest} Updates aus ${city || 'der Umgebung'}`, tag: 'local' },
+        { type: 'analysis', title: `🔍 Analyse: ${interest} Entwicklungen`, tag: 'analysis' },
+        { type: 'guide', title: `📖 ${interest} Guide: Alles was du wissen musst`, tag: 'guide' },
+        { type: 'review', title: `⭐ Review: Die besten ${interest} Spots`, tag: 'review' },
+        { type: 'event', title: `🎉 Events: ${interest} Veranstaltungen in ${city || 'deiner Nähe'}`, tag: 'event' },
+        { type: 'tips', title: `💡 Insider Tips: ${interest} ${city || ''}`, tag: 'tips' },
+        { type: 'update', title: `🆕 Update: Neueste ${interest} Trends`, tag: 'update' },
+        { type: 'feature', title: `✨ Feature: ${interest} Highlights`, tag: 'feature' }
+      ]
 
-      articles.push(article)
+      for (const newsType of newsTypes) {
+        const timestamp = Date.now() - Math.random() * 86400000 * 7 // Last 7 days
+        const article: NewsArticle = {
+          id: `news_${interest}_${newsType.type}_${timestamp}`,
+          title: newsType.title,
+          summary: `${newsType.title} - Aktuelle Informationen und Updates.`,
+          content: `Detaillierter Bericht über ${interest} mit allen wichtigen Informationen...`,
+          source: 'NewsAPI',
+          sourceUrl: `https://newsapi.org`,
+          imageUrl: `https://picsum.photos/seed/news-${interest}-${newsType.type}/800/600`,
+          publishedAt: timestamp,
+          topics: [interest, 'news', newsType.type],
+          tags: [interest, newsType.tag, 'aktuell']
+        }
+
+        articles.push(article)
+      }
     }
 
     return articles

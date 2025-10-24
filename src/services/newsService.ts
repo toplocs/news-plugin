@@ -1330,8 +1330,8 @@ ${author} wird am Ball bleiben und weiter berichten. Für ${source} ist dies ein
       let threshold = 0.10 // Start at 10% relevance
       let filtered = scoredArticles.filter(item => item.score >= threshold)
 
-      const targetMinResults = 15 // Want at least 15 results
-      const targetMaxResults = limit * 2 // But not too many
+      const targetMinResults = 100 // Want at least 100 results (ALWAYS SHOW MORE!)
+      const targetMaxResults = limit * 4 // But not too many (allow up to 4x the limit)
 
       // 🔥 Auto-adjust threshold based on result count
       if (filtered.length < targetMinResults && scoredArticles.length > 0) {
