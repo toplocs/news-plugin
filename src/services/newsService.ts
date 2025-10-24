@@ -5,6 +5,7 @@ import { topicMatcher } from './topicMatcher'
 import { articleStorage } from './articleStorageService'
 import { advancedMatchingEngine, type UserBehavior } from './advancedMatching'
 import { hyperLocalService, type HyperLocalMatch } from './hyperLocalService'
+import { openDataService } from './openDataService'
 
 /**
  * News Service - Complete pipeline for fetching, processing, and storing news
@@ -1350,6 +1351,39 @@ ${author} wird am Ball bleiben und weiter berichten. Für ${source} ist dies ein
           filtered = scoredArticles
           threshold = 0
           console.log(`🔧 [AUTO-ADJUST] Taking all ${filtered.length} articles (threshold = 0)`)
+        }
+
+        // 🌍 ALWAYS SHOW: If still not enough results, get REAL DATA from open sources
+        if (filtered.length < targetMinResults && userLocation) {
+          console.log(`🌍 [OPEN DATA] Not enough results (${filtered.length}), fetching from open sources...`)
+
+          try {
+            const openSourceArticles = await openDataService.getAllContent(
+              interests,
+              userLocation,
+              userLocation.radius || 1, // Start with user's radius or 1km
+              targetMinResults * 2 // Request more to ensure enough after filtering
+            )
+
+            console.log(`✅ [OPEN DATA] Got ${openSourceArticles.length} articles from open sources`)
+
+            // Merge with existing articles
+            allArticles.push(...openSourceArticles)
+
+            // Re-score all articles including new ones
+            const rescored = advancedMatchingEngine.scoreArticles(
+              allArticles,
+              interests,
+              userLocation,
+              userBehavior
+            )
+
+            // Update filtered results
+            filtered = rescored.filter(item => item.score >= threshold)
+            console.log(`🔄 [OPEN DATA] After merging: ${filtered.length} total articles`)
+          } catch (error) {
+            console.error('❌ [OPEN DATA] Error fetching open source data:', error)
+          }
         }
       } else if (filtered.length > targetMaxResults) {
         // Too many results - raise threshold
