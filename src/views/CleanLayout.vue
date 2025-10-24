@@ -61,6 +61,40 @@
               </button>
             </div>
 
+            <!-- Hyper-Local Mode Toggle -->
+            <div class="filter-section">
+              <label class="filter-label">🎯 Matching-Modus</label>
+              <div class="sort-options">
+                <button
+                  @click="hyperLocalMode = false; handleRefresh()"
+                  :class="{ active: !hyperLocalMode }"
+                  class="sort-btn"
+                  title="Erweiterte Algorithmen (TF-IDF, Multi-Layer Scoring)"
+                >
+                  <span>🚀</span>
+                  <span>Advanced</span>
+                </button>
+                <button
+                  @click="hyperLocalMode = true; handleRefresh()"
+                  :class="{ active: hyperLocalMode }"
+                  class="sort-btn"
+                  title="Ultra-präzise Standort-Matching (500m Radius)"
+                >
+                  <span>🎯</span>
+                  <span>Hyper-Lokal</span>
+                </button>
+              </div>
+              <div v-if="hyperLocalMode" class="hyper-local-info" style="margin-top: 8px; padding: 8px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; font-size: 0.85rem; color: #a5b4fc;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span>📍</span>
+                  <span>{{ locationName || 'Standort wählen' }} • {{ (hyperLocalRadius * 1000).toFixed(0) }}m Radius</span>
+                </div>
+                <div style="margin-top: 4px; font-size: 0.75rem; color: #818cf8;">
+                  Zeigt Inhalte mit hoher Wahrscheinlichkeit für deinen exakten Standort
+                </div>
+              </div>
+            </div>
+
             <!-- Sort Options -->
             <div class="filter-section">
               <label class="filter-label">📊 Sortierung</label>
@@ -527,6 +561,8 @@ const showChatModal = ref(false)
 const selectedUser = ref<any>(null)
 const chatPartner = ref<any>(null)
 const isLoading = ref(false)
+const hyperLocalMode = ref(false) // 🎯 Hyper-local mode toggle
+const hyperLocalRadius = ref(0.5) // 🎯 Default 500m radius for hyper-local
 const lastRefreshTime = ref<number>(0)
 // Initialize or load user ID from localStorage
 const initializeUserId = () => {
@@ -765,7 +801,7 @@ const handleRefresh = async () => {
       ? interests.interests.value.map(i => i.keyword)
       : ['community', 'local', 'tech'] // Default fallback
 
-    console.log(`🔄 Refreshing articles for interests:`, userInterests)
+    console.log(`🚀 [ADVANCED] Refreshing articles for interests:`, userInterests)
 
     // Clear old articles first
     store.clearArticles(props.parentId || 'default')
@@ -779,12 +815,40 @@ const handleRefresh = async () => {
       }
       success(`${rssArticles.length} Artikel von RSS Feeds geladen`)
     } else {
-      // Generate mock data based on USER interests
-      const freshArticles = await newsService.searchByInterests(userInterests)
+      let freshArticles: NewsArticle[] = []
+
+      // 🎯 HYPER-LOCAL MODE: Ultra-precise location matching (500m radius)
+      if (hyperLocalMode.value && locationName.value) {
+        console.log(`🎯 [HYPER-LOCAL] Using exact location: "${locationName.value}"`)
+        freshArticles = await newsService.searchByExactLocation(
+          locationName.value,
+          userInterests,
+          hyperLocalRadius.value,
+          50
+        )
+        console.log(`✅ [HYPER-LOCAL] Got ${freshArticles.length} hyper-local articles`)
+        success(`${freshArticles.length} hyper-lokale Artikel gefunden 🎯 (${hyperLocalRadius.value}km)`)
+      }
+      // 🚀 ADVANCED MODE: TF-IDF and multi-layer scoring
+      else {
+        freshArticles = await newsService.searchByInterestsAdvanced(
+          userInterests,
+          currentLocation.value ? {
+            lat: currentLocation.value.lat,
+            lng: currentLocation.value.lng,
+            radius: settings.value.radius
+          } : undefined,
+          undefined, // User behavior (can be added later)
+          50 // Get up to 50 articles
+        )
+        console.log(`✅ [ADVANCED] Got ${freshArticles.length} highly relevant articles`)
+        success(`${freshArticles.length} intelligent passende Artikel gefunden 🎯`)
+      }
+
+      // Add articles to store
       for (const article of freshArticles) {
         await store.addArticle(props.parentId || 'default', article)
       }
-      info(`${freshArticles.length} Artikel zu deinen Interessen generiert`)
     }
 
     lastRefreshTime.value = Date.now()

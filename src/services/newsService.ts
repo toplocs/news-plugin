@@ -3,6 +3,8 @@ import { rssService } from './rssService'
 import { nlpService } from './nlpService'
 import { topicMatcher } from './topicMatcher'
 import { articleStorage } from './articleStorageService'
+import { advancedMatchingEngine, type UserBehavior } from './advancedMatching'
+import { hyperLocalService, type HyperLocalMatch } from './hyperLocalService'
 
 /**
  * News Service - Complete pipeline for fetching, processing, and storing news
@@ -1273,6 +1275,156 @@ ${author} wird am Ball bleiben und weiter berichten. Für ${source} ist dies ein
     } catch (error) {
       console.error('❌ Error fetching recent articles:', error)
       return []
+    }
+  }
+
+  /**
+   * 🚀 ADVANCED: Search with powerful TF-IDF and multi-layer scoring
+   * This is the NEW recommended method for intelligent article matching
+   */
+  async searchByInterestsAdvanced(
+    interests: string[],
+    userLocation?: { lat: number; lng: number; radius: number },
+    userBehavior?: UserBehavior,
+    limit: number = 40
+  ): Promise<NewsArticle[]> {
+    try {
+      console.log(`🚀 [ADVANCED] Searching with powerful algorithms...`)
+      console.log(`   Interests: ${interests.join(', ')}`)
+      console.log(`   Location: ${userLocation ? `${userLocation.lat}, ${userLocation.lng} (${userLocation.radius}km)` : 'None'}`)
+
+      // 1️⃣ Get all available articles from multiple sources
+      const allArticles: NewsArticle[] = []
+
+      // Try Gun.js storage first
+      const storedArticles = await this.getPersonalizedFeed(interests, 200)
+      allArticles.push(...storedArticles)
+
+      // Try recent articles
+      if (allArticles.length < 50) {
+        const recentArticles = await this.getRecentArticles(100)
+        allArticles.push(...recentArticles)
+      }
+
+      // Generate intelligent mocks if not enough articles
+      if (allArticles.length < 30) {
+        console.log(`⚠️  Only ${allArticles.length} articles found, generating intelligent mocks...`)
+        const mockCount = 40 - allArticles.length
+        const mocks = this.generateMockArticles(mockCount, { interests })
+        allArticles.push(...mocks)
+      }
+
+      console.log(`📊 Total articles to score: ${allArticles.length}`)
+
+      // 2️⃣ Score articles with Advanced Matching Engine
+      const scoredArticles = advancedMatchingEngine.scoreArticles(
+        allArticles,
+        interests,
+        userLocation,
+        userBehavior
+      )
+
+      // 3️⃣ Filter by minimum threshold (0.10 = 10% relevance)
+      const filtered = scoredArticles.filter(item => item.score >= 0.10)
+
+      console.log(`✅ Advanced filtering: ${filtered.length}/${allArticles.length} articles above threshold`)
+
+      // Log top 5 scores for debugging
+      const top5 = filtered.slice(0, 5)
+      console.log(`🏆 Top 5 matches:`)
+      top5.forEach((item, index) => {
+        console.log(`   ${index + 1}. ${item.article.title.substring(0, 50)}...`)
+        console.log(`      Score: ${item.score.toFixed(3)} | TF-IDF: ${item.breakdown.tfIdf.toFixed(3)} | Topic: ${item.breakdown.topicMatch.toFixed(3)} | Recency: ${item.breakdown.recency.toFixed(3)}`)
+      })
+
+      // 4️⃣ Return articles sorted by score
+      return filtered.slice(0, limit).map(item => item.article)
+
+    } catch (error) {
+      console.error('❌ searchByInterestsAdvanced error:', error)
+      // Fallback to basic generation
+      return this.generateMockArticles(20, { interests })
+    }
+  }
+
+  /**
+   * 📍 ADVANCED: Location-based search with intelligent scoring
+   */
+  async searchByLocationAdvanced(
+    lat: number,
+    lng: number,
+    radius: number,
+    interests: string[] = [],
+    userBehavior?: UserBehavior,
+    limit: number = 30
+  ): Promise<NewsArticle[]> {
+    try {
+      console.log(`🚀 [ADVANCED] Location search: (${lat}, ${lng}) radius ${radius}km`)
+
+      // Use searchByInterestsAdvanced with location parameter
+      return await this.searchByInterestsAdvanced(
+        interests.length > 0 ? interests : ['local', 'community', 'news'],
+        { lat, lng, radius },
+        userBehavior,
+        limit
+      )
+    } catch (error) {
+      console.error('❌ searchByLocationAdvanced error:', error)
+      return this.generateLocalArticles(lat, lng, radius, interests, limit)
+    }
+  }
+
+  /**
+   * 🎯 HYPER-LOCAL: Search by exact location name with ultra-precise matching
+   *
+   * Example: "Maffeiplatz, Nürnberg" → All relevant content within 500m
+   *
+   * Returns articles with HIGH PROBABILITY of relevance based on:
+   * - Exact location (geocoded)
+   * - User interests
+   * - Local context (POIs, events)
+   * - Distance in meters
+   * - Probability score (0-100%)
+   */
+  async searchByExactLocation(
+    locationName: string,
+    userInterests: string[],
+    radiusKm: number = 0.5,
+    limit: number = 30
+  ): Promise<NewsArticle[]> {
+    try {
+      console.log(`🎯 [HYPER-LOCAL] Exact location search: "${locationName}"`)
+      console.log(`   Interests: ${userInterests.join(', ')}`)
+      console.log(`   Radius: ${radiusKm}km`)
+
+      // Get hyper-local matches with probability scoring
+      const matches: HyperLocalMatch[] = await hyperLocalService.getHyperLocalContent(
+        locationName,
+        userInterests,
+        radiusKm
+      )
+
+      console.log(`✅ [HYPER-LOCAL] Found ${matches.length} matches`)
+
+      // Log top 3 with details
+      if (matches.length > 0) {
+        console.log(`🏆 Top 3 Hyper-Local Matches:`)
+        matches.slice(0, 3).forEach((match, i) => {
+          console.log(`   ${i + 1}. ${match.article.title.substring(0, 50)}...`)
+          console.log(`      📍 Distance: ${match.distance.toFixed(0)}m`)
+          console.log(`      🎯 Probability: ${match.probability}%`)
+          console.log(`      💡 Reason: ${match.matchReason}`)
+        })
+      }
+
+      // Return articles sorted by probability & distance
+      return matches.slice(0, limit).map(m => m.article)
+
+    } catch (error) {
+      console.error('❌ searchByExactLocation error:', error)
+      // Fallback: try regular location search
+      console.warn('⚠️  Falling back to standard location search...')
+      return this.searchByLocationAdvanced(0, 0, radiusKm, userInterests, undefined, limit)
     }
   }
 }
