@@ -15,11 +15,14 @@
  */
 
 import type { NewsArticle } from '../types'
+import { semanticMatchingService } from './semanticMatchingService'
 
 export interface ScoredArticle {
   article: NewsArticle
   score: number
   breakdown: ScoreBreakdown
+  proximityBoost?: number  // 🔥 NEW: 10x boost for ultra-close content
+  semanticMatches?: string[] // 🔥 NEW: Matched semantic terms
 }
 
 export interface ScoreBreakdown {
@@ -58,7 +61,12 @@ export class AdvancedMatchingEngine {
     userLocation?: { lat: number; lng: number; radius: number },
     userBehavior?: UserBehavior
   ): ScoredArticle[] {
-    console.log(`🧠 [Advanced Engine] Scoring ${articles.length} articles...`)
+    console.log(`🧠 [ADVANCED ENGINE] Scoring ${articles.length} articles...`)
+    console.log(`   Interests: ${interests.join(', ')}`)
+
+    // 🔥 SEMANTIC EXPANSION: Expand interests (food → restaurant, café, etc.)
+    const expandedInterests = semanticMatchingService.expandAllInterests(interests)
+    console.log(`🔥 [SEMANTIC] Expanded ${interests.length} → ${expandedInterests.length} terms`)
 
     // Build document frequency index for TF-IDF
     this.buildDocumentFrequency(articles)
@@ -77,21 +85,35 @@ export class AdvancedMatchingEngine {
         total: 0
       }
 
-      // 1️⃣ TF-IDF Scoring (40% weight)
-      breakdown.tfIdf = this.calculateTFIDF(article, interests) * 0.4
+      // 1️⃣ TF-IDF Scoring (40% weight) - NOW WITH EXPANDED INTERESTS 🔥
+      breakdown.tfIdf = this.calculateTFIDF(article, expandedInterests) * 0.4
 
-      // 2️⃣ Exact Topic/Tag Matching (25% weight)
-      breakdown.topicMatch = this.calculateTopicMatch(article, interests) * 0.15
-      breakdown.tagMatch = this.calculateTagMatch(article, interests) * 0.10
+      // 2️⃣ Exact Topic/Tag Matching (25% weight) - WITH EXPANDED INTERESTS 🔥
+      breakdown.topicMatch = this.calculateTopicMatch(article, expandedInterests) * 0.15
+      breakdown.tagMatch = this.calculateTagMatch(article, expandedInterests) * 0.10
 
       // 3️⃣ Recency Score (15% weight) - Time decay
       breakdown.recency = this.calculateRecencyScore(article) * 0.15
 
-      // 4️⃣ Quality Indicators (10% weight)
-      breakdown.quality = this.calculateQualityScore(article) * 0.10
+      // 4️⃣ Quality Indicators (10% weight) - ENHANCED FOR FOOD 🔥
+      breakdown.quality = this.calculateQualityScoreEnhanced(article, interests) * 0.10
 
-      // 5️⃣ Location Relevance (5% weight)
+      // 5️⃣ Location Relevance (5% weight) - WITH PROXIMITY BOOST 🔥
+      let proximityBoost = 1.0
       if (userLocation && article.coordinates) {
+        const distanceKm = this.calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          article.coordinates.lat,
+          article.coordinates.lng
+        )
+        const distanceMeters = distanceKm * 1000
+
+        // 🔥 PROXIMITY MULTIPLIER: 10x boost for <100m, 5x for <250m, 2x for <500m
+        if (distanceMeters < 100) proximityBoost = 10.0
+        else if (distanceMeters < 250) proximityBoost = 5.0
+        else if (distanceMeters < 500) proximityBoost = 2.0
+
         breakdown.location = this.calculateLocationScore(article, userLocation) * 0.05
       }
 
@@ -100,18 +122,39 @@ export class AdvancedMatchingEngine {
         breakdown.behavior = this.calculateBehaviorScore(article, userBehavior) * 0.05
       }
 
-      // Total Score
+      // Total Score (before proximity boost)
       breakdown.total = Object.values(breakdown).reduce((sum, val) => sum + val, 0) - breakdown.total
+
+      // 🔥 Apply proximity boost to final score
+      const finalScore = breakdown.total * proximityBoost
+
+      // 🔥 Check semantic matches
+      const articleText = this.getArticleText(article)
+      const semanticMatch = semanticMatchingService.matchesExpandedInterests(articleText, interests)
 
       scoredArticles.push({
         article,
-        score: breakdown.total,
-        breakdown
+        score: finalScore,
+        breakdown,
+        proximityBoost: proximityBoost > 1 ? proximityBoost : undefined,
+        semanticMatches: semanticMatch.matchedTerms.slice(0, 5) // Top 5 matched terms
       })
     }
 
     // Sort by score descending
-    return scoredArticles.sort((a, b) => b.score - a.score)
+    const sorted = scoredArticles.sort((a, b) => b.score - a.score)
+
+    // Log top 3 with details
+    console.log(`🏆 Top 3 Scored Articles:`)
+    sorted.slice(0, 3).forEach((item, i) => {
+      console.log(`   ${i + 1}. ${item.article.title.substring(0, 50)}...`)
+      console.log(`      Score: ${item.score.toFixed(3)} ${item.proximityBoost ? `(${item.proximityBoost}x boost 🔥)` : ''}`)
+      if (item.semanticMatches && item.semanticMatches.length > 0) {
+        console.log(`      Matches: ${item.semanticMatches.join(', ')}`)
+      }
+    })
+
+    return sorted
   }
 
   /**
@@ -246,6 +289,120 @@ export class AdvancedMatchingEngine {
     // Reputable source (can be expanded)
     const reputableSources = ['Reuters', 'AP', 'BBC', 'Guardian', 'NYTimes']
     if (reputableSources.includes(article.source)) qualityScore += 0.1
+
+    return Math.min(1, qualityScore)
+  }
+
+  /**
+   * 🔥 ENHANCED Quality Score - Optimized for Food & Local Content
+   */
+  private calculateQualityScoreEnhanced(article: NewsArticle, userInterests: string[]): number {
+    let qualityScore = 0
+
+    // Base quality (same as before)
+    qualityScore += this.calculateQualityScore(article) * 0.6
+
+    // 🔥 FOOD-SPECIFIC QUALITY INDICATORS
+    const isFoodRelated = userInterests.some(int =>
+      ['food', 'restaurant', 'café', 'bar', 'essen'].includes(int.toLowerCase())
+    )
+
+    if (isFoodRelated) {
+      // Has high-quality image (critical for food!) (+0.25)
+      if (article.imageUrl) {
+        // Bonus if image URL suggests food photography
+        if (article.imageUrl.match(/food|restaurant|cafe|dish|meal/i)) {
+          qualityScore += 0.25
+        } else {
+          qualityScore += 0.15
+        }
+      }
+
+      // Has price information (+0.15)
+      const hasPriceInfo = article.content?.match(/€|EUR|price|preis|cost/i) ||
+                           article.summary.match(/€|EUR|price|preis|cost/i)
+      if (hasPriceInfo) qualityScore += 0.15
+
+      // Has opening hours (+0.15)
+      const hasHours = article.content?.match(/open|hours|opening|öffnungszeiten|geöffnet/i) ||
+                       article.summary.match(/open|hours|opening|öffnungszeiten|geöffnet/i)
+      if (hasHours) qualityScore += 0.15
+
+      // Has rating/review indicators (+0.2)
+      const hasRating = article.content?.match(/⭐|rating|review|stars|bewertung/i) ||
+                        article.summary.match(/⭐|rating|review|stars|bewertung/i) ||
+                        article.tags?.some(tag => tag.match(/rated|popular|trending/i))
+      if (hasRating) qualityScore += 0.2
+
+      // Has menu keywords (+0.1)
+      const hasMenu = article.content?.match(/menu|speisekarte|dishes|gerichte/i) ||
+                      article.summary.match(/menu|speisekarte|dishes|gerichte/i)
+      if (hasMenu) qualityScore += 0.1
+
+      // Has ambiance/atmosphere description (+0.1)
+      const hasAmbiance = article.content?.match(/cozy|modern|traditional|atmosphere|ambiente/i) ||
+                          article.summary.match(/cozy|modern|traditional|atmosphere|ambiente/i)
+      if (hasAmbiance) qualityScore += 0.1
+    }
+
+    // 🔥 TIME-OF-DAY RELEVANCE
+    const currentHour = new Date().getHours()
+    const timeRelevantKeywords: Record<string, string[]> = {
+      breakfast: ['breakfast', 'frühstück', 'morning', 'morgen', 'brunch'],
+      lunch: ['lunch', 'mittagessen', 'mittag'],
+      dinner: ['dinner', 'abendessen', 'evening', 'abend']
+    }
+
+    let timeBonus = 0
+    if (currentHour >= 6 && currentHour < 11) {
+      // Morning: boost breakfast
+      if (timeRelevantKeywords.breakfast.some(kw =>
+        article.title.toLowerCase().includes(kw) ||
+        article.summary.toLowerCase().includes(kw)
+      )) {
+        timeBonus = 0.15
+      }
+    } else if (currentHour >= 11 && currentHour < 15) {
+      // Midday: boost lunch
+      if (timeRelevantKeywords.lunch.some(kw =>
+        article.title.toLowerCase().includes(kw) ||
+        article.summary.toLowerCase().includes(kw)
+      )) {
+        timeBonus = 0.15
+      }
+    } else if (currentHour >= 17 && currentHour < 23) {
+      // Evening: boost dinner
+      if (timeRelevantKeywords.dinner.some(kw =>
+        article.title.toLowerCase().includes(kw) ||
+        article.summary.toLowerCase().includes(kw)
+      )) {
+        timeBonus = 0.15
+      }
+    }
+
+    qualityScore += timeBonus
+
+    // 🔥 POPULARITY SIGNALS
+    // Note: In real implementation, these would come from actual data
+    // For now, we infer from tags and content
+    const popularityIndicators = [
+      'trending', 'popular', 'viral', 'top rated', 'best',
+      'must try', 'highly recommended', 'award winning'
+    ]
+
+    const hasPopularitySignal = article.tags?.some(tag =>
+      popularityIndicators.some(ind => tag.toLowerCase().includes(ind))
+    ) || article.title.toLowerCase().match(/best|top|award|must/i)
+
+    if (hasPopularitySignal) qualityScore += 0.15
+
+    // 🔥 VISUAL QUALITY (inferred from image URL patterns)
+    if (article.imageUrl) {
+      // High-res indicators
+      if (article.imageUrl.match(/1200|1920|2048|4k|hd/i)) {
+        qualityScore += 0.1
+      }
+    }
 
     return Math.min(1, qualityScore)
   }

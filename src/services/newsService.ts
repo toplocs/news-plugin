@@ -1324,10 +1324,48 @@ ${author} wird am Ball bleiben und weiter berichten. Für ${source} ist dies ein
         userBehavior
       )
 
-      // 3️⃣ Filter by minimum threshold (0.10 = 10% relevance)
-      const filtered = scoredArticles.filter(item => item.score >= 0.10)
+      // 3️⃣ 🔥 DYNAMIC THRESHOLD AUTO-ADJUSTMENT
+      // If we don't get enough results, lower the threshold
+      let threshold = 0.10 // Start at 10% relevance
+      let filtered = scoredArticles.filter(item => item.score >= threshold)
 
-      console.log(`✅ Advanced filtering: ${filtered.length}/${allArticles.length} articles above threshold`)
+      const targetMinResults = 15 // Want at least 15 results
+      const targetMaxResults = limit * 2 // But not too many
+
+      // 🔥 Auto-adjust threshold based on result count
+      if (filtered.length < targetMinResults && scoredArticles.length > 0) {
+        // Too few results - lower threshold
+        const attempts = [0.08, 0.05, 0.03, 0.01]
+        for (const newThreshold of attempts) {
+          filtered = scoredArticles.filter(item => item.score >= newThreshold)
+          console.log(`🔧 [AUTO-ADJUST] Lowered threshold to ${newThreshold} → ${filtered.length} results`)
+          if (filtered.length >= targetMinResults) {
+            threshold = newThreshold
+            break
+          }
+        }
+
+        // If still not enough, take all we have
+        if (filtered.length < targetMinResults) {
+          filtered = scoredArticles
+          threshold = 0
+          console.log(`🔧 [AUTO-ADJUST] Taking all ${filtered.length} articles (threshold = 0)`)
+        }
+      } else if (filtered.length > targetMaxResults) {
+        // Too many results - raise threshold
+        const attempts = [0.15, 0.20, 0.25, 0.30]
+        for (const newThreshold of attempts) {
+          const testFiltered = scoredArticles.filter(item => item.score >= newThreshold)
+          if (testFiltered.length >= targetMinResults && testFiltered.length <= targetMaxResults) {
+            filtered = testFiltered
+            threshold = newThreshold
+            console.log(`🔧 [AUTO-ADJUST] Raised threshold to ${newThreshold} → ${filtered.length} results`)
+            break
+          }
+        }
+      }
+
+      console.log(`✅ Advanced filtering: ${filtered.length}/${allArticles.length} articles above threshold (${threshold.toFixed(2)})`)
 
       // Log top 5 scores for debugging
       const top5 = filtered.slice(0, 5)
