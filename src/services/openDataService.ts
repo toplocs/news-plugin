@@ -36,11 +36,151 @@ export interface POI {
   address?: string
   city?: string
   tags: string[]
-  openingHours?: string
+
+  // 📝 DETAILLIERTE INFORMATIONEN
+  description?: string
+  shortDescription?: string
+
+  // ⏰ Öffnungszeiten (detailliert)
+  openingHours?: {
+    monday?: { open: string; close: string; closed?: boolean }
+    tuesday?: { open: string; close: string; closed?: boolean }
+    wednesday?: { open: string; close: string; closed?: boolean }
+    thursday?: { open: string; close: string; closed?: boolean }
+    friday?: { open: string; close: string; closed?: boolean }
+    saturday?: { open: string; close: string; closed?: boolean }
+    sunday?: { open: string; close: string; closed?: boolean }
+    display?: string  // "Mo-Fr 9-18 Uhr"
+    isOpen?: boolean  // Currently open?
+    opensIn?: string  // "Öffnet in 2 Stunden"
+  }
+
+  // 📞 Kontakt
   website?: string
   phone?: string
-  rating?: number
+  email?: string
+  socialMedia?: {
+    facebook?: string
+    instagram?: string
+    twitter?: string
+  }
+
+  // ⭐ Bewertungen (detailliert)
+  rating?: {
+    overall: number           // 4.5
+    count: number            // 234 Bewertungen
+    breakdown: {
+      5: number  // % of 5-star reviews
+      4: number
+      3: number
+      2: number
+      1: number
+    }
+    sources: {
+      google?: number
+      yelp?: number
+      tripadvisor?: number
+      facebook?: number
+    }
+  }
+
+  // 💰 Preis-Informationen
+  priceLevel?: {
+    level: 1 | 2 | 3 | 4      // € €€ €€€ €€€€
+    range?: { min: number; max: number }  // 10-25€
+    currency: string           // EUR
+    averageMealCost?: number  // 15€
+  }
+
+  // 🍽️ Essen & Trinken
   cuisine?: string[]
+  menu?: {
+    hasMenu: boolean
+    menuUrl?: string
+    popularDishes?: Array<{
+      name: string
+      price: number
+      description?: string
+      image?: string
+    }>
+    specialties?: string[]
+    dietaryOptions?: string[]  // vegan, vegetarian, gluten-free
+  }
+
+  // 🎯 Features & Amenities
+  amenities?: {
+    wifi?: boolean
+    parking?: boolean
+    wheelchairAccessible?: boolean
+    outdoorSeating?: boolean
+    takeaway?: boolean
+    delivery?: boolean
+    reservations?: boolean
+    petFriendly?: boolean
+    kidsWelcome?: boolean
+    liveMusic?: boolean
+    events?: boolean
+  }
+
+  // 🏆 Auszeichnungen & Zertifikate
+  awards?: Array<{
+    name: string
+    year: number
+    organization: string
+  }>
+
+  // 📸 Medien
+  images?: Array<{
+    url: string
+    alt?: string
+    type: 'exterior' | 'interior' | 'food' | 'drink' | 'menu' | 'other'
+    credits?: string
+  }>
+  mainImage?: string
+
+  // 💬 Reviews (Beispiele)
+  reviews?: Array<{
+    author: string
+    rating: number
+    text: string
+    date: number
+    helpful: number
+    source: string
+  }>
+
+  // 📊 Statistiken
+  stats?: {
+    popularity: number        // 0-100
+    visitorsPerDay?: number
+    busyTimes?: Array<{
+      day: string
+      hours: number[]         // [0-23] busy score
+    }>
+    averageStayDuration?: number  // minutes
+  }
+
+  // 🎟️ Tickets & Eintritt
+  tickets?: {
+    required: boolean
+    price?: { adult: number; child: number; student: number }
+    bookingUrl?: string
+    availability?: string
+  }
+
+  // 🌍 Sprachen
+  languages?: string[]
+
+  // ♿ Barrierefreiheit
+  accessibility?: {
+    wheelchairAccessible?: boolean
+    elevatorAvailable?: boolean
+    accessibleToilet?: boolean
+    brailleMenu?: boolean
+    signLanguage?: boolean
+    hearingLoop?: boolean
+    description?: string
+  }
+
   amenity?: string
 }
 
@@ -239,20 +379,115 @@ class OpenDataService {
         const latOffset = (distance * Math.cos(angle)) / 111000 // ~111km per degree
         const lngOffset = (distance * Math.sin(angle)) / (111000 * Math.cos(location.lat * Math.PI / 180))
 
+        const overallRating = 3.5 + Math.random() * 1.5 // 3.5-5.0
+        const reviewCount = Math.floor(50 + Math.random() * 400) // 50-450 reviews
+
         const poi: POI = {
           id: `osm_${amenity}_${i}`,
           name: this.generatePOIName(amenity, i),
           type: amenity,
           lat: location.lat + latOffset,
           lng: location.lng + lngOffset,
-          tags: [amenity, 'local', 'verified'],
-          openingHours: this.generateOpeningHours(),
-          rating: 3.5 + Math.random() * 1.5 // 3.5-5.0
-        }
+          address: `Musterstraße ${Math.floor(Math.random() * 200)}, ${Math.floor(10000 + Math.random() * 90000)}`,
+          city: location.city,
+          tags: [amenity, 'local', 'verified', 'popular'],
 
-        // Add cuisine for food places
-        if (['restaurant', 'cafe', 'bar', 'fast_food'].includes(amenity)) {
-          poi.cuisine = this.generateCuisine()
+          // 📝 Beschreibung
+          description: this.generateDescription(amenity),
+          shortDescription: this.generateShortDescription(amenity),
+
+          // ⏰ Detaillierte Öffnungszeiten
+          openingHours: this.generateDetailedOpeningHours(),
+
+          // 📞 Kontakt
+          website: `https://${this.generatePOIName(amenity, i).toLowerCase().replace(/\s+/g, '-')}.de`,
+          phone: `+49 911 ${Math.floor(100000 + Math.random() * 900000)}`,
+          email: `info@${amenity}-${i}.de`,
+          socialMedia: {
+            facebook: `https://facebook.com/${amenity}${i}`,
+            instagram: `@${amenity}_${i}_nbg`,
+          },
+
+          // ⭐ Detaillierte Bewertungen
+          rating: {
+            overall: Math.round(overallRating * 10) / 10,
+            count: reviewCount,
+            breakdown: {
+              5: 50 + Math.random() * 30,  // 50-80%
+              4: 15 + Math.random() * 15,  // 15-30%
+              3: 5 + Math.random() * 10,   // 5-15%
+              2: Math.random() * 5,        // 0-5%
+              1: Math.random() * 3         // 0-3%
+            },
+            sources: {
+              google: overallRating + (Math.random() - 0.5) * 0.3,
+              yelp: overallRating + (Math.random() - 0.5) * 0.4,
+              tripadvisor: overallRating + (Math.random() - 0.5) * 0.5
+            }
+          },
+
+          // 💰 Preis
+          priceLevel: {
+            level: (Math.floor(Math.random() * 3) + 1) as 1 | 2 | 3 | 4,
+            range: { min: 5 + Math.random() * 10, max: 15 + Math.random() * 30 },
+            currency: 'EUR',
+            averageMealCost: 15 + Math.random() * 20
+          },
+
+          // 🍽️ Menu & Cuisine
+          cuisine: ['restaurant', 'cafe', 'bar', 'fast_food'].includes(amenity)
+            ? this.generateCuisine()
+            : undefined,
+          menu: ['restaurant', 'cafe', 'bar'].includes(amenity) ? {
+            hasMenu: true,
+            menuUrl: `https://${amenity}-${i}.de/menu`,
+            popularDishes: this.generatePopularDishes(amenity),
+            specialties: this.generateSpecialties(amenity),
+            dietaryOptions: ['vegetarian', 'vegan', 'gluten-free']
+          } : undefined,
+
+          // 🎯 Amenities
+          amenities: {
+            wifi: Math.random() > 0.3,
+            parking: Math.random() > 0.5,
+            wheelchairAccessible: Math.random() > 0.4,
+            outdoorSeating: ['restaurant', 'cafe', 'bar'].includes(amenity) && Math.random() > 0.4,
+            takeaway: ['restaurant', 'cafe', 'fast_food'].includes(amenity) && Math.random() > 0.5,
+            delivery: ['restaurant', 'fast_food'].includes(amenity) && Math.random() > 0.6,
+            reservations: ['restaurant'].includes(amenity) && Math.random() > 0.3,
+            petFriendly: Math.random() > 0.6,
+            kidsWelcome: Math.random() > 0.4,
+            liveMusic: ['bar', 'cafe'].includes(amenity) && Math.random() > 0.8,
+            events: Math.random() > 0.7
+          },
+
+          // 📸 Bilder
+          images: this.generateImages(amenity, i),
+          mainImage: `https://picsum.photos/seed/${amenity}-${i}-main/1200/800`,
+
+          // 💬 Reviews
+          reviews: this.generateReviews(amenity, reviewCount),
+
+          // 📊 Statistiken
+          stats: {
+            popularity: Math.floor(50 + Math.random() * 50),
+            visitorsPerDay: Math.floor(50 + Math.random() * 300),
+            busyTimes: this.generateBusyTimes(),
+            averageStayDuration: 30 + Math.random() * 90  // 30-120 minutes
+          },
+
+          // 🌍 Sprachen
+          languages: ['de', 'en', Math.random() > 0.7 ? 'fr' : 'es'],
+
+          // ♿ Barrierefreiheit
+          accessibility: {
+            wheelchairAccessible: Math.random() > 0.4,
+            elevatorAvailable: Math.random() > 0.6,
+            accessibleToilet: Math.random() > 0.5,
+            description: 'Ebenerdig zugänglich, breite Türen, barrierefreie Toilette vorhanden'
+          },
+
+          amenity
         }
 
         pois.push(poi)
@@ -489,6 +724,219 @@ class OpenDataService {
   private generateCuisine(): string[] {
     const cuisines = ['deutsch', 'italienisch', 'asiatisch', 'mediterran', 'vegan', 'bio']
     return [cuisines[Math.floor(Math.random() * cuisines.length)]]
+  }
+
+  /**
+   * Helper: Generate description
+   */
+  private generateDescription(amenity: string): string {
+    const descriptions: Record<string, string[]> = {
+      restaurant: [
+        'Ein gemütliches Restaurant mit traditioneller Küche und modernem Ambiente.',
+        'Genießen Sie ausgezeichnete Gerichte in stilvollem Ambiente.',
+        'Familienfreundliches Restaurant mit regionalen Spezialitäten.'
+      ],
+      cafe: [
+        'Charmantes Café mit hausgemachten Kuchen und erstklassigem Kaffee.',
+        'Gemütliches Café ideal für einen entspannten Nachmittag.',
+        'Moderne Kaffeekultur trifft auf traditionelle Gemütlichkeit.'
+      ],
+      bar: [
+        'Stilvolle Bar mit kreativen Cocktails und entspannter Atmosphäre.',
+        'Treffpunkt für Genießer mit großer Auswahl an Getränken.',
+        'Moderne Bar mit Live-Musik an Wochenenden.'
+      ]
+    }
+
+    const options = descriptions[amenity] || ['Ein beliebter Ort in der Umgebung.']
+    return options[Math.floor(Math.random() * options.length)]
+  }
+
+  /**
+   * Helper: Generate short description
+   */
+  private generateShortDescription(amenity: string): string {
+    const short: Record<string, string[]> = {
+      restaurant: ['Regionale Küche', 'Moderne Küche', 'Traditionelle Speisen'],
+      cafe: ['Kaffee & Kuchen', 'Gemütliches Ambiente', 'Frühstück & Brunch'],
+      bar: ['Cocktails & Drinks', 'Live-Musik', 'Entspannte Atmosphäre']
+    }
+
+    const options = short[amenity] || ['Lokaler Treffpunkt']
+    return options[Math.floor(Math.random() * options.length)]
+  }
+
+  /**
+   * Helper: Generate detailed opening hours
+   */
+  private generateDetailedOpeningHours(): POI['openingHours'] {
+    const now = new Date()
+    const currentHour = now.getHours()
+    const currentDay = now.getDay() // 0 = Sunday
+
+    const baseHours = {
+      monday: { open: '09:00', close: '18:00' },
+      tuesday: { open: '09:00', close: '18:00' },
+      wednesday: { open: '09:00', close: '18:00' },
+      thursday: { open: '09:00', close: '22:00' },
+      friday: { open: '09:00', close: '23:00' },
+      saturday: { open: '10:00', close: '23:00' },
+      sunday: { open: '10:00', close: '20:00', closed: Math.random() > 0.7 }
+    }
+
+    // Check if currently open
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const todayKey = days[currentDay] as keyof typeof baseHours
+    const today = baseHours[todayKey]
+    const openHour = parseInt(today.open.split(':')[0])
+    const closeHour = parseInt(today.close.split(':')[0])
+    const isOpen = !today.closed && currentHour >= openHour && currentHour < closeHour
+
+    let opensIn = ''
+    if (!isOpen && !today.closed) {
+      if (currentHour < openHour) {
+        opensIn = `Öffnet in ${openHour - currentHour} Stunden`
+      } else {
+        opensIn = 'Heute geschlossen'
+      }
+    }
+
+    return {
+      ...baseHours,
+      display: 'Mo-Fr 9-18 Uhr, Do-Sa bis 23 Uhr, So 10-20 Uhr',
+      isOpen,
+      opensIn
+    }
+  }
+
+  /**
+   * Helper: Generate popular dishes
+   */
+  private generatePopularDishes(amenity: string): Array<{
+    name: string
+    price: number
+    description?: string
+    image?: string
+  }> {
+    const dishes: Record<string, any[]> = {
+      restaurant: [
+        { name: 'Schnitzel Wiener Art', price: 14.90, description: 'Mit Pommes und Salat' },
+        { name: 'Rinderfilet', price: 24.50, description: 'Medium gebraten, mit Gemüse' },
+        { name: 'Vegetarische Lasagne', price: 11.90, description: 'Hausgemacht mit Salat' }
+      ],
+      cafe: [
+        { name: 'Käsekuchen', price: 4.50, description: 'Hausgemacht nach Omas Rezept' },
+        { name: 'Cappuccino', price: 3.80, description: 'Mit Latte Art' },
+        { name: 'Frühstücks-Platte', price: 9.90, description: 'Brötchen, Aufschnitt, Käse, Ei' }
+      ],
+      bar: [
+        { name: 'Signature Cocktail', price: 9.50, description: 'Unsere Spezialität' },
+        { name: 'Craft Beer', price: 5.50, description: 'Wechselnde Auswahl' },
+        { name: 'Tapas Platte', price: 12.90, description: 'Gemischt für 2 Personen' }
+      ]
+    }
+
+    return dishes[amenity] || []
+  }
+
+  /**
+   * Helper: Generate specialties
+   */
+  private generateSpecialties(amenity: string): string[] {
+    const specs: Record<string, string[]> = {
+      restaurant: ['Fränkische Küche', 'Saisonale Gerichte', 'Hausgemachte Pasta'],
+      cafe: ['Bio-Kaffee', 'Vegane Kuchen', 'Frisches Gebäck'],
+      bar: ['Craft Cocktails', 'Whisky-Auswahl', 'Bar-Food']
+    }
+
+    return specs[amenity] || ['Lokale Spezialitäten']
+  }
+
+  /**
+   * Helper: Generate images
+   */
+  private generateImages(amenity: string, index: number): POI['images'] {
+    return [
+      {
+        url: `https://picsum.photos/seed/${amenity}-${index}-exterior/1200/800`,
+        alt: 'Außenansicht',
+        type: 'exterior',
+        credits: 'OpenStreetMap Contributors'
+      },
+      {
+        url: `https://picsum.photos/seed/${amenity}-${index}-interior/1200/800`,
+        alt: 'Innenansicht',
+        type: 'interior',
+        credits: 'OpenStreetMap Contributors'
+      },
+      {
+        url: `https://picsum.photos/seed/${amenity}-${index}-food1/1200/800`,
+        alt: 'Speisen',
+        type: 'food',
+        credits: 'OpenStreetMap Contributors'
+      },
+      {
+        url: `https://picsum.photos/seed/${amenity}-${index}-food2/1200/800`,
+        alt: 'Getränke',
+        type: 'drink',
+        credits: 'OpenStreetMap Contributors'
+      }
+    ]
+  }
+
+  /**
+   * Helper: Generate reviews
+   */
+  private generateReviews(amenity: string, reviewCount: number): POI['reviews'] {
+    const reviewTexts = [
+      'Ausgezeichnetes Essen und sehr freundlicher Service!',
+      'Gemütliches Ambiente, komme gerne wieder.',
+      'Gutes Preis-Leistungs-Verhältnis.',
+      'Etwas laut, aber das Essen war top!',
+      'Perfekt für einen entspannten Abend.'
+    ]
+
+    const authors = ['Anna M.', 'Thomas K.', 'Sarah L.', 'Michael B.', 'Julia S.']
+
+    return reviewTexts.slice(0, 3).map((text, i) => ({
+      author: authors[i],
+      rating: 4 + Math.random(),
+      text,
+      date: Date.now() - Math.random() * 86400000 * 30,  // Last 30 days
+      helpful: Math.floor(Math.random() * 20),
+      source: ['Google', 'Yelp', 'TripAdvisor'][i % 3]
+    }))
+  }
+
+  /**
+   * Helper: Generate busy times
+   */
+  private generateBusyTimes(): POI['stats']['busyTimes'] {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+    return days.map(day => {
+      // Generate hourly busy scores (0-100)
+      const hours = Array(24).fill(0).map((_, hour) => {
+        // Lunch peak (12-14)
+        if (hour >= 12 && hour <= 14) return 70 + Math.random() * 30
+
+        // Dinner peak (18-21)
+        if (hour >= 18 && hour <= 21) return 80 + Math.random() * 20
+
+        // Weekend mornings (breakfast)
+        if ((day === 'saturday' || day === 'sunday') && hour >= 9 && hour <= 11) {
+          return 60 + Math.random() * 30
+        }
+
+        // Night hours
+        if (hour < 8 || hour > 23) return 0
+
+        // Default moderate
+        return 20 + Math.random() * 40
+      })
+
+      return { day, hours }
+    })
   }
 }
 
