@@ -1,42 +1,69 @@
-// Service Worker für TopLocs News Plugin
-// Version 2.0.0
+/**
+ * Service Worker for TopLocs News Plugin
+ * Provides offline support and caching
+ */
 
-const CACHE_NAME = 'toplocs-news-v2.0.0'
-const RUNTIME_CACHE = 'toplocs-news-runtime'
+const CACHE_VERSION = 'v1'
+const CACHE_NAME = `toplocs-news-${CACHE_VERSION}`
 
 // Files to cache immediately
 const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/demo-3col.html',
+  '/solid-dashboard.html',
+  '/offline.html'
 ]
 
-// Install event - precache static assets
+// Cache strategies
+const CACHE_STRATEGIES = {
+  // Network first, fallback to cache
+  networkFirst: [
+    /\/api\//,
+    /\.json$/
+  ],
+  // Cache first, fallback to network
+  cacheFirst: [
+    /\.css$/,
+    /\.js$/,
+    /\.woff2?$/,
+    /\.png$/,
+    /\.jpg$/,
+    /\.svg$/
+  ],
+  // Stale while revalidate
+  staleWhileRevalidate: [
+    /\.html$/
+  ]
+}
+
+// Install event - cache essential resources
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...')
-  
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Precaching static assets')
+        console.log('[SW] Precaching resources')
         return cache.addAll(PRECACHE_URLS)
       })
       .then(() => self.skipWaiting())
+      .catch((error) => {
+        console.error('[SW] Precaching failed:', error)
+      })
   )
 })
 
-// Activate event - clean up old caches
+// Activate event - cleanup old caches
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...')
-  
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((name) => name !== CACHE_NAME && name !== RUNTIME_CACHE)
+            .filter((name) => name !== CACHE_NAME)
             .map((name) => {
               console.log('[SW] Deleting old cache:', name)
               return caches.delete(name)
@@ -47,131 +74,124 @@ self.addEventListener('activate', (event) => {
   )
 })
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - handle requests with appropriate strategy
 self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
   // Skip cross-origin requests
-  if (url.origin !== location.origin) {
+  if (url.origin !== self.location.origin) {
     return
   }
 
-  // Skip Gun.js Gun sync requests (always use network)
-  if (url.pathname.includes('/gun')) {
-    return
-  }
-
-  // Handle different request types
-  if (request.method !== 'GET') {
-    return
-  }
+  // Determine strategy
+  const strategy = getStrategy(url.pathname)
 
   event.respondWith(
-    caches.match(request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          console.log('[SW] Serving from cache:', url.pathname)
-          return cachedResponse
-        }
-
-        // Not in cache, fetch from network
-        return fetch(request)
-          .then((response) => {
-            // Don't cache non-successful responses
-            if (!response || response.status !== 200 || response.type === 'error') {
-              return response
-            }
-
-            // Clone response (can only be consumed once)
-            const responseToCache = response.clone()
-
-            // Cache dynamic content
-            caches.open(RUNTIME_CACHE)
-              .then((cache) => {
-                console.log('[SW] Caching new resource:', url.pathname)
-                cache.put(request, responseToCache)
-              })
-
-            return response
-          })
-          .catch((error) => {
-            console.error('[SW] Fetch failed:', error)
-            
-            // Return offline page if available
-            return caches.match('/offline.html')
-              .then((fallback) => fallback || new Response('Offline - bitte Internetverbindung prüfen'))
-          })
-      })
+    handleRequest(request, strategy)
   )
 })
 
-// Message event - handle messages from app
+// Get caching strategy for URL
+function getStrategy(pathname) {
+  for (const [strategy, patterns] of Object.entries(CACHE_STRATEGIES)) {
+    if (patterns.some(pattern => pattern.test(pathname))) {
+      return strategy
+    }
+  }
+  return 'networkFirst' // Default
+}
+
+// Handle request with strategy
+async function handleRequest(request, strategy) {
+  switch (strategy) {
+    case 'cacheFirst':
+      return cacheFirst(request)
+    case 'networkFirst':
+      return networkFirst(request)
+    case 'staleWhileRevalidate':
+      return staleWhileRevalidate(request)
+    default:
+      return networkFirst(request)
+  }
+}
+
+// Cache first strategy
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_NAME)
+  const cached = await cache.match(request)
+
+  if (cached) {
+    return cached
+  }
+
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      cache.put(request, response.clone())
+    }
+    return response
+  } catch (error) {
+    console.error('[SW] Fetch failed:', error)
+    return new Response('Offline', { status: 503 })
+  }
+}
+
+// Network first strategy
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME)
+
+  try {
+    const response = await fetch(request)
+    if (response.ok) {
+      cache.put(request, response.clone())
+    }
+    return response
+  } catch (error) {
+    console.error('[SW] Network failed, trying cache:', error)
+    const cached = await cache.match(request)
+    if (cached) {
+      return cached
+    }
+    // Return offline page for navigation requests
+    if (request.mode === 'navigate') {
+      return cache.match('/offline.html')
+    }
+    return new Response('Offline', { status: 503 })
+  }
+}
+
+// Stale while revalidate strategy
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME)
+  const cached = await cache.match(request)
+
+  const fetchPromise = fetch(request)
+    .then((response) => {
+      if (response.ok) {
+        cache.put(request, response.clone())
+      }
+      return response
+    })
+    .catch(() => cached)
+
+  return cached || fetchPromise
+}
+
+// Message handler for manual cache updates
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[SW] Skip waiting requested')
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
   }
 
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
-    console.log('[SW] Clearing all caches')
+  if (event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
-      caches.keys()
-        .then((cacheNames) => Promise.all(cacheNames.map((name) => caches.delete(name))))
+      caches.delete(CACHE_NAME)
+        .then(() => {
+          event.ports[0].postMessage({ success: true })
+        })
     )
   }
 })
-
-// Background sync for offline actions
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-messages') {
-    console.log('[SW] Background sync: messages')
-    event.waitUntil(syncMessages())
-  }
-})
-
-// Push notification handling
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {}
-  const title = data.title || 'TopLocs News'
-  const options = {
-    body: data.body || 'Neue Benachrichtigung',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-96.png',
-    data: data
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  )
-})
-
-// Notification click handling
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close()
-
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
-  )
-})
-
-// Helper functions
-async function syncMessages() {
-  // Sync pending messages when back online
-  try {
-    const cache = await caches.open(RUNTIME_CACHE)
-    const cachedRequests = await cache.keys()
-    
-    // Process pending message sends
-    for (const request of cachedRequests) {
-      if (request.url.includes('/messages/send')) {
-        await fetch(request)
-        await cache.delete(request)
-      }
-    }
-  } catch (error) {
-    console.error('[SW] Sync failed:', error)
-  }
-}
 
 console.log('[SW] Service Worker loaded')

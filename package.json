@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
+    "@inrupt/solid-client": "^2.1.2",
+    "@inrupt/solid-client-authn-browser": "^3.1.0",
+    "@inrupt/vocab-common-rdf": "^1.0.5",
     "@toplocs/plugin-sdk": "^1.1.0",
     "gun": "^0.2020.1241",
     "pinia": "^3.0.3",

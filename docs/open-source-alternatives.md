@@ -65,9 +65,31 @@ await saveSolidDatasetAt(
 - ✅ **Interoperabilität** (Apps teilen Daten)
 
 ### Pod Provider Optionen:
-1. **solidcommunity.net** - Kostenlos, Community-betrieben
-2. **Inrupt PodSpaces** - Commercial, Enterprise-ready
-3. **Self-hosted** - Eigener Server (Node Solid Server)
+1. **Community Solid Server (CSS)** - ✅ EMPFOHLEN! Open Source, Node.js, einfach
+2. **solidcommunity.net** - Kostenlos, Community-betrieben
+3. **Inrupt PodSpaces** - Commercial, Enterprise-ready (Email für Zugang)
+4. **Inrupt ESS** - Self-hosted Enterprise (benötigt Kubernetes + Lizenz)
+
+### Community Solid Server Installation (EMPFOHLEN):
+```bash
+# Methode 1: npx (schnellster Start)
+npx @solid/community-server -c @css:config/file.json -f .data
+
+# Methode 2: Docker
+docker run -p 3000:3000 solidproject/community-server
+
+# Methode 3: Von Source (für Development)
+git clone https://github.com/CommunitySolidServer/CommunitySolidServer
+cd CommunitySolidServer
+npm ci && npm start
+```
+
+**Requirements:**
+- Node.js 18.0+ oder höher
+- 2 GB RAM minimum
+- Port 3000 (default)
+
+**Vorteil CSS:** 100% Open Source (MIT License), keine Enterprise-Lizenz nötig!
 
 **Links:**
 - Docs: https://docs.inrupt.com/developer-tools/javascript/client-libraries/
@@ -90,14 +112,35 @@ await saveSolidDatasetAt(
 - ✅ Lightweight (< 1 KB Script)
 - ✅ Open Source (AGPLv3)
 
-### Installation:
+### Installation (Docker Compose - EMPFOHLEN):
 ```bash
-# Self-hosted:
-docker run -d \
-  -e BASE_URL=https://analytics.toplocs.org \
-  -p 8000:8000 \
-  plausible/analytics:latest
+# 1. Clone Plausible Community Edition
+git clone -b v3.0.1 --single-branch \
+  https://github.com/plausible/community-edition plausible-ce
+cd plausible-ce
+
+# 2. Configure .env file
+cat > .env <<EOF
+BASE_URL=https://analytics.toplocs.org
+SECRET_KEY_BASE=$(openssl rand -base64 48)
+HTTP_PORT=80
+HTTPS_PORT=443
+EOF
+
+# 3. Start mit Docker Compose
+docker-compose up -d
 ```
+
+**Requirements:**
+- Docker + Docker Compose
+- 2 GB RAM minimum (für ClickHouse + PostgreSQL)
+- CPU mit SSE 4.2 oder NEON support
+
+**Komponenten:**
+- PostgreSQL (User-Daten)
+- ClickHouse (Analytics-Daten)
+- Plausible App
+- Automatisches Let's Encrypt SSL
 
 ### Code-Beispiel:
 ```html
@@ -180,9 +223,37 @@ client.on('Room.timeline', (event) => {
 ```
 
 ### Matrix Homeserver Optionen:
-1. **matrix.org** - Kostenlos, öffentlich
-2. **Synapse** - Self-hosted Server (Python)
-3. **Dendrite** - Self-hosted (Go, leichter)
+1. **Synapse** - ✅ EMPFOHLEN! Self-hosted Server (Python, stabil)
+2. **Dendrite** - Self-hosted (Go, leichter, noch Beta)
+3. **matrix.org** - Kostenlos, öffentlich (für Testing)
+
+### Synapse Installation (Docker Compose):
+```bash
+# 1. Clone Setup mit Element + NGINX + Admin UI
+git clone https://github.com/AmirDez/matrix-on-premise
+cd matrix-on-premise
+
+# 2. Configure docker-compose.yml
+# Edit: server_name, database credentials, ports
+
+# 3. Start services
+docker-compose up -d
+```
+
+**Komponenten:**
+- Synapse (Matrix Homeserver)
+- PostgreSQL (Datenbank)
+- Element Web (Web-Client)
+- NGINX (Reverse Proxy)
+- Coturn (TURN Server für Voice/Video)
+- Synapse Admin (Admin UI)
+
+**Requirements:**
+- Docker + Docker Compose
+- 2-4 GB RAM (mehr für viele föderiete Server)
+- Raspberry Pi möglich (für kleine Communities)
+
+**Vorteil:** Komplettes Setup mit einer Zeile!
 
 ### Vorteile für TopLocs:
 - ✅ **Keine zentrale Kontrolle** (User wählt Server)
@@ -216,7 +287,30 @@ User A (server1.org) → Post → Follower B (server2.org)
                                 Server 2 empfängt Activity
 ```
 
-### JavaScript Implementation:
+### JavaScript Libraries (Optionen):
+
+**1. ActivityPub Express** (EMPFOHLEN für Node.js):
+```bash
+npm install activitypub-express
+```
+- Express.js Middleware
+- MongoDB Storage (austauschbar)
+- Vollständige AP-Implementierung
+
+**2. Fedify** (TypeScript):
+```bash
+npm install @fedify/fedify
+```
+- TypeScript-native
+- Moderne API
+- Standards-konform
+
+**3. Express ActivityPub** (Simple Reference):
+- Minimale Implementierung
+- Gut für Prototyping
+- GitHub: immers-space/activitypub-express
+
+### JavaScript Implementation Beispiel:
 ```typescript
 // ActivityPub Post erstellen:
 const activity = {

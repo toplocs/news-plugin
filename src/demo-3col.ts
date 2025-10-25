@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import CleanLayout from './views/CleanLayout.vue'
+import { useSolidSession } from './stores/useSolidSession'
 import '@toplocs/plugin-sdk/style.css'
 
 const app = createApp(CleanLayout, {
@@ -10,6 +11,15 @@ const app = createApp(CleanLayout, {
 
 const pinia = createPinia()
 app.use(pinia)
+
+// Initialize Solid Session
+const solidSession = useSolidSession()
+solidSession.init().then(() => {
+  console.log('✅ Solid Session initialized')
+  if (solidSession.isLoggedIn) {
+    console.log('✅ User logged in:', solidSession.webId)
+  }
+})
 
 app.mount('#app')
 

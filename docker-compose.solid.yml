@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # Community Solid Server
+  solid-server:
+    image: solidproject/community-server:latest
+    container_name: toplocs-solid-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./solid-data:/data
+      - ./solid-config:/config
+    environment:
+      - CSS_BASE_URL=http://localhost:3000/
+      - CSS_PORT=3000
+      - CSS_CONFIG=/config/config.json
+    command: npx @solid/community-server -c /config/config.json
+    restart: unless-stopped
+    networks:
+      - toplocs-network
+
+  # Plausible Analytics (optional)
+  plausible:
+    image: plausible/analytics:latest
+    container_name: toplocs-plausible
+    ports:
+      - "8000:8000"
+    environment:
+      - BASE_URL=http://localhost:8000
+      - SECRET_KEY_BASE=changeme_generate_your_own_secret_key
+    depends_on:
+      - plausible-db
+      - plausible-events-db
+    restart: unless-stopped
+    networks:
+      - toplocs-network
+
+  plausible-db:
+    image: postgres:14-alpine
+    container_name: toplocs-plausible-db
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - plausible-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - toplocs-network
+
+  plausible-events-db:
+    image: clickhouse/clickhouse-server:23.3.7.5-alpine
+    container_name: toplocs-plausible-events
+    volumes:
+      - plausible-events-data:/var/lib/clickhouse
+    restart: unless-stopped
+    networks:
+      - toplocs-network
+
+networks:
+  toplocs-network:
+    driver: bridge
+
+volumes:
+  plausible-db-data:
+  plausible-events-data:
