@@ -1059,6 +1059,270 @@
         </div>
       </div>
 
+      <!-- Music Matching Tab -->
+      <div v-show="activeTab === 'music'" class="tab-panel">
+        <h2>🎵 Music Matching - Spotify API Integration</h2>
+        <p class="intro">Match users and events based on music taste using Spotify data</p>
+
+        <!-- Statistics Overview -->
+        <div class="music-stats-overview">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ musicStats.totalProfiles }}</div>
+              <div class="stat-label">Music Profiles</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎪</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ musicStats.totalEvents }}</div>
+              <div class="stat-label">Events with Music Data</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎧</div>
+            <div class="stat-content">
+              <div class="stat-value">{{ musicStats.profilesWithData }}</div>
+              <div class="stat-label">Profiles with Spotify Data</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Test Actions -->
+        <div class="music-test-section">
+          <h3>🧪 Test Music Matching</h3>
+
+          <div class="test-actions-grid">
+            <div class="test-action-card">
+              <h4>1️⃣ Generate Music Profiles</h4>
+              <p>Create test users with different music tastes (Rock, Electronic, Pop, Mixed)</p>
+              <button @click="generateMusicProfiles" class="btn-primary">
+                🎵 Generate 5 Profiles
+              </button>
+            </div>
+
+            <div class="test-action-card">
+              <h4>2️⃣ Test User Compatibility</h4>
+              <p>Calculate music compatibility between two users</p>
+              <button @click="testUserCompatibility" class="btn-primary">
+                🤝 Match Users
+              </button>
+            </div>
+
+            <div class="test-action-card">
+              <h4>3️⃣ Test Event Match</h4>
+              <p>Match a user to an event based on music preferences</p>
+              <button @click="testEventMatch" class="btn-primary">
+                🎪 Match Event
+              </button>
+            </div>
+
+            <div class="test-action-card">
+              <h4>4️⃣ Generate Event Playlist</h4>
+              <p>Create a personalized playlist for an event</p>
+              <button @click="generateEventPlaylist" class="btn-primary">
+                📀 Create Playlist
+              </button>
+            </div>
+          </div>
+
+          <!-- Clear Data Button -->
+          <button @click="clearMusicData" class="btn-clear">
+            🗑️ Clear All Music Data
+          </button>
+        </div>
+
+        <!-- Results Section -->
+        <div v-if="musicResults.userCompatibility || musicResults.eventMatch || musicResults.playlist" class="music-results">
+          <h3>📊 Results</h3>
+
+          <!-- User Compatibility Result -->
+          <div v-if="musicResults.userCompatibility" class="result-card music-compatibility">
+            <h4>🤝 User Music Compatibility</h4>
+            <div class="result-main">
+              <div class="score-display">
+                <div class="score-value">{{ musicResults.userCompatibility.compatibilityScore }}</div>
+                <div class="score-label">Compatibility Score</div>
+                <div class="confidence-badge" :class="musicResults.userCompatibility.confidence">
+                  {{ musicResults.userCompatibility.confidence }}
+                </div>
+              </div>
+              <div class="score-breakdown">
+                <div class="score-item">
+                  <span class="label">Audio Features:</span>
+                  <span class="value">{{ musicResults.userCompatibility.audioFeaturesCompatibility }}/100</span>
+                </div>
+                <div class="score-item">
+                  <span class="label">Mood Compatibility:</span>
+                  <span class="value">{{ musicResults.userCompatibility.moodCompatibility }}/100</span>
+                </div>
+                <div class="score-item">
+                  <span class="label">Diversity Balance:</span>
+                  <span class="value">{{ musicResults.userCompatibility.diversityBalance }}/100</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-details">
+              <div v-if="musicResults.userCompatibility.sharedArtists.length > 0" class="detail-section">
+                <strong>🎤 Shared Artists:</strong>
+                <div class="artist-list">
+                  <span v-for="artist in musicResults.userCompatibility.sharedArtists.slice(0, 5)" :key="artist.id" class="artist-tag">
+                    {{ artist.name }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="musicResults.userCompatibility.sharedGenres.length > 0" class="detail-section">
+                <strong>🎸 Shared Genres:</strong>
+                <div class="genre-list">
+                  <span v-for="genre in musicResults.userCompatibility.sharedGenres" :key="genre" class="genre-tag">
+                    {{ genre }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="musicResults.userCompatibility.reasons.length > 0" class="detail-section">
+                <strong>💡 Reasons:</strong>
+                <ul class="reasons-list">
+                  <li v-for="(reason, idx) in musicResults.userCompatibility.reasons" :key="idx">
+                    {{ reason }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Event Match Result -->
+          <div v-if="musicResults.eventMatch" class="result-card event-match">
+            <h4>🎪 Event Music Match</h4>
+            <div class="result-main">
+              <div class="score-display">
+                <div class="score-value">{{ musicResults.eventMatch.musicScore }}</div>
+                <div class="score-label">Music Match Score</div>
+              </div>
+              <div class="score-breakdown">
+                <div class="score-item">
+                  <span class="label">Vibe Match:</span>
+                  <span class="value">{{ musicResults.eventMatch.vibeMatch }}/100</span>
+                </div>
+                <div class="score-item">
+                  <span class="label">Matching Artists:</span>
+                  <span class="value">{{ musicResults.eventMatch.matchingArtists.length }}</span>
+                </div>
+                <div class="score-item">
+                  <span class="label">Matching Genres:</span>
+                  <span class="value">{{ musicResults.eventMatch.matchingGenres.length }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-details">
+              <div v-if="musicResults.eventMatch.matchingArtists.length > 0" class="detail-section">
+                <strong>🎤 Matching Artists:</strong>
+                <div class="artist-list">
+                  <span v-for="artist in musicResults.eventMatch.matchingArtists" :key="artist" class="artist-tag">
+                    {{ artist }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="musicResults.eventMatch.matchingGenres.length > 0" class="detail-section">
+                <strong>🎸 Matching Genres:</strong>
+                <div class="genre-list">
+                  <span v-for="genre in musicResults.eventMatch.matchingGenres" :key="genre" class="genre-tag">
+                    {{ genre }}
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="musicResults.eventMatch.reasons.length > 0" class="detail-section">
+                <strong>💡 Recommendations:</strong>
+                <ul class="reasons-list">
+                  <li v-for="(reason, idx) in musicResults.eventMatch.reasons" :key="idx">
+                    {{ reason }}
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="musicResults.eventMatch.recommendedPlaylist.length > 0" class="detail-section">
+                <strong>📀 Recommended Tracks ({{ musicResults.eventMatch.recommendedPlaylist.length }}):</strong>
+                <div class="track-list">
+                  <div v-for="track in musicResults.eventMatch.recommendedPlaylist.slice(0, 5)" :key="track.id" class="track-item">
+                    🎵 {{ track.name }} - {{ track.artists.map(a => a.name).join(', ') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Playlist Result -->
+          <div v-if="musicResults.playlist" class="result-card playlist">
+            <h4>📀 Generated Event Playlist</h4>
+            <div class="playlist-header">
+              <div class="playlist-info">
+                <div class="playlist-title">{{ musicResults.playlist.eventName }}</div>
+                <div class="playlist-meta">
+                  {{ musicResults.playlist.tracks.length }} tracks · {{ Math.floor(musicResults.playlist.totalDuration / 60000) }} minutes
+                </div>
+              </div>
+              <div class="playlist-stats">
+                <div class="stat-pill">
+                  <span class="label">Energy:</span>
+                  <span class="value">{{ (musicResults.playlist.averageEnergy * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="stat-pill">
+                  <span class="label">Danceability:</span>
+                  <span class="value">{{ (musicResults.playlist.averageDanceability * 100).toFixed(0) }}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="playlist-genres">
+              <strong>Genres:</strong>
+              <span v-for="genre in musicResults.playlist.genres" :key="genre" class="genre-tag">
+                {{ genre }}
+              </span>
+            </div>
+
+            <div class="playlist-tracks">
+              <div v-for="(track, idx) in musicResults.playlist.tracks" :key="track.id" class="playlist-track">
+                <div class="track-number">{{ idx + 1 }}</div>
+                <div class="track-info">
+                  <div class="track-name">{{ track.name }}</div>
+                  <div class="track-artist">{{ track.artists.map(a => a.name).join(', ') }}</div>
+                </div>
+                <div class="track-duration">{{ Math.floor(track.duration_ms / 60000) }}:{{ String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0') }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="music-info">
+          <h3>ℹ️ How Music Matching Works</h3>
+          <div class="info-grid">
+            <div class="info-card">
+              <h4>🎵 Spotify Integration</h4>
+              <p>Uses real Spotify API data structures (artists, tracks, audio features) to analyze music preferences</p>
+            </div>
+            <div class="info-card">
+              <h4>🤝 User Matching</h4>
+              <p>Calculates compatibility based on shared artists (40%), genre similarity (30%), audio features (20%), and mood (10%)</p>
+            </div>
+            <div class="info-card">
+              <h4>🎪 Event Matching</h4>
+              <p>Matches users to events by comparing their music taste with event genres, artists, and vibe</p>
+            </div>
+            <div class="info-card">
+              <h4>📀 Playlist Generation</h4>
+              <p>Creates personalized event playlists based on user preferences and event music data</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Config Tab -->
       <div v-show="activeTab === 'config'" class="tab-panel">
         <h2>⚙️ Konfiguration</h2>
@@ -1123,6 +1387,7 @@ import { sentimentAnalysisService } from '../services/sentimentAnalysisService'
 import { socialGraphService } from '../services/socialGraphService'
 import { predictiveAnalyticsService } from '../services/predictiveAnalyticsService'
 import { analyticsDashboardService } from '../services/analyticsDashboardService'
+import { musicMatchingService } from '../services/musicMatchingService'
 import LineChart from '../components/charts/LineChart.vue'
 import BarChart from '../components/charts/BarChart.vue'
 import DoughnutChart from '../components/charts/DoughnutChart.vue'
@@ -1138,6 +1403,7 @@ const tabs = [
   { id: 'features', icon: '🎯', label: 'Features' },
   { id: 'ml', icon: '🤖', label: 'Machine Learning' },
   { id: 'analytics', icon: '📊', label: 'Analytics Dashboard' },
+  { id: 'music', icon: '🎵', label: 'Music Matching' },
   { id: 'chat', icon: '💬', label: 'Chat System' },
   { id: 'transparency', icon: '🎉', label: 'Event Transparency' },
   { id: 'private-events', icon: '🏠', label: 'Private Events' },
@@ -1461,6 +1727,21 @@ const mlResults = ref<any>({
 
 const sentimentText = ref('This is an amazing event! The music was fantastic and everyone had a great time. Highly recommended!')
 
+// MUSIC MATCHING STATE
+const musicStats = ref({
+  totalProfiles: 0,
+  totalEvents: 0,
+  profilesWithData: 0
+})
+
+const musicResults = ref<any>({
+  userCompatibility: null,
+  eventMatch: null,
+  playlist: null
+})
+
+const selectedMusicTaste = ref<'rock' | 'electronic' | 'pop' | 'mixed'>('mixed')
+
 // ML METHODS
 
 // AI Matching
@@ -1583,6 +1864,91 @@ function updateMLStats() {
       confidence: 70
     }
   }
+}
+
+// MUSIC MATCHING METHODS
+
+function generateMusicProfiles() {
+  // Generate 5 test users with different music tastes
+  musicMatchingService.generateMockSpotifyData('user_rock', 'rock')
+  musicMatchingService.generateMockSpotifyData('user_electronic', 'electronic')
+  musicMatchingService.generateMockSpotifyData('user_pop', 'pop')
+  musicMatchingService.generateMockSpotifyData('user_mixed_1', 'mixed')
+  musicMatchingService.generateMockSpotifyData('user_mixed_2', 'mixed')
+
+  updateMusicStats()
+  alert('✅ Music Matching: 5 music profiles generated!')
+}
+
+function testUserCompatibility() {
+  // Test compatibility between two users
+  const result = musicMatchingService.calculateUserCompatibility('user_rock', 'user_mixed_1')
+
+  if (result) {
+    musicResults.value.userCompatibility = result
+    alert(`✅ Music Compatibility: ${result.compatibilityScore}/100 (${result.confidence})`)
+  } else {
+    alert('❌ Please generate profiles first!')
+  }
+}
+
+function testEventMatch() {
+  // Set up a test event with music data
+  musicMatchingService.setEventMusicData(
+    'event_test_music',
+    ['rock', 'alternative', 'indie'],
+    ['Arctic Monkeys', 'The Strokes'],
+    'concert'
+  )
+
+  // Test match
+  const result = musicMatchingService.matchUserToEvent('user_rock', 'event_test_music')
+
+  if (result) {
+    musicResults.value.eventMatch = result
+    alert(`✅ Event Music Score: ${result.musicScore}/100 (Vibe: ${result.vibeMatch}/100)`)
+  } else {
+    alert('❌ Please generate profiles first!')
+  }
+}
+
+function generateEventPlaylist() {
+  // Set up event music data if not exists
+  musicMatchingService.setEventMusicData(
+    'event_test_music',
+    ['rock', 'alternative', 'indie'],
+    ['Arctic Monkeys', 'The Strokes'],
+    'concert'
+  )
+
+  const result = musicMatchingService.createEventPlaylist(
+    'user_rock',
+    'event_test_music',
+    'Rock Concert Test',
+    3600000 // 1 hour
+  )
+
+  if (result) {
+    musicResults.value.playlist = result
+    alert(`✅ Playlist generated: ${result.tracks.length} tracks (${Math.floor(result.totalDuration / 60000)} min)`)
+  } else {
+    alert('❌ Please generate profiles first!')
+  }
+}
+
+function updateMusicStats() {
+  musicStats.value = musicMatchingService.getStatistics()
+}
+
+function clearMusicData() {
+  musicMatchingService.clear()
+  musicResults.value = {
+    userCompatibility: null,
+    eventMatch: null,
+    playlist: null
+  }
+  updateMusicStats()
+  alert('✅ Music data cleared!')
 }
 
 // ANALYTICS DASHBOARD STATE
@@ -2634,6 +3000,417 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
+/* Music Matching Tab Styles */
+.music-stats-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.music-stats-overview .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.2s;
+}
+
+.music-stats-overview .stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.music-stats-overview .stat-icon {
+  font-size: 2.5rem;
+}
+
+.music-stats-overview .stat-content {
+  flex: 1;
+}
+
+.music-stats-overview .stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.music-stats-overview .stat-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.25rem;
+}
+
+.music-test-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.music-test-section h3 {
+  margin: 0 0 1.5rem 0;
+}
+
+.test-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.test-action-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.test-action-card h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.test-action-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  flex: 1;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-clear {
+  padding: 0.75rem 1.5rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-clear:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.music-results {
+  margin-bottom: 2rem;
+}
+
+.music-results h3 {
+  margin: 0 0 1.5rem 0;
+}
+
+.music-results .result-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.music-results .result-card h4 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+}
+
+.result-main {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102, 126, 234, 0.2);
+  border: 2px solid rgba(102, 126, 234, 0.4);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.score-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.confidence-badge {
+  margin-top: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.confidence-badge.high {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+.confidence-badge.medium {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde047;
+}
+
+.confidence-badge.low {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.score-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.score-item .label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+}
+
+.score-item .value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+.result-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.detail-section {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.detail-section strong {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.artist-list, .genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.artist-tag, .genre-tag {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 16px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reasons-list {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.reasons-list li {
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.track-item {
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+/* Playlist Styles */
+.playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.playlist-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.playlist-meta {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.5rem;
+}
+
+.playlist-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 0.875rem;
+}
+
+.stat-pill .label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-pill .value {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+.playlist-genres {
+  margin-bottom: 1.5rem;
+}
+
+.playlist-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.playlist-track {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.playlist-track:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.track-number {
+  width: 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.track-info {
+  flex: 1;
+}
+
+.track-name {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 0.25rem;
+}
+
+.track-artist {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.track-duration {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+}
+
+.music-info {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.music-info h3 {
+  margin: 0 0 1.5rem 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.info-card h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.info-card p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .feature-tests {
@@ -2670,6 +3447,31 @@ onMounted(() => {
 
   .metrics-tables {
     grid-template-columns: 1fr;
+  }
+
+  .music-stats-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .test-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-main {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .playlist-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .playlist-stats {
+    flex-direction: column;
   }
 }
 </style>
