@@ -57,7 +57,7 @@
             {{ message.isSent ? '📤 An:' : '📥 Von:' }}
             {{ truncatePub(message.isSent ? message.toPub : message.fromPub) }}
           </span>
-          <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+          <span class="message-time">{{ formatTime(message.created) }}</span>
         </div>
         <div class="message-content">{{ message.content }}</div>
         <div class="message-actions">
@@ -129,7 +129,7 @@ onUnmounted(() => {
 })
 
 const sortedMessages = computed(() => {
-  return [...messages.value].sort((a, b) => b.timestamp - a.timestamp)
+  return [...messages.value].sort((a, b) => b.created - a.created)
 })
 
 const sendNewMessage = async () => {
@@ -144,11 +144,14 @@ const sendNewMessage = async () => {
       // Add to local messages as sent
       messages.value.push({
         id: `msg_${Date.now()}`,
+        from: gunUser.is?.alias || '',
         fromPub: gunUser.is?.pub || '',
+        to: '',
         toPub: newMessage.value.toPub,
         content: newMessage.value.content,
-        timestamp: Date.now(),
+        created: Date.now(),
         encrypted: true,
+        read: false,
         isSent: true
       })
 

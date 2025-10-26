@@ -1,12 +1,29 @@
 <template>
   <div class="community-feed">
+    <!-- Header with Search -->
     <div class="feed-header">
       <h2>🌐 Community Feed</h2>
-      <button @click="showCreatePost = true" class="create-btn" v-if="gunAuth.isLoggedIn">
-        <span>✏️</span>
-        <span>Neuer Post</span>
-      </button>
+      <div class="header-actions">
+        <SearchBar
+          ref="searchBar"
+          placeholder="Posts durchsuchen..."
+          @search="handleSearch"
+          @select="handleSearchSelect"
+        />
+        <button @click="showCreatePost = true" class="create-btn" v-if="gunAuth.isLoggedIn">
+          <span>✏️</span>
+          <span>Neuer Post</span>
+        </button>
+      </div>
     </div>
+
+    <!-- Tag Filter -->
+    <TagFilter
+      v-if="availableTags.length > 0"
+      :available-tags="availableTags"
+      :tag-counts="tagCounts"
+      @update:selected-tags="handleTagsUpdate"
+    />
 
     <!-- Create Post Modal -->
     <div v-if="showCreatePost" class="modal-overlay" @click="showCreatePost = false">
@@ -45,6 +62,13 @@
               class="input"
             />
           </div>
+          <div class="form-group">
+            <label>Bild (optional)</label>
+            <ImageUpload
+              @image-selected="handleImageSelected"
+              :max-size-m-b="5"
+            />
+          </div>
           <button type="submit" :disabled="posting" class="submit-btn">
             <span v-if="posting">Wird gepostet...</span>
             <span v-else>Posten</span>
@@ -59,6 +83,13 @@
         <p>🔐 Bitte logge dich ein, um den Community Feed zu sehen</p>
       </div>
 
+      <!-- Loading Skeleton -->
+      <LoadingSkeleton
+        v-else-if="loading"
+        type="post"
+        :count="3"
+      />
+
       <div v-else-if="posts.length === 0" class="empty-state">
         <p>📭 Noch keine Posts. Sei der Erste!</p>
       </div>
@@ -67,16 +98,25 @@
         <div
           v-for="post in sortedPosts"
           :key="post.id"
+          :data-post-id="post.id"
           class="post-card"
         >
           <div class="post-header">
             <div class="author">
               <div class="avatar">{{ post.author[0].toUpperCase() }}</div>
+              <OnlineStatus status="online" :show-label="false" />
               <div class="author-info">
                 <span class="name">{{ post.author }}</span>
                 <span class="time">{{ formatTime(post.created) }}</span>
               </div>
             </div>
+            <button
+              @click="handleSavePost(post)"
+              class="save-btn"
+              :class="{ saved: isPostSaved(post.id) }"
+            >
+              {{ isPostSaved(post.id) ? '💾' : '🔖' }}
+            </button>
           </div>
 
           <div class="post-content">
@@ -94,7 +134,11 @@
               <span>❤️</span>
               <span>{{ post.likes || 0 }}</span>
             </button>
-            <button class="action-btn">
+            <button
+              @click="toggleComments(post.id)"
+              class="action-btn"
+              :class="{ active: expandedComments.has(post.id) }"
+            >
               <span>💬</span>
               <span>{{ post.comments || 0 }}</span>
             </button>
@@ -103,6 +147,13 @@
               <span>Teilen</span>
             </button>
           </div>
+
+          <!-- Post Comments -->
+          <PostComments
+            v-if="expandedComments.has(post.id)"
+            :post-id="post.id"
+            @comment-added="handleCommentAdded(post.id)"
+          />
         </div>
       </div>
     </div>
@@ -118,10 +169,23 @@ import {
   likePost,
   type GunPost
 } from '../services/gunService'
+import SearchBar, { type SearchResult } from './SearchBar.vue'
+import TagFilter from './TagFilter.vue'
+import ImageUpload from './ImageUpload.vue'
+import PostComments from './PostComments.vue'
+import LoadingSkeleton from './LoadingSkeleton.vue'
+import OnlineStatus from './OnlineStatus.vue'
+import { useSavedPosts } from '../composables/useSavedPosts'
+import { useKeyboardShortcuts } from '../composables/useKeyboardShortcuts'
 
 const showCreatePost = ref(false)
 const posting = ref(false)
 const posts = ref<GunPost[]>([])
+const loading = ref(true)
+const searchBar = ref<InstanceType<typeof SearchBar> | null>(null)
+const selectedTags = ref<string[]>([])
+const uploadedImage = ref<string>('')
+const expandedComments = ref<Set<string>>(new Set())
 
 const newPost = ref({
   title: '',
@@ -129,8 +193,45 @@ const newPost = ref({
   tagsInput: ''
 })
 
+// Saved Posts Composable
+const { isPostSaved, toggleSave } = useSavedPosts()
+
+// All available tags from posts
+const availableTags = computed(() => {
+  const tagSet = new Set<string>()
+  posts.value.forEach(post => {
+    post.tags?.forEach(tag => tagSet.add(tag))
+  })
+  return Array.from(tagSet)
+})
+
+// Tag counts
+const tagCounts = computed(() => {
+  const counts: Record<string, number> = {}
+  posts.value.forEach(post => {
+    post.tags?.forEach(tag => {
+      counts[tag] = (counts[tag] || 0) + 1
+    })
+  })
+  return counts
+})
+
+// Filtered and sorted posts
+const filteredPosts = computed(() => {
+  let filtered = posts.value
+
+  // Filter by selected tags
+  if (selectedTags.value.length > 0) {
+    filtered = filtered.filter(post =>
+      post.tags?.some(tag => selectedTags.value.includes(tag))
+    )
+  }
+
+  return filtered
+})
+
 const sortedPosts = computed(() => {
-  return [...posts.value].sort((a, b) => b.created - a.created)
+  return [...filteredPosts.value].sort((a, b) => b.created - a.created)
 })
 
 async function handleCreatePost() {
@@ -180,6 +281,84 @@ function formatTime(timestamp: number): string {
   return `vor ${days}d`
 }
 
+// Search
+function handleSearch(query: string) {
+  const results: SearchResult[] = posts.value
+    .filter(post =>
+      post.title.toLowerCase().includes(query.toLowerCase()) ||
+      post.content.toLowerCase().includes(query.toLowerCase())
+    )
+    .map(post => ({
+      id: post.id,
+      title: post.title,
+      description: post.content.substring(0, 100),
+      icon: '📄'
+    }))
+
+  searchBar.value?.setResults(results)
+}
+
+function handleSearchSelect(result: SearchResult) {
+  // Scroll to post
+  const postEl = document.querySelector(`[data-post-id="${result.id}"]`)
+  postEl?.scrollIntoView({ behavior: 'smooth' })
+}
+
+// Tags Filter
+function handleTagsUpdate(tags: string[]) {
+  selectedTags.value = tags
+}
+
+// Image Upload
+function handleImageSelected(file: File, preview: string) {
+  uploadedImage.value = preview
+}
+
+// Save Post
+function handleSavePost(post: GunPost) {
+  toggleSave(post.id, post.title, post.author, post.tags)
+}
+
+// Comments
+function toggleComments(postId: string) {
+  if (expandedComments.value.has(postId)) {
+    expandedComments.value.delete(postId)
+  } else {
+    expandedComments.value.add(postId)
+  }
+}
+
+function handleCommentAdded(postId: string) {
+  // Increment comment count
+  const post = posts.value.find(p => p.id === postId)
+  if (post) {
+    post.comments = (post.comments || 0) + 1
+  }
+}
+
+// Keyboard Shortcuts
+useKeyboardShortcuts([
+  {
+    key: 'k',
+    ctrl: true,
+    description: 'Search öffnen',
+    handler: () => {
+      const searchInput = document.querySelector<HTMLInputElement>('.search-input')
+      searchInput?.focus()
+    }
+  },
+  {
+    key: 'n',
+    ctrl: true,
+    description: 'Neuer Post',
+    handler: () => {
+      if (gunAuth.isLoggedIn) {
+        showCreatePost.value = true
+      }
+    }
+  }
+])
+
 onMounted(() => {
   if (gunAuth.isLoggedIn) {
     subscribeToPosts((post) => {
@@ -188,6 +367,13 @@ onMounted(() => {
         posts.value.push(post)
       }
     }, 50)
+
+    // Simulate loading delay
+    setTimeout(() => {
+      loading.value = false
+    }, 1000)
+  } else {
+    loading.value = false
   }
 })
 </script>

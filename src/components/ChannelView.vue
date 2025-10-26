@@ -105,7 +105,7 @@
 
             <!-- Distance Badge (overlay) -->
             <div v-if="getChannelDistance(channel)" class="distance-badge">
-              📍 {{ formatDistance(getChannelDistance(channel)) }}
+              📍 {{ formatDistance(getChannelDistance(channel)!) }}
             </div>
 
             <!-- Upcoming Events Badge (overlay) -->
@@ -121,7 +121,7 @@
             <div class="channel-location-distance">
               <span class="channel-location">📍 {{ channel.location.name }}</span>
               <span v-if="getChannelDistance(channel)" class="channel-distance-inline">
-                {{ formatDistance(getChannelDistance(channel)) }}
+                {{ formatDistance(getChannelDistance(channel)!) }}
               </span>
             </div>
 
@@ -146,8 +146,8 @@
                 <span class="next-event-title">Nächstes Event</span>
               </div>
               <div class="next-event-details">
-                <div class="next-event-name">{{ getNextChannelEvent(channel).title }}</div>
-                <div class="next-event-time">{{ formatCountdown(getNextChannelEvent(channel).startTime) }}</div>
+                <div class="next-event-name">{{ getNextChannelEvent(channel)!.title }}</div>
+                <div class="next-event-time">{{ formatCountdown(getNextChannelEvent(channel)!.startTime) }}</div>
               </div>
             </div>
           </div>
@@ -166,7 +166,7 @@
             <div class="channel-meta">
               <span class="meta-location">📍 {{ channel.location.name }}</span>
               <span v-if="getChannelDistance(channel)" class="meta-distance">
-                {{ formatDistance(getChannelDistance(channel)) }}
+                {{ formatDistance(getChannelDistance(channel)!) }}
               </span>
             </div>
 

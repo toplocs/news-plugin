@@ -347,7 +347,7 @@ class EventAggregationService {
       summary: `📅 ${dateStr} • ⏰ ${timeStr} • 📍 ${event.location.name}\n${priceInfo} ${attendeeInfo}`,
       content: event.description,
       source: event.source.charAt(0).toUpperCase() + event.source.slice(1),
-      sourceUrl: event.url || `https://${event.source}.com`,
+      url: event.url || `https://${event.source}.com`,
       imageUrl: event.imageUrl,
       publishedAt: event.startTime,
       topics: event.category,

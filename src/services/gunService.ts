@@ -25,6 +25,9 @@ export const gun = Gun({
 // User reference
 export const user = gun.user().recall({ sessionStorage: true })
 
+// Alias for components that use gunUser
+export const gunUser = user
+
 // SEA für Verschlüsselung
 export const SEA = Gun.SEA
 
@@ -120,6 +123,9 @@ export interface GunProfile {
   }
   created: number
   updated: number
+  // Privacy settings
+  public?: boolean
+  showLocation?: boolean
 }
 
 /**
@@ -284,10 +290,15 @@ export async function sendMessage(toPub: string, content: string): Promise<boole
   }
 
   try {
+    if (!gunAuth.pair) {
+      console.error('[Gun] No keypair available')
+      return false
+    }
+
     // Encrypt message for recipient
-    const theirPub = await gun.user(toPub).get('pub').then()
+    const theirPub = toPub
     const secret = await SEA.secret(theirPub, gunAuth.pair)
-    const encrypted = await SEA.encrypt(content, secret)
+    const encrypted = await SEA.encrypt(content, secret as string)
 
     const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const message: GunMessage = {
@@ -331,10 +342,15 @@ export function subscribeToMessages(callback: (message: GunMessage) => void) {
   user.get('inbox').map().on(async (encMsg: any, id: string) => {
     if (encMsg && encMsg.encrypted) {
       try {
+        if (!gunAuth.pair) {
+          console.error('[Gun] No keypair available for decryption')
+          return
+        }
+
         // Decrypt message
         const theirPub = encMsg.fromPub
         const secret = await SEA.secret(theirPub, gunAuth.pair)
-        const decrypted = await SEA.decrypt(encMsg.content, secret)
+        const decrypted = await SEA.decrypt(encMsg.content, secret as string)
 
         const message: GunMessage = {
           ...encMsg,

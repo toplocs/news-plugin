@@ -26,7 +26,7 @@
 
         <div class="detail-group">
           <label>Standort</label>
-          <p>{{ profile.location || 'Kein Standort gesetzt' }}</p>
+          <p>{{ profile.location ? `${profile.location.city}, ${profile.location.country}` : 'Kein Standort gesetzt' }}</p>
         </div>
 
         <div class="detail-group">
@@ -50,7 +50,7 @@
 
         <div class="detail-group">
           <label>Mitglied seit</label>
-          <p>{{ formatDate(profile.createdAt) }}</p>
+          <p>{{ profile.created ? formatDate(profile.created) : 'Unbekannt' }}</p>
         </div>
       </div>
     </div>
@@ -85,7 +85,7 @@
         <div class="form-group">
           <label>Standort</label>
           <input
-            v-model="editData.location"
+            v-model="locationInput"
             type="text"
             class="input-field"
             placeholder="z.B. Berlin, Deutschland"
@@ -162,21 +162,34 @@
 import { ref, reactive, onMounted } from 'vue'
 import { gunUser, type GunProfile } from '../services/gunService'
 
-const profile = reactive<GunProfile>({
+// Extended profile interface for component use
+interface ComponentProfile extends Partial<GunProfile> {
+  alias: string
+  displayName?: string
+  bio?: string
+  interests?: string[]
+  created?: number
+  updated?: number
+  public?: boolean
+  showLocation?: boolean
+}
+
+const profile = reactive<ComponentProfile>({
   alias: '',
-  pub: '',
+  displayName: '',
   bio: '',
-  location: '',
   interests: [],
   public: true,
   showLocation: true,
-  createdAt: Date.now()
+  created: Date.now(),
+  updated: Date.now()
 })
 
 const editData = reactive<Partial<GunProfile>>({})
 const editing = ref(false)
 const saving = ref(false)
 const interestsInput = ref('')
+const locationInput = ref('')
 
 const stats = reactive({
   posts: 0,
@@ -194,13 +207,17 @@ const loadProfile = () => {
   if (gunUser.is) {
     profile.alias = gunUser.is.alias || 'Unknown'
     userPub.value = gunUser.is.pub || ''
-    profile.pub = gunUser.is.pub || ''
 
     // Load profile data from Gun.js (mock for now)
+    profile.displayName = gunUser.is.alias || 'Unknown'
     profile.bio = 'P2P Enthusiast | Privacy Advocate | Dezentralisierung FTW! 🌐'
-    profile.location = 'Berlin, Deutschland'
+    profile.location = {
+      city: 'Berlin',
+      country: 'Deutschland'
+    }
     profile.interests = ['Blockchain', 'P2P', 'Privacy', 'Open Source']
-    profile.createdAt = Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days ago
+    profile.created = Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days ago
+    profile.updated = Date.now()
 
     // Load stats (mock)
     stats.posts = 42
@@ -212,6 +229,7 @@ const loadProfile = () => {
 const startEdit = () => {
   Object.assign(editData, profile)
   interestsInput.value = profile.interests?.join(', ') || ''
+  locationInput.value = profile.location ? `${profile.location.city}, ${profile.location.country}` : ''
   editing.value = true
 }
 
@@ -231,11 +249,23 @@ const saveProfile = async () => {
   saving.value = true
 
   try {
+    // Parse location from input
+    if (locationInput.value) {
+      const parts = locationInput.value.split(',').map(s => s.trim())
+      if (parts.length >= 2) {
+        editData.location = {
+          city: parts[0],
+          country: parts.slice(1).join(', ')
+        }
+      }
+    }
+
     // Save to Gun.js (implement actual save logic)
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     // Update local profile
     Object.assign(profile, editData)
+    profile.updated = Date.now()
 
     editing.value = false
     alert('✅ Profil gespeichert!')

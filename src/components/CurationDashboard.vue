@@ -74,8 +74,8 @@
       >
         <span>📊</span>
         <span>Topics</span>
-        <span v-if="topicsStore.readyForPromotionCount > 0" class="tab-badge">
-          {{ topicsStore.readyForPromotionCount }}
+        <span v-if="topicsStore.readyForPromotionCount.value > 0" class="tab-badge">
+          {{ topicsStore.readyForPromotionCount.value }}
         </span>
       </button>
 
@@ -86,8 +86,8 @@
       >
         <span>📍</span>
         <span>Locations</span>
-        <span v-if="locationsStore.readyForPromotionCount > 0" class="tab-badge">
-          {{ locationsStore.readyForPromotionCount }}
+        <span v-if="locationsStore.readyForPromotionCount.value > 0" class="tab-badge">
+          {{ locationsStore.readyForPromotionCount.value }}
         </span>
       </button>
 

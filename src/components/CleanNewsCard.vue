@@ -35,7 +35,7 @@
         <div class="explanation-content">
           <div class="explanation-section">
             <div class="explanation-label">🎯 Interesse-Match</div>
-            <div class="explanation-value">{{ Math.round(matchScore * 100) }}% Übereinstimmung</div>
+            <div class="explanation-value">{{ Math.round((matchScore || 0) * 100) }}% Übereinstimmung</div>
             <div v-if="matchedInterests.length > 0" class="explanation-interests">
               <span v-for="interest in matchedInterests" :key="interest" class="interest-tag">
                 {{ interest }}

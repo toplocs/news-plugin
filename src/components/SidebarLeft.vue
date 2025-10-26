@@ -302,7 +302,7 @@ const menuItems: Array<{ id: ViewType; icon: string; label: string; badge?: stri
     icon: '🚀',
     label: 'Auto-Promote',
     badge: computed(() => {
-      const total = (topicsStore.readyForPromotionCount || 0) + (locationsStore.readyForPromotionCount || 0)
+      const total = (topicsStore.readyForPromotionCount.value || 0) + (locationsStore.readyForPromotionCount.value || 0)
       return total > 0 ? total.toString() : ''
     })
   },
