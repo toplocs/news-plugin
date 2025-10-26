@@ -883,6 +883,182 @@
         </div>
       </div>
 
+      <!-- Analytics Dashboard Tab -->
+      <div v-show="activeTab === 'analytics'" class="tab-panel">
+        <h2>📊 Analytics Dashboard</h2>
+        <p class="intro">Comprehensive Platform Analytics mit Chart.js & D3.js</p>
+
+        <!-- Summary Cards -->
+        <div class="analytics-summary">
+          <div class="summary-stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <div class="stat-value">{{ summaryStats.totalUsers.toLocaleString() }}</div>
+              <div class="stat-label">Total Users</div>
+              <div class="stat-trend positive">+{{ userGrowth.weekly.toFixed(1) }}% this week</div>
+            </div>
+          </div>
+
+          <div class="summary-stat-card">
+            <div class="stat-icon">🎉</div>
+            <div class="stat-info">
+              <div class="stat-value">{{ summaryStats.totalEvents }}</div>
+              <div class="stat-label">Total Events</div>
+              <div class="stat-trend positive">+{{ eventGrowth.weekly.toFixed(1) }}% this week</div>
+            </div>
+          </div>
+
+          <div class="summary-stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-info">
+              <div class="stat-value">{{ summaryStats.avgRating.toFixed(1) }}</div>
+              <div class="stat-label">Avg Rating</div>
+              <div class="stat-trend positive">Excellent</div>
+            </div>
+          </div>
+
+          <div class="summary-stat-card">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-info">
+              <div class="stat-value">{{ summaryStats.mlAccuracy }}%</div>
+              <div class="stat-label">ML Accuracy</div>
+              <div class="stat-trend positive">High confidence</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <!-- User Growth Chart -->
+          <div class="chart-card">
+            <h3>📈 User Growth (30 Days)</h3>
+            <LineChart
+              :data="userGrowthChartData"
+              :height="250"
+            />
+          </div>
+
+          <!-- Event Categories -->
+          <div class="chart-card">
+            <h3>🎯 Popular Categories</h3>
+            <DoughnutChart
+              :data="categoriesChartData"
+              :height="250"
+            />
+          </div>
+
+          <!-- Daily Engagement -->
+          <div class="chart-card">
+            <h3>⚡ Daily Active Users</h3>
+            <LineChart
+              :data="engagementChartData"
+              :height="250"
+            />
+          </div>
+
+          <!-- Event Creation -->
+          <div class="chart-card">
+            <h3>🎪 Events Created</h3>
+            <BarChart
+              :data="eventsChartData"
+              :height="250"
+            />
+          </div>
+        </div>
+
+        <!-- Insights Section -->
+        <div class="insights-section">
+          <h3>💡 Platform Insights</h3>
+          <div class="insights-grid">
+            <div
+              v-for="(insight, index) in insights"
+              :key="index"
+              class="insight-card"
+              :class="insight.type"
+            >
+              <div class="insight-header">
+                <span class="insight-icon">
+                  {{ insight.type === 'success' ? '✅' : insight.type === 'warning' ? '⚠️' : insight.type === 'error' ? '❌' : 'ℹ️' }}
+                </span>
+                <h4>{{ insight.title }}</h4>
+              </div>
+              <p class="insight-message">{{ insight.message }}</p>
+              <div v-if="insight.recommendation" class="insight-recommendation">
+                <strong>💡 Recommendation:</strong> {{ insight.recommendation }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Tables -->
+        <div class="metrics-tables">
+          <div class="metrics-table-card">
+            <h3>🏆 Top Events</h3>
+            <table class="metrics-table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Attendees</th>
+                  <th>Rating</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="event in topPerformers.events" :key="event.id">
+                  <td>{{ event.name }}</td>
+                  <td>{{ event.attendees }}</td>
+                  <td>⭐ {{ event.rating }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="metrics-table-card">
+            <h3>📊 ML Services Performance</h3>
+            <table class="metrics-table">
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Metric</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>AI Matching</td>
+                  <td>{{ mlMetrics.aiMatching.conversionRate }}% conversion</td>
+                  <td><span class="status-badge success">Active</span></td>
+                </tr>
+                <tr>
+                  <td>Sentiment Analysis</td>
+                  <td>{{ mlMetrics.sentimentAnalysis.positiveRatio }}% positive</td>
+                  <td><span class="status-badge success">Active</span></td>
+                </tr>
+                <tr>
+                  <td>Social Graph</td>
+                  <td>{{ mlMetrics.socialGraph.communitiesDetected }} communities</td>
+                  <td><span class="status-badge success">Active</span></td>
+                </tr>
+                <tr>
+                  <td>Predictive Analytics</td>
+                  <td>{{ mlMetrics.predictiveAnalytics.averageAccuracy }}% accuracy</td>
+                  <td><span class="status-badge success">Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Export Button -->
+        <div class="export-section">
+          <button @click="exportAnalytics('json')" class="export-btn">
+            📥 Export JSON
+          </button>
+          <button @click="exportAnalytics('csv')" class="export-btn">
+            📊 Export CSV
+          </button>
+        </div>
+      </div>
+
       <!-- Config Tab -->
       <div v-show="activeTab === 'config'" class="tab-panel">
         <h2>⚙️ Konfiguration</h2>
@@ -946,6 +1122,10 @@ import { aiMatchingService } from '../services/aiMatchingService'
 import { sentimentAnalysisService } from '../services/sentimentAnalysisService'
 import { socialGraphService } from '../services/socialGraphService'
 import { predictiveAnalyticsService } from '../services/predictiveAnalyticsService'
+import { analyticsDashboardService } from '../services/analyticsDashboardService'
+import LineChart from '../components/charts/LineChart.vue'
+import BarChart from '../components/charts/BarChart.vue'
+import DoughnutChart from '../components/charts/DoughnutChart.vue'
 
 const solidSession = useSolidSession()
 
@@ -957,6 +1137,7 @@ const tabs = [
   { id: 'tests', icon: '🧪', label: 'Tests' },
   { id: 'features', icon: '🎯', label: 'Features' },
   { id: 'ml', icon: '🤖', label: 'Machine Learning' },
+  { id: 'analytics', icon: '📊', label: 'Analytics Dashboard' },
   { id: 'chat', icon: '💬', label: 'Chat System' },
   { id: 'transparency', icon: '🎉', label: 'Event Transparency' },
   { id: 'private-events', icon: '🏠', label: 'Private Events' },
@@ -1402,6 +1583,89 @@ function updateMLStats() {
       confidence: 70
     }
   }
+}
+
+// ANALYTICS DASHBOARD STATE
+const summaryStats = computed(() => analyticsDashboardService.getSummaryStats())
+const userGrowth = computed(() => analyticsDashboardService.getGrowthRate('users'))
+const eventGrowth = computed(() => analyticsDashboardService.getGrowthRate('events'))
+const topPerformers = computed(() => analyticsDashboardService.getTopPerformers())
+const insights = computed(() => analyticsDashboardService.getInsights())
+const mlMetrics = computed(() => analyticsDashboardService.getMLServicesMetrics())
+
+// Chart Data
+const userGrowthChartData = computed(() => {
+  const data = analyticsDashboardService.getTimeSeriesData('users')
+  return {
+    labels: data.map(d => new Date(d.timestamp).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' })),
+    datasets: [{
+      label: 'Total Users',
+      data: data.map(d => d.value),
+      borderColor: 'rgb(102, 126, 234)',
+      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+      fill: true,
+      tension: 0.4
+    }]
+  }
+})
+
+const engagementChartData = computed(() => {
+  const data = analyticsDashboardService.getTimeSeriesData('engagement')
+  return {
+    labels: data.map(d => new Date(d.timestamp).toLocaleDateString('de-DE', { month: 'short', day: 'numeric' })),
+    datasets: [{
+      label: 'Active Users',
+      data: data.map(d => d.value),
+      borderColor: 'rgb(237, 100, 166)',
+      backgroundColor: 'rgba(237, 100, 166, 0.1)',
+      fill: true,
+      tension: 0.4
+    }]
+  }
+})
+
+const eventsChartData = computed(() => {
+  const data = analyticsDashboardService.getTimeSeriesData('events').slice(-7)
+  return {
+    labels: data.map(d => new Date(d.timestamp).toLocaleDateString('de-DE', { weekday: 'short' })),
+    datasets: [{
+      label: 'Events Created',
+      data: data.map(d => d.value),
+      backgroundColor: 'rgba(118, 75, 162, 0.8)',
+      borderColor: 'rgb(118, 75, 162)',
+      borderWidth: 1
+    }]
+  }
+})
+
+const categoriesChartData = computed(() => {
+  const eventMetrics = analyticsDashboardService.getEventPerformanceMetrics()
+  return {
+    labels: eventMetrics.popularCategories.map(c => c.category),
+    datasets: [{
+      data: eventMetrics.popularCategories.map(c => c.count),
+      backgroundColor: [
+        'rgba(102, 126, 234, 0.8)',
+        'rgba(118, 75, 162, 0.8)',
+        'rgba(237, 100, 166, 0.8)',
+        'rgba(255, 154, 158, 0.8)',
+        'rgba(250, 208, 196, 0.8)'
+      ]
+    }]
+  }
+})
+
+// ANALYTICS METHODS
+function exportAnalytics(format: 'json' | 'csv') {
+  const data = analyticsDashboardService.exportData(format)
+  const blob = new Blob([data], { type: format === 'json' ? 'application/json' : 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `toplocs-analytics-${Date.now()}.${format}`
+  a.click()
+  URL.revokeObjectURL(url)
+  alert(`✅ Analytics exported as ${format.toUpperCase()}!`)
 }
 
 // Error tracking
@@ -2149,6 +2413,227 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
+/* Analytics Dashboard Styles */
+.analytics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+
+.summary-stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.summary-stat-card .stat-icon {
+  font-size: 3rem;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-trend {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stat-trend.positive {
+  color: #86efac;
+}
+
+.stat-trend.negative {
+  color: #fca5a5;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.chart-card h3 {
+  margin: 0 0 1.5rem 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.insights-section {
+  margin-bottom: 2rem;
+}
+
+.insights-section h3 {
+  margin-bottom: 1.5rem;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1rem;
+}
+
+.insight-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid;
+}
+
+.insight-card.success {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.insight-card.warning {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.insight-card.error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.insight-card.info {
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.3);
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.insight-icon {
+  font-size: 1.5rem;
+}
+
+.insight-header h4 {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.insight-message {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 0.75rem 0;
+}
+
+.insight-recommendation {
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.metrics-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metrics-table-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.metrics-table-card h3 {
+  margin: 0 0 1rem 0;
+}
+
+.metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.metrics-table th {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
+
+.metrics-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.metrics-table tr:last-child td {
+  border-bottom: none;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-badge.success {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+.export-section {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.export-btn {
+  padding: 1rem 2rem;
+  background: rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(102, 126, 234, 0.5);
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.export-btn:hover {
+  background: rgba(102, 126, 234, 0.5);
+  transform: translateY(-2px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .feature-tests {
@@ -2168,6 +2653,22 @@ onMounted(() => {
   }
 
   .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-tables {
     grid-template-columns: 1fr;
   }
 }
